@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Circle, Rectangle
 import numpy as np
 
-# Simplified representation of the human body with labeled regions
+# Simplified representation of the human body with labeled regions.
 body_parts = {
     "Left Foot": (-1, -5),
     "Right Foot": (1, -5),
