@@ -1,0 +1,332 @@
+{
+    "DateTime": {
+        "description": "Timestamp of the record",
+        "type": "datetime",
+        "unit": null,
+        "category": "time"
+    },
+    "Place": {
+        "description": "Measurement place",
+        "type": "string",
+        "unit": null,
+        "category": "place"
+    },
+    "PCS": {
+        "description": "Personal Comfort System",
+        "type": "string",
+        "unit": null,
+        "category": "comfort"
+    },
+    "State": {
+        "description": "State of manikin",
+        "type": "string",
+        "unit": null,
+        "category": "state"
+    },
+    "Situation": {
+        "description": "Simulated situation",
+        "type": "string",
+        "unit": null,
+        "category": "state"
+    },
+    "Ta": {
+        "description": "Air temperature",
+        "type": "float",
+        "unit": "oC",
+        "category": "environment"
+    },
+    "MRT": {
+        "description": "Mean Radiant Temperature",
+        "type": "float",
+        "unit": "oC",
+        "category": "environment"
+    },
+    "RH": {
+        "description": "Relative Humidity",
+        "type": "float",
+        "unit": "%",
+        "category": "environment"
+    },
+    "V": {
+        "description": "Air velocity",
+        "type": "float",
+        "unit": "m/s",
+        "category": "environment"
+    },
+    "Clo": {
+        "description": "Clothing insulation",
+        "type": "float",
+        "unit": "clo",
+        "category": "clothing"
+    },
+    "Posture": {
+        "description": "Posture of the subject",
+        "type": "string",
+        "unit": null,
+        "category": "state"
+    },
+    "Delta_Teq_Crown": {
+        "description": "Delta equivalent temperature for Crown",
+        "type": "float",
+        "unit": "oC",
+        "category": "body_temperature"
+    },
+    "Delta_Teq_Head": {
+        "description": "Delta equivalent temperature for Head",
+        "type": "float",
+        "unit": "oC",
+        "category": "body_temperature"
+    },
+    "Delta_Teq_Left_Chest": {
+        "description": "Delta equivalent temperature for Left Chest",
+        "type": "float",
+        "unit": "oC",
+        "category": "body_temperature"
+    },
+    "Delta_Teq_Right_Chest": {
+        "description": "Delta equivalent temperature for Right Chest",
+        "type": "float",
+        "unit": "oC",
+        "category": "body_temperature"
+    },
+    "Delta_Teq_Left_Back": {
+        "description": "Delta equivalent temperature for Left Back",
+        "type": "float",
+        "unit": "oC",
+        "category": "body_temperature"
+    },
+    "Delta_Teq_Right_Back": {
+        "description": "Delta equivalent temperature for Right Back",
+        "type": "float",
+        "unit": "oC",
+        "category": "body_temperature"
+    },
+    "Delta_Teq_Abdomen": {
+        "description": "Delta equivalent temperature for Abdomen",
+        "type": "float",
+        "unit": "oC",
+        "category": "body_temperature"
+    },
+    "Delta_Teq_Buttocks": {
+        "description": "Delta equivalent temperature for Buttocks",
+        "type": "float",
+        "unit": "oC",
+        "category": "body_temperature"
+    },
+    "Delta_Teq_Left_Upper_Arm": {
+        "description": "Delta equivalent temperature for Left Upper Arm",
+        "type": "float",
+        "unit": "oC",
+        "category": "body_temperature"
+    },
+    "Delta_Teq_Right_Upper_Arm": {
+        "description": "Delta equivalent temperature for Right Upper Arm",
+        "type": "float",
+        "unit": "oC",
+        "category": "body_temperature"
+    },
+    "Delta_Teq_Left_Forearm": {
+        "description": "Delta equivalent temperature for Left Forearm",
+        "type": "float",
+        "unit": "oC",
+        "category": "body_temperature"
+    },
+    "Delta_Teq_Right_Forearm": {
+        "description": "Delta equivalent temperature for Right Forearm",
+        "type": "float",
+        "unit": "oC",
+        "category": "body_temperature"
+    },
+    "Delta_Teq_Left_Hand": {
+        "description": "Delta equivalent temperature for Left Hand",
+        "type": "float",
+        "unit": "oC",
+        "category": "body_temperature"
+    },
+    "Delta_Teq_Right_Hand": {
+        "description": "Delta equivalent temperature for Right Hand",
+        "type": "float",
+        "unit": "oC",
+        "category": "body_temperature"
+    },
+    "Delta_Teq_Left_Front_Thigh": {
+        "description": "Delta equivalent temperature for Left Front Thigh",
+        "type": "float",
+        "unit": "oC",
+        "category": "body_temperature"
+    },
+    "Delta_Teq_Right_Front_Thigh": {
+        "description": "Delta equivalent temperature for Right Front Thigh",
+        "type": "float",
+        "unit": "oC",
+        "category": "body_temperature"
+    },
+    "Delta_Teq_Left_Back_Thigh": {
+        "description": "Delta equivalent temperature for Left Back Thigh",
+        "type": "float",
+        "unit": "oC",
+        "category": "body_temperature"
+    },
+    "Delta_Teq_Right_Back_Thigh": {
+        "description": "Delta equivalent temperature for Right Back Thigh",
+        "type": "float",
+        "unit": "oC",
+        "category": "body_temperature"
+    },
+    "Delta_Teq_Left_Lower_Leg": {
+        "description": "Delta equivalent temperature for Left Lower Leg",
+        "type": "float",
+        "unit": "oC",
+        "category": "body_temperature"
+    },
+    "Delta_Teq_Right_Lower_Leg": {
+        "description": "Delta equivalent temperature for Right Lower Leg",
+        "type": "float",
+        "unit": "oC",
+        "category": "body_temperature"
+    },
+    "Delta_Teq_Left_Foot": {
+        "description": "Delta equivalent temperature for Left Foot",
+        "type": "float",
+        "unit": "oC",
+        "category": "body_temperature"
+    },
+    "Delta_Teq_Right_Foot": {
+        "description": "Delta equivalent temperature for Right Foot",
+        "type": "float",
+        "unit": "oC",
+        "category": "body_temperature"
+    },
+    "Clo_Crown": {
+        "description": "Clo value for Crown",
+        "type": "float",
+        "unit": "clo",
+        "category": "clothing"
+    },
+    "Clo_Head": {
+        "description": "Clo value for Head",
+        "type": "float",
+        "unit": "clo",
+        "category": "clothing"
+    },
+    "Clo_Left_Chest": {
+        "description": "Clo value for Left Chest",
+        "type": "float",
+        "unit": "clo",
+        "category": "clothing"
+    },
+    "Clo_Right_Chest": {
+        "description": "Clo value for Right Chest",
+        "type": "float",
+        "unit": "clo",
+        "category": "clothing"
+    },
+    "Clo_Left_Back": {
+        "description": "Clo value for Left Back",
+        "type": "float",
+        "unit": "clo",
+        "category": "clothing"
+    },
+    "Clo_Right_Back": {
+        "description": "Clo value for Right Back",
+        "type": "float",
+        "unit": "clo",
+        "category": "clothing"
+    },
+    "Clo_Abdomen": {
+        "description": "Clo value for Abdomen",
+        "type": "float",
+        "unit": "clo",
+        "category": "clothing"
+    },
+    "Clo_Buttocks": {
+        "description": "Clo value for Buttocks",
+        "type": "float",
+        "unit": "clo",
+        "category": "clothing"
+    },
+    "Clo_Left_Upper_Arm": {
+        "description": "Clo value for Left Upper Arm",
+        "type": "float",
+        "unit": "clo",
+        "category": "clothing"
+    },
+    "Clo_Right_Upper_Arm": {
+        "description": "Clo value for Right Upper Arm",
+        "type": "float",
+        "unit": "clo",
+        "category": "clothing"
+    },
+    "Clo_Left_Forearm": {
+        "description": "Clo value for Left Forearm",
+        "type": "float",
+        "unit": "clo",
+        "category": "clothing"
+    },
+    "Clo_Right_Forearm": {
+        "description": "Clo value for Right Forearm",
+        "type": "float",
+        "unit": "clo",
+        "category": "clothing"
+    },
+    "Clo_Left_Hand": {
+        "description": "Clo value for Left Hand",
+        "type": "float",
+        "unit": "clo",
+        "category": "clothing"
+    },
+    "Clo_Right_Hand": {
+        "description": "Clo value for Right Hand",
+        "type": "float",
+        "unit": "clo",
+        "category": "clothing"
+    },
+    "Clo_Left_Front_Thigh": {
+        "description": "Clo value for Left Front Thigh",
+        "type": "float",
+        "unit": "clo",
+        "category": "clothing"
+    },
+    "Clo_Right_Front_Thigh": {
+        "description": "Clo value for Right Front Thigh",
+        "type": "float",
+        "unit": "clo",
+        "category": "clothing"
+    },
+    "Clo_Left_Back_Thigh": {
+        "description": "Clo value for Left Back Thigh",
+        "type": "float",
+        "unit": "clo",
+        "category": "clothing"
+    },
+    "Clo_Right_Back_Thigh": {
+        "description": "Clo value for Right Back Thigh",
+        "type": "float",
+        "unit": "clo",
+        "category": "clothing"
+    },
+    "Clo_Left_Lower_Leg": {
+        "description": "Clo value for Left Lower Leg",
+        "type": "float",
+        "unit": "clo",
+        "category": "clothing"
+    },
+    "Clo_Right_Lower_Leg": {
+        "description": "Clo value for Right Lower Leg",
+        "type": "float",
+        "unit": "clo",
+        "category": "clothing"
+    },
+    "Clo_Left_Foot": {
+        "description": "Clo value for Left Foot",
+        "type": "float",
+        "unit": "clo",
+        "category": "clothing"
+    },
+    "Clo_Right_Foot": {
+        "description": "Clo value for Right Foot",
+        "type": "float",
+        "unit": "clo",
+        "category": "clothing"
+    }
+}

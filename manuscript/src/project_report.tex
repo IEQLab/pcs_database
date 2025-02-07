@@ -1,0 +1,95 @@
+%! Date = 27/12/2024
+
+% Preamble
+\documentclass[11pt]{article}
+
+% Packages
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{csvsimple}
+
+%\newcommand{\projectroot}{.} % プロジェクトのルートディレクトリ
+%\newcommand{\figurefilepath}{C:\Users\monyo\OneDrive - The University of Sydney (Staff)\PCS Library\figure\example_plot.pdf}
+
+\input{myglossary.tex}
+
+% Document
+\begin{document}
+\title{Project Report 1: Research Questions for Environmental and Control Testing in PCS Evaluation}
+\author{Akihisa Nomoto}
+\date{\today}
+\maketitle
+
+%\input{myacronyms.tex}
+
+\section*{Overview}
+
+In this project, we aim to develop a database for thermal environmental changes surrounding the human body when using a Personal Comfort System (PCS).
+This database will help researcher understand the impact of PCS on thermal comfort and be a valuable resource for comfort simulations.
+
+This report examines our research questions and proposes a standardized method and explores its limitations. This work will help resersher to jump in this project before developing the database.
+Probably the next report will be a database focusing on the typical office PCS.
+
+
+\section*{Key Research Questions}
+
+\begin{enumerate}
+    \item \textbf{Temperature Dependence of Testing Environments}
+    : Is there a temperature dependence in the surrounding environment?
+    \begin{itemize}
+        \item Verify whether there is a difference in overall heat transfer coefficient between clothed and unclothed conditions.
+        \item There is if air movement is provided because the convective heat transfer depends on the ambient temperature, but may be less when warming PCS is used.
+    \end{itemize}
+
+    \item \textbf{Clothing Dependence}
+    : Airflow passes through fabric fibers, so it is desirable to measure conditions assuming actual clothing. However, this means that changing the clothing alters the results, which may limit generalizability.
+    It might be good idea to test using different clothing ensambles that we could think of, and then show the variety of effects (e.g. 0.3-0.4 m/s).
+    \begin{itemize}
+        \item Investigate the difference in the impact of PCS when clothing differs at a given temperature.
+        \item Might be good to have a standalized clothing ensambles for both summer and winter. UNIQLO's clothing might be good idea because it is around the world, which makes the dupulication easy.
+    \end{itemize}
+
+    \item \textbf{Manikin’s Control Method}
+    : There are (1) surface temperature control, (2) heat flux control, and (3) comfort control methods. Temperature control with PI control is easier to interpret. Can the same results be obtained with comfort control?
+    \begin{itemize}
+        \item At a given temperature, examine the impact of PCS under surface temperature control and comfort control conditions.
+    \end{itemize}
+
+    \item \textbf{Output Results}
+    : What should be organized as output results?
+    \begin{itemize}
+        \item Considering input conditions for modeling, it may be ideal to organize results based on changes in $\Delta X$. Maybe, using $\Delta t_{eq}$ would be the simplest approach?
+    \end{itemize}
+
+\end{enumerate}
+
+
+\subsection{Figure}
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.8\textwidth]{C:/Users/monyo/OneDrive - The University of Sydney (Staff)/PCS Library/figure/example_plot.pdf}
+    \caption{Example PDF Figure}
+    \label{fig:example}
+\end{figure}
+
+
+
+\section*{Other variables}
+
+\begin{enumerate}
+    \item \textbf{Noise level}
+
+\end{enumerate}
+%\subsection{How to add acronyms/nomenclature}\label{subsec:how-to-add-acronyms}
+%This is an example on how to add acronyms.
+%You can reference the acronym using the command \verb!\ac{t-db}! this will result in the following \ac{t-db}.
+%If you use the command \verb!\ac{t-db}! again, it will result in \ac{t-db}.
+%You can check the list of acronyms in the \texttt{myacronyms.tex} file.
+%
+%\subsection{Glossary}\label{subsec:glossary}
+%
+%This is an example on how to add a glossary.
+%You can reference the glossary using the command \verb!\gls{7730}! this will result in the following \gls{7730}.
+%You can check the list of glossary terms in the \texttt{myglossary.tex} file.
+
+\end{document}
