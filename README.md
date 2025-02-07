@@ -16,9 +16,9 @@ but you can access them at [here](https://unisyd-my.sharepoint.com/:f:/r/persona
         ├── PCS_Database.csv # Database
         └── metadata.json # For detailed descriptions
     ├── figure # For generated figures
-    ├── image # For images
-    ├── manuscript # For scientific paper
-    ├── presentation # For presentation
+    ├── image # For images of experiment/each PCS
+    ├── manuscript
+    ├── presentation
     ├── reference
     └── out
     ``
