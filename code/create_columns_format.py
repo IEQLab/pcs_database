@@ -17,8 +17,8 @@ def generate_columns(body_parts=utilities.BodyPartTemporary):
     # General columns and group definitions
     general_columns = ["Datetime", "Runtime"]
     group_columns = ["All", "Group A", "Group B"]
-    group_results = ["T", "P", "Clo", "Teq", "PMV", "PPD", "SET", "ET"]
-    part_results = ["T", "P", "Clo", "Teq"]
+    group_results = ["Tsk", "P", "Clo", "Teq", "PMV", "PPD", "SET", "ET"]
+    part_results = ["Tsk", "P", "Clo", "Teq"]
 
     # Generate group columns in "item_body" order
     group_columns_full = [f"{result}_{group}" for group in group_columns for result in group_results]

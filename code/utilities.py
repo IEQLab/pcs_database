@@ -82,10 +82,18 @@ class BodyPartTemporary:
     Left_Back: str = "Left Back"
     Right_Back: str = "Right Back"
 
-
-condition_pairs = [
-    ("withoutPCS", "DaisonFan_Level2"),
-    ("withoutPCS", "DaisonFan_Level4"),
-    ("withoutPCS", "Daison_Fan_Level2"),
-]
+# Define condition pairs and calculate deltas
+# condition_pairs = [
+#     ("withoutPCS_Ta25", "Daison_Fan_Level2_Ta25"),
+#     ("withoutPCS_Ta25", "Daison_Fan_Level4_Ta25"),
+#     ("withoutPCS_Ta25", "Daison_Fan_Level6_Ta25"),
+#     ("withoutPCS_Ta25", "Neck_Fan_Level1_Ta25"),
+#     ("withoutPCS_Ta25", "Neck_Fan_Level3_Ta25"),
+#     ("withoutPCS_Ta25", "Neck_Fan_Level4_Ta25"),
+# ]
+# condition_pairs = [
+#     ("2025-02-01_ID0_NoPCS", "2025-02-01_ID1_Small desk fan (grey)_Low"),
+#     ("2025-02-01_ID0_NoPCS", "2025-02-01_ID1_Small desk fan (grey)_Mid"),
+#     ("2025-02-01_ID0_NoPCS", "2025-02-01_ID1_Small desk fan (grey)_High"),
+# ]
 
