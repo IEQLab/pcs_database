@@ -1,4 +1,5 @@
 import os
+import numpy as np
 import pandas as pd
 import chardet
 from datetime import timedelta
@@ -82,15 +83,125 @@ def average_last_five_minute(file_path, custom_columns):
 
 
 # Step 4: Search for files by keyword
-def find_files_with_keyword(folder_path, keyword):
+import os
+
+import os
+
+
+def find_files_with_keyword(folder_path, keyword, exclude_folders=["Old", "UFAD"]):
     """
-    Search for files in a folder containing a specific keyword in their names.
+    Search for files in a folder containing a specific keyword in their names,
+    while avoiding files inside specific folders.
+
+    Parameters:
+        folder_path (str): The path to the root folder to search.
+        keyword (str): The keyword to search for in file names.
+        exclude_folders (list): A list of folder names to exclude.
+
+    Returns:
+        list: A list of file paths matching the criteria.
     """
-    return [
-        os.path.join(root, file)
-        for root, _, files in os.walk(folder_path)
-        for file in files if keyword in file
-    ]
+
+    result_files = []
+
+    for root, _, files in os.walk(folder_path):
+        # Skip directories that are in the exclude list
+        if any(excluded in root.split(os.sep) for excluded in exclude_folders):
+            continue
+
+        # Add files that contain the keyword in their names
+        result_files.extend(
+            os.path.join(root, file)
+            for file in files if keyword in file
+        )
+
+    return result_files
+
+
+def extract_info_from_filename(filename):
+    """
+    Extracts ID, Name, Level, Ta, and Control method from a given filename.
+    Additionally extracts optional parameters like Angle and Distance if present.
+    """
+    # Remove file extension
+    filename = os.path.basename(filename).split('.')[0]
+
+    # Split by underscores
+    parts = filename.split('_')
+
+    # Initialize extracted data
+    dict_extracted_info = {
+        "ID": None,
+        "PCS_name": None,
+        "Intensity": None,
+        "Angle": None,
+        "Distance": None,
+        "Ta": None,
+        "Control method": None
+    }
+
+    # Extract known fixed fields
+    dict_extracted_info["ID"] = int(parts[1].replace("ID", ""))  # Extract number only
+    dict_extracted_info["PCS_name"] = parts[2]
+    dict_extracted_info["Level"] = parts[3]
+
+    # Process remaining parts for optional parameters
+    for part in parts[4:]:
+        if part.startswith("Angle"):
+            dict_extracted_info["Angle"] = int(part.replace("Angle", ""))
+        elif part.startswith("Distance"):
+            dict_extracted_info["Distance"] = int(part.replace("Distance", ""))
+        elif part.startswith("Ta"):
+            dict_extracted_info["Ta"] = int(part.replace("Ta", ""))
+        elif "Control" in part:  # if "Control" is in the part
+            dict_extracted_info["Control method"] = part
+
+    print(dict_extracted_info)
+
+    return dict_extracted_info
+
+
+# Apply `extract_info_from_filename` function to add extracted information to `delta_results`
+def add_extracted_info_to_dataframe(df):
+    """
+    Adds extracted file information (ID, PCS_name, Level, etc.) to the delta_results DataFrame,
+    placing the extracted columns at the beginning (excluding the index).
+
+    Args:
+        df (pd.DataFrame): DataFrame containing 'Condition_with_PCS' and 'Condition_without_PCS' file names.
+
+    Returns:
+        pd.DataFrame: Updated DataFrame with extracted columns placed at the leftmost side.
+    """
+    extracted_data = []
+
+    for _, row in df.iterrows():
+        # Extract information from the PCS file name
+        with_pcs_info = extract_info_from_filename(row["Condition_with_PCS"])
+
+        # Store extracted data along with original row, placing extracted info first
+        extracted_data.append({
+            **row.to_dict(),  # Add original delta values first
+            "ID": with_pcs_info["ID"],
+            "PCS_name": with_pcs_info["PCS_name"],
+            "Level": with_pcs_info["Level"],
+            "Angle": with_pcs_info["Angle"],
+            "Distance": with_pcs_info["Distance"],
+            "Ta": with_pcs_info["Ta"],
+            "Control method": with_pcs_info["Control method"],
+        })
+
+    # Convert list of dictionaries to DataFrame
+    updated_df = pd.DataFrame(extracted_data)
+
+    # Reorder columns to ensure extracted info is at the left
+    extracted_columns = ["ID", "PCS_name", "Level", "Angle", "Distance", "Ta", "Control method"]
+    remaining_columns = [col for col in updated_df.columns if col not in extracted_columns]
+
+    # Reorder DataFrame
+    updated_df = updated_df[extracted_columns + remaining_columns]
+
+    return updated_df
 
 
 def generate_condition_pairs(matching_files):
@@ -127,9 +238,9 @@ def generate_condition_pairs(matching_files):
 
         # Create condition pairs: One NoPCS file paired with each PCS file
         if without_pcs:
-            base_condition = without_pcs[0]  # Keep `.csv`
+            base_condition = without_pcs[0]  # Get the file name
             for pcs_file in with_pcs:
-                pcs_condition = pcs_file  # Keep `.csv`
+                pcs_condition = pcs_file  # Get the file name
                 condition_pairs.append((base_condition, pcs_condition))
 
     return condition_pairs
@@ -152,7 +263,6 @@ def reorder_columns(df):
 
     return df[ordered_columns]
 
-# TODO: Condition with and without PCS is flipped
 # Step 6: Calculate delta between conditions
 def calculate_deltas(df, condition_pairs):
     """
@@ -180,36 +290,36 @@ def calculate_deltas(df, condition_pairs):
     if "Reference_time" in df.columns:
         p_columns.append("Reference_time")
 
-    for condition_with_pcs, condition_without_pcs in condition_pairs:
+    for condition_without_pcs, condition_with_pcs in condition_pairs:
         # Find matching rows for each condition using File_name
-        matched_files_with_pcs = df["File_name"].str.contains(condition_with_pcs, case=False, na=False, regex=False)
         matched_files_without_pcs = df["File_name"].str.contains(condition_without_pcs, case=False, na=False, regex=False)
+        matched_files_with_pcs = df["File_name"].str.contains(condition_with_pcs, case=False, na=False, regex=False)
 
         if matched_files_with_pcs.any() and matched_files_without_pcs.any():
             # Extract the first matching row for each condition
-            row_condition_with_pcs = df.loc[matched_files_with_pcs, p_columns].iloc[0]
             row_condition_without_pcs = df.loc[matched_files_without_pcs, p_columns].iloc[0]
+            row_condition_with_pcs = df.loc[matched_files_with_pcs, p_columns].iloc[0]
 
             # Identify numeric columns (excluding Reference_time)
             numeric_columns = [col for col in p_columns if col != "Reference_time"]
 
             # Convert numerical columns to float
-            row_condition_with_pcs[numeric_columns] = row_condition_with_pcs[numeric_columns].astype(float)
             row_condition_without_pcs[numeric_columns] = row_condition_without_pcs[numeric_columns].astype(float)
+            row_condition_with_pcs[numeric_columns] = row_condition_with_pcs[numeric_columns].astype(float)
 
             # Compute deltas (difference between with_PCS and without_PCS)
             delta_values = (row_condition_without_pcs[numeric_columns] - row_condition_with_pcs[numeric_columns]).round(2)
 
             # Ensure Reference_time is preserved without modification
-            reference_time_value = row_condition_without_pcs["Reference_time"] if "Reference_time" in p_columns else None
+            reference_time_value = row_condition_with_pcs["Reference_time"] if "Reference_time" in p_columns else None
 
             # Rename columns to add 'Delta_' prefix (excluding Reference_time)
             prefix = "Delta"
             delta_values = delta_values.rename(lambda col: f"{prefix}_{col}" if col != "Reference_time" else col)
 
             # Store results as a DataFrame row
-            delta_values["Condition_with_PCS"] = condition_with_pcs
             delta_values["Condition_without_PCS"] = condition_without_pcs
+            delta_values["Condition_with_PCS"] = condition_with_pcs
 
             # Convert results to DataFrame and reorder columns
             delta_df = pd.DataFrame([delta_values])
@@ -237,7 +347,7 @@ def main():
 
         # Find all target files
         keyword = "TskControl"
-        matching_files = find_files_with_keyword(folder_path=config.RAW_DATA_DIR, keyword=keyword)
+        matching_files = find_files_with_keyword(folder_path=config.RAW_DATA_DIR, keyword=keyword, exclude_folders=["Old", "UFAD"])
         print("matching_files", matching_files)
         if not matching_files:
             print(f"No files found with the keyword {keyword}")
@@ -246,8 +356,6 @@ def main():
         # Generate condition pairs based on date
         condition_pairs = generate_condition_pairs(matching_files=matching_files)
         print(f"Generated condition pairs: {condition_pairs}")
-
-
 
         # Process each file
         all_averages = []
@@ -275,9 +383,17 @@ def main():
 
             # Calculate the difference between with PCS and without PCS
             delta_results = calculate_deltas(df=reordered_combined_averages, condition_pairs=condition_pairs)
-            print("delta_results:", delta_results)
+            delta_results_with_extracted_info = add_extracted_info_to_dataframe(df=delta_results)
+
+            # Sort by ID
+            delta_results_with_extracted_info = delta_results_with_extracted_info.sort_values(by="ID", ascending=True)
+
+            # Handle missing values
+            delta_results_with_extracted_info = delta_results_with_extracted_info.fillna(np.nan)
+
+            print("delta_results:", delta_results_with_extracted_info)
             file_name_to_save = os.path.join(config.PROCESSED_DATA_DIR, "delta_results.csv")
-            delta_results.to_csv(file_name_to_save, index=False)
+            delta_results_with_extracted_info.to_csv(file_name_to_save, index=False)
             print(f"Saved delta results to {file_name_to_save}")
 
             # # Extract Teq-related columns and save
