@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PCS Database</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Arial', sans-serif;
+        }
+        .container {
+            margin-top: 40px;
+        }
+        h1 {
+            font-size: 2.5rem;
+            font-weight: bold;
+            text-align: center;
+            color: #343a40;
+            margin-bottom: 20px;
+        }
+        .table-container {
+            max-height: 500px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            position: relative;
+            background: white;
+        }
+        .table th, .table td {
+            text-align: center;
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+        .table tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+        .btn-primary {
+            font-size: 1.2rem;
+            font-weight: bold;
+            padding: 12px 24px;
+            border-radius: 8px;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .form-select, .form-control {
+            font-size: 1.1rem;
+            padding: 10px;
+            border-radius: 6px;
+        }
+        thead {
+            position: sticky;
+            top: 0;
+            background-color: #343a40;
+            color: white;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>PCS Database</h1>
+
+        <!-- Filter Form -->
+        <form id="filter-form" class="mt-4">
+            <div class="row">
+                <div class="col-md-6">
+                    <label for="pcsid" class="form-label fw-bold">Select PCSID:</label>
+                    <select name="pcsid" id="pcsid" class="form-select">
+                        <option value="">All</option>
+                        {% for pcid in pcsids %}
+                            <option value="{{ pcid }}">{{ pcid }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label for="pcsname" class="form-label fw-bold">Search PCS Name:</label>
+                    <input type="text" name="pcsname" id="pcsname" class="form-control" placeholder="Enter PCS Name">
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary mt-3">Filter</button>
+        </form>
+
+        <!-- CSV Download Form -->
+        <form method="POST" action="/download_csv" class="mt-2">
+            <input type="hidden" name="pcsid" id="csv_pcsid">
+            <input type="hidden" name="pcsname" id="csv_pcsname">
+            <button type="submit" class="btn btn-success" id="download-btn" disabled>Download CSV</button>
+        </form>
+
+
+        <h2 class="mt-4 fw-bold">Filtered Results</h2>
+        <div class="table-responsive table-container bg-white p-3">
+            <table class="table table-bordered table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        {% for col in (filtered_data[0].keys() if filtered_data else all_data[0].keys()) %}
+                            <th>{{ col }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                    {% if filtered_data %}
+                        {% for row in filtered_data %}
+                        <tr>
+                            {% for value in row.values() %}
+                                <td>{{ value }}</td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        {% for row in all_data %}
+                        <tr>
+                            {% for value in row.values() %}
+                                <td>{{ value }}</td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom Script -->
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
+
+<!--<!DOCTYPE html>-->
+<!--<html>-->
+<!--<head>-->
+<!--    <title>CSV Filter</title>-->
+<!--    &lt;!&ndash; Bootstrap CSS &ndash;&gt;-->
+<!--    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">-->
+<!--    <style>-->
+<!--        body {-->
+<!--            background-color: #f8f9fa;-->
+<!--        }-->
+<!--        .container {-->
+<!--            margin-top: 40px;-->
+<!--        }-->
+<!--        h1 {-->
+<!--            font-size: 2.5rem;-->
+<!--            font-weight: bold;-->
+<!--            text-align: center;-->
+<!--            color: #343a40;-->
+<!--            margin-bottom: 20px;-->
+<!--        }-->
+<!--        .table-container {-->
+<!--            max-height: 400px;-->
+<!--            overflow-y: auto;-->
+<!--            border: 1px solid #ccc;-->
+<!--            border-radius: 10px;-->
+<!--            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);-->
+<!--            position: relative;-->
+<!--        }-->
+<!--        .table th, .table td {-->
+<!--            text-align: center;-->
+<!--            vertical-align: middle;-->
+<!--        }-->
+<!--        .table tbody tr:hover {-->
+<!--            background-color: #f1f1f1;-->
+<!--        }-->
+<!--        .btn-primary {-->
+<!--            font-size: 1.1rem;-->
+<!--            font-weight: bold;-->
+<!--            padding: 10px 20px;-->
+<!--            border-radius: 8px;-->
+<!--            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);-->
+<!--        }-->
+<!--        .form-select, .form-control {-->
+<!--            font-size: 1.1rem;-->
+<!--            padding: 10px;-->
+<!--        }-->
+<!--        thead {-->
+<!--            position: sticky;-->
+<!--            top: 0;-->
+<!--            background-color: #343a40;-->
+<!--            color: white;-->
+<!--            z-index: 100;-->
+<!--        }-->
+<!--    </style>-->
+<!--</head>-->
+<!--<body>-->
+<!--    <div class="container">-->
+<!--        <h1>PCS Database</h1>-->
+
+<!--        &lt;!&ndash; Form for selecting PCSID and PCS Name &ndash;&gt;-->
+<!--        <form method="POST" action="/filter" class="mt-4">-->
+<!--            <div class="row">-->
+<!--                <div class="col-md-6">-->
+<!--                    <label for="pcsid" class="form-label fw-bold">Select PCSID:</label>-->
+<!--                    <select name="pcsid" id="pcsid" class="form-select">-->
+<!--                        <option value="">All</option>-->
+<!--                        {% for pcid in pcsids %}-->
+<!--                            <option value="{{ pcid }}">{{ pcid }}</option>-->
+<!--                        {% endfor %}-->
+<!--                    </select>-->
+<!--                </div>-->
+<!--                <div class="col-md-6">-->
+<!--                    <label for="pcsname" class="form-label fw-bold">Search PCS Name:</label>-->
+<!--                    <input type="text" name="pcsname" id="pcsname" class="form-control" placeholder="Enter PCS Name">-->
+<!--                </div>-->
+<!--            </div>-->
+<!--            <button type="submit" class="btn btn-primary mt-3">Filter</button>-->
+<!--        </form>-->
+
+<!--        <h2 class="mt-4 fw-bold">Filtered Results</h2>-->
+<!--        <div class="table-responsive table-container bg-white p-3">-->
+<!--            <table class="table table-bordered table-striped">-->
+<!--                <thead class="table-dark">-->
+<!--                    <tr>-->
+<!--                        {% for col in (filtered_data[0].keys() if filtered_data else all_data[0].keys()) %}-->
+<!--                            <th>{{ col }}</th>-->
+<!--                        {% endfor %}-->
+<!--                    </tr>-->
+<!--                </thead>-->
+<!--                <tbody>-->
+<!--                    {% if filtered_data %}-->
+<!--                        {% for row in filtered_data %}-->
+<!--                        <tr>-->
+<!--                            {% for value in row.values() %}-->
+<!--                                <td>{{ value }}</td>-->
+<!--                            {% endfor %}-->
+<!--                        </tr>-->
+<!--                        {% endfor %}-->
+<!--                    {% else %}-->
+<!--                        {% for row in all_data %}-->
+<!--                        <tr>-->
+<!--                            {% for value in row.values() %}-->
+<!--                                <td>{{ value }}</td>-->
+<!--                            {% endfor %}-->
+<!--                        </tr>-->
+<!--                        {% endfor %}-->
+<!--                    {% endif %}-->
+<!--                </tbody>-->
+<!--            </table>-->
+<!--        </div>-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; Bootstrap JS &ndash;&gt;-->
+<!--    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>-->
+<!--</body>-->
+<!--</html>-->
