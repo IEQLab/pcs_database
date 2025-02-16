@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, send_file, jsonify
+from flask import Flask, render_template, request, send_file, jsonify, send_from_directory
 import pandas as pd
 import os
 import configuration
@@ -83,6 +83,11 @@ def download_csv():
     csv_buffer.seek(0)
 
     return send_file(csv_buffer, mimetype="text/csv", as_attachment=True, download_name="filtered_data.csv")
+
+# Serve images from "image" directory
+@app.route('/image/<path:filename>')
+def serve_image(filename):
+    return send_from_directory("../image", filename)  # Adjust path if needed
 
 # if __name__ == '__main__':
 #     app.run(debug=True)

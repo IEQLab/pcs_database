@@ -1,0 +1,68 @@
+/* General styles */
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f8f9fa;
+}
+
+/* Sidebar */
+.sidebar {
+    height: 100vh;
+    padding-top: 10px;
+}
+
+
+/* Table styles */
+.table-container {
+    max-height: 500px;
+    overflow-y: auto;
+    overflow-x: auto;
+    position: relative;
+}
+
+/* Fixing card height */
+.overview-card {
+    height: 300px; /* Ensure all cards have the same height */
+    display: 300px;
+    flex-direction: column;
+}
+
+.overview-card img {
+    height: 150px; /* Set a fixed height for images */
+    object-fit: cover; /* Ensure images maintain aspect ratio */
+}
+
+.overview-card .card-body {
+    flex-grow: 1;
+}
+/* Fixed table headers */
+.table thead {
+    position: sticky;
+    top: 0;
+    background-color: #343a40;
+    color: white;
+    z-index: 100;
+}
+
+/* Column filter dropdowns */
+#dataTable thead tr:nth-child(2) th {
+    padding: 5px;
+}
+.columnFilter {
+    width: 100%;
+    font-size: 14px;
+    padding: 5px;
+}
+
+/* Active section styling */
+.content-section {
+    display: none;
+}
+.active-section {
+    display: block;
+}
+
+/* Graph styling */
+canvas {
+    max-width: 100%;
+    height: auto;
+}
