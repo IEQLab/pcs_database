@@ -35,64 +35,40 @@ This is a characteristic of the free hosting service we currently use, which put
 <!-- METADATA_START -->
 # Database Metadata
 
-Schema Description (Generated on 2025-02-27 10:08:57)
+Schema Description (Generated on 2025-02-27 10:18:16)
 
-| Parameter | Type | Enum | Description |
+| Parameter | Type | Description | Example |
 |---|---|---|---|
-| - **`ID`** | integer | N/A | Unique identifier for each PCS. |
-| - **`Category`** | string | Cooling, Heating | Category of the PCS. |
-| - **`Type`** | string | Cooling, Heating | Type of PCS (e.g., fan, foot warmer). |
-| - **`Brand`** | string | N/A | Brand name of the PCS. |
-| - **`PCS_Reference`** | string | N/A | Reference URL of PCS. |
-| - **`PCS_Intensity`** | string | N/A | Intensity level of the PCS. |
-| - **`Price_USD`** | number | N/A | Price of the PCS in US dollars. |
-| - **`Angle`** | number | N/A | Angle of the PCS and target (degrees). |
-| - **`Distance`** | number | N/A | Distance from PCS to target (m). |
-| - **`Target_Body`** | string | N/A | Targeted body segment for PCS application. |
-| - **`Power_W`** | number | N/A | Energy consumption of the PCS (W). |
-| - **`DateTime`** | string | N/A | Timestamp of data entry. |
-| - **`Place`** | string | N/A | Location where the measurement was taken. |
-| - **`Posture`** | string | N/A | Posture of the manikin during measurement (e.g., standing, sitting). |
-| - **`Situation`** | string | N/A | Description of the environment where PCS is used (e.g., office, car). |
-| - **`Manikin_Company`** | string | N/A | Manufacturer of the thermal manikin used. |
-| - **`Manikin_Gender`** | string | Male, Female | Gender representation of the thermal manikin. |
-| - **`Manikin_Body_Segments`** | integer | N/A | Number of body segments of the thermal manikin. |
-| - **`Control_Method`** | string | TskControl, HeatFluxControl, ComfortControl | Method used to control the PCS (e.g., manual, automatic). |
-| - **`Ta`** | number | N/A | Ambient air temperature (°C). |
-| - **`MRT`** | number | N/A | Mean radiant temperature (°C). |
-| - **`RH`** | number | N/A | Relative humidity (%). |
-| - **`V`** | number | N/A | Air velocity (m/s). |
-| - **`Delta_Teq_`** | object | N/A | Equivalent temperature change for specific body parts. |
-| - **`Delta_P_`** | object | N/A | Change in perceived temperature or power supply for specific body parts. |
-| - **`Clo_`** | object | N/A | Clothing insulation value for specific body parts. |
-| - **`Image_Path`** | string | N/A | File path of related images. |
+| - **`ID`** | integer | Unique identifier for each PCS. | 1 |
+| - **`Category`** | string | Category of the PCS. Must be one of: Cooling, Heating. | Cooling |
+| - **`Type`** | string | Type of PCS (e.g., fan, foot warmer). Must be one of: Cooling, Heating. | Small desk fan |
+| - **`Brand`** | string | Brand name of the PCS. | Simpeak |
+| - **`PCS_Reference`** | string | Reference URL of PCS. | Reference link |
+| - **`PCS_Intensity`** | string | Intensity level of the PCS. | Low |
+| - **`Price_USD`** | number | Price of the PCS in US dollars. | 10 |
+| - **`Angle`** | number | Angle of the PCS and target (degrees). | 125.0 |
+| - **`Distance`** | number | Distance from PCS to target (m). | 60.0 |
+| - **`Target_Body`** | string | Targeted body segment for PCS application. | Face |
+| - **`Power_W`** | number | Energy consumption of the PCS (W). | 2 |
+| - **`DateTime`** | string | Timestamp of data entry. | 2025-02-01T17:18:00Z |
+| - **`Place`** | string | Location where the measurement was taken. | The University of Sydney |
+| - **`Posture`** | string | Posture of the manikin during measurement (e.g., standing, sitting). | Sitting |
+| - **`Situation`** | string | Description of the environment where PCS is used (e.g., office, car). | Office |
+| - **`Manikin_Company`** | string | Manufacturer of the thermal manikin used. | PT Manikins |
+| - **`Manikin_Gender`** | string | Gender representation of the thermal manikin. Must be one of: Male, Female. | Female |
+| - **`Manikin_Body_Segments`** | integer | Number of body segments of the thermal manikin. | 22 |
+| - **`Control_Method`** | string | Method used to control the PCS (e.g., manual, automatic). Must be one of: TskControl, HeatFluxControl, ComfortControl. | TskControl34 |
+| - **`Ta`** | number | Ambient air temperature (°C). | 25 |
+| - **`MRT`** | number | Mean radiant temperature (°C). | 25 |
+| - **`RH`** | number | Relative humidity (%). | 50 |
+| - **`V`** | number | Air velocity (m/s). | 0.1 |
+| - **`Delta_Teq_`** | object | Equivalent temperature change for specific body parts. See: #/definitions/BodyPart | N/A |
+| - **`Delta_P_`** | object | Change in perceived temperature or power supply for specific body parts. See: #/definitions/BodyPart | N/A |
+| - **`Clo_`** | object | Clothing insulation value for specific body parts. See: #/definitions/BodyPart | N/A |
+| - **`Image_Path`** | string | File path of related images. | N/A |
 
 ## Definitions
-
-- <a id="definitions/BodyPart"></a>**`BodyPart`** *(type: object)*: Body parts affected by PCS.
-  - **Enum**: N/A
-  - **`Crown`** *(type: number, enum: N/A)*
-  - **`Head`** *(type: number, enum: N/A)*
-  - **`Left_Chest`** *(type: number, enum: N/A)*
-  - **`Right_Chest`** *(type: number, enum: N/A)*
-  - **`Left_Back`** *(type: number, enum: N/A)*
-  - **`Right_Back`** *(type: number, enum: N/A)*
-  - **`Abdomen`** *(type: number, enum: N/A)*
-  - **`Buttocks`** *(type: number, enum: N/A)*
-  - **`Left_Upper_Arm`** *(type: number, enum: N/A)*
-  - **`Right_Upper_Arm`** *(type: number, enum: N/A)*
-  - **`Left_Forearm`** *(type: number, enum: N/A)*
-  - **`Right_Forearm`** *(type: number, enum: N/A)*
-  - **`Left_Hand`** *(type: number, enum: N/A)*
-  - **`Right_Hand`** *(type: number, enum: N/A)*
-  - **`Left_Front_Thigh`** *(type: number, enum: N/A)*
-  - **`Right_Front_Thigh`** *(type: number, enum: N/A)*
-  - **`Left_Back_Thigh`** *(type: number, enum: N/A)*
-  - **`Right_Back_Thigh`** *(type: number, enum: N/A)*
-  - **`Left_Lower_Leg`** *(type: number, enum: N/A)*
-  - **`Right_Lower_Leg`** *(type: number, enum: N/A)*
-  - **`Left_Foot`** *(type: number, enum: N/A)*
-  - **`Right_Foot`** *(type: number, enum: N/A)*
+- **`BodyPart`** *(type: object)* - Properties: `Crown`, `Head`, `Left_Chest`, `Right_Chest`, `Left_Back`, `Right_Back`, `Abdomen`, `Buttocks`, `Left_Upper_Arm`, `Right_Upper_Arm`, `Left_Forearm`, `Right_Forearm`, `Left_Hand`, `Right_Hand`, `Left_Front_Thigh`, `Right_Front_Thigh`, `Left_Back_Thigh`, `Right_Back_Thigh`, `Left_Lower_Leg`, `Right_Lower_Leg`, `Left_Foot`, `Right_Foot`
 
 <!-- METADATA_END -->
 

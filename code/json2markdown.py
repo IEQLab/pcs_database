@@ -5,23 +5,43 @@ import configuration
 
 def extract_properties(properties):
     """
-    Extracts key, description, type, and enum from properties in the JSON schema.
+    Extracts key, description, type, $ref, enum, and example from properties in the JSON schema.
     :param properties: Dictionary of properties from the JSON schema.
-    :return: List of dictionaries containing key, description, type, and enum.
+    :return: List of dictionaries containing key, description, type, and example.
     """
     extracted = []
     for key, attributes in properties.items():
         description = attributes.get("description", "No description available.")
-        type_info = attributes.get("type", "Unknown")  # Type情報を取得
-        enum_info = attributes.get("enum", [])  # Enum情報を取得
-        enum_str = ", ".join(map(str, enum_info)) if enum_info else "N/A"  # リストを文字列に変換
-        extracted.append({"key": key, "description": description, "type": type_info, "enum": enum_str})
+
+        # Handle $ref (reference to another schema)
+        ref_info = attributes.get("$ref")
+        if ref_info:
+            description += f" See: {ref_info}"
+
+        # Handle enum (enumeration values)
+        enum_info = attributes.get("enum", [])
+        if enum_info:
+            enum_str = ", ".join(map(str, enum_info))
+            description += f" Must be one of: {enum_str}."
+
+        # Handle example value
+        example_info = attributes.get("example", "N/A")
+
+        # Extract type information
+        type_info = attributes.get("type", "Unknown")
+
+        extracted.append({
+            "key": key,
+            "description": description,
+            "type": type_info,
+            "example": example_info
+        })
     return extracted
 
 
 def extract_definitions(definitions):
     """
-    Extracts definitions from the JSON schema.
+    Extracts key, type, and properties (if available) from definitions in the JSON schema.
     :param definitions: Dictionary of definitions.
     :return: Formatted Markdown string for definitions.
     """
@@ -30,20 +50,13 @@ def extract_definitions(definitions):
 
     definition_content = "\n## Definitions\n"
     for key, attributes in definitions.items():
-        description = attributes.get("description", "No description available.")
-        type_info = attributes.get("type", "Unknown")  # Type情報
-        enum_info = attributes.get("enum", [])  # Enum情報
-        enum_str = ", ".join(map(str, enum_info)) if enum_info else "N/A"
+        type_info = attributes.get("type", "Unknown")
 
-        definition_content += f"\n- <a id=\"definitions/{key}\"></a>**`{key}`** *(type: {type_info})*: {description}\n"
-        definition_content += f"  - **Enum**: {enum_str}\n"
+        # Extract properties if available
+        properties_info = attributes.get("properties", {})
+        property_keys = ", ".join(f"`{p}`" for p in properties_info.keys()) if properties_info else "None"
 
-        if "properties" in attributes:
-            for sub_key, sub_attributes in attributes["properties"].items():
-                sub_type = sub_attributes.get("type", "Unknown")
-                sub_enum = sub_attributes.get("enum", [])
-                sub_enum_str = ", ".join(map(str, sub_enum)) if sub_enum else "N/A"
-                definition_content += f"  - **`{sub_key}`** *(type: {sub_type}, enum: {sub_enum_str})*\n"
+        definition_content += f"- **`{key}`** *(type: {type_info})* - Properties: {property_keys}\n"
 
     return definition_content
 
@@ -72,10 +85,10 @@ def save_schema_as_markdown(json_file_path, markdown_file_path):
 
     # Construct Markdown table for properties
     markdown_content = f"# Database Metadata\n\n{schema_description}\n\n"
-    markdown_content += "| Parameter | Type | Enum | Description |\n|---|---|---|---|\n"
+    markdown_content += "| Parameter | Type | Description | Example |\n|---|---|---|---|\n"
 
     for entry in extracted_data:
-        markdown_content += f"| - **`{entry['key']}`** | {entry['type']} | {entry['enum']} | {entry['description']} |\n"
+        markdown_content += f"| - **`{entry['key']}`** | {entry['type']} | {entry['description']} | {entry['example']} |\n"
 
     # Append definitions
     markdown_content += definitions_content
