@@ -54,7 +54,7 @@ def extract_definitions(definitions):
 
         # Handle $ref in definitions as a clickable link
         ref_info = attributes.get("$ref")
-        ref_link = f" `See {ref_info}`" if ref_info else ""
+        ref_link = f" `Body part information follows this parameter. See: {ref_info}`" if ref_info else ""
 
         # Extract properties if available
         properties_info = attributes.get("properties", {})
