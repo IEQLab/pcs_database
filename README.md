@@ -61,6 +61,16 @@ This is a characteristic of the free hosting service we currently use, which put
 | - **`V`** *(number)* | Air velocity (m/s). |  |
 
 **Definitions:**
+Examples:
+```json
+{
+"Crown": -1.5,
+"Head": -1.0,
+"Left_Chest": -0.8,
+"Right_Chest": -0.8,
+"OTHER BODY PARTS": -0.8
+}
+```
 - **`Image_Path`** *(string)*: File path of related images.
 - **`Crown`** *(number)*
 - **`Head`** *(number)*
@@ -76,61 +86,4 @@ This is a characteristic of the free hosting service we currently use, which put
 - **`Right_Forearm`** *(number)*
 - **`Left_Hand`** *(number)*
 - **`Right_Hand`** *(number)*
-- **`Left_Front_Thigh`** *(number)*
-- **`Right_Front_Thigh`** *(number)*
-- **`Left_Back_Thigh`** *(number)*
-- **`Right_Back_Thigh`** *(number)*
-- **`Left_Lower_Leg`** *(number)*
-- **`Right_Lower_Leg`** *(number)*
-- **`Left_Foot`** *(number)*
-- **`Right_Foot`** *(number)*
-## Examples
-```json
-{
-"ID": 1,
-"Category": "Fan",
-"Type": "Small desk fan",
-"Brand": "Simpeak",
-"PCS_Reference": "Reference link",
-"PCS_Intensity": "Low",
-"Price_USD": 10,
-"Angle": 125.0,
-"Distance": 60.0,
-"Target_Body": "Face",
-"Power_W": 2,
-"DateTime": "2025-02-01T17:18:00Z",
-"Place": "The University of Sydney",
-"Posture": "Sitting",
-"Situation": "Office",
-"Manikin_Company": "PT Manikins",
-"Manikin_Gender": "Female",
-"Manikin_Body_Segments": 22,
-"Control_Method": "TskControl34",
-"Ta": 25,
-"MRT": 25,
-"RH": 50,
-"V": 0.1,
-"Delta_Teq_": {
-"Crown": -1.5,
-"Head": -1.0,
-"Left_Chest": -0.8,
-"Right_Chest": -0.8,
-"OTHER BODY PARTS": -0.8
-},
-"Delta_P_": {
-"Crown": -10,
-"Head": -10,
-"Left_Chest": 0,
-"Right_Chest": 0,
-"OTHER BODY PARTS": 0
-},
-"Clo_": {
-"Crown": 0.6,
-"Head": 0.6,
-"Left_Chest": 1.0,
-"Right_Chest": 1.0,
-"OTHER BODY PARTS": 1.0
-}
-}
-```
 <!-- METADATA_END -->
