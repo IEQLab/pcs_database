@@ -13,16 +13,16 @@ def extract_properties(properties):
     for key, attributes in properties.items():
         description = attributes.get("description", "No description available.")
 
-        # Handle $ref (reference to another schema)
+        # Handle $ref (reference to another schema) - Make it a clickable link
         ref_info = attributes.get("$ref")
         if ref_info:
-            description += f" See: {ref_info}"
+            description += f" [See here]({ref_info})"
 
         # Handle enum (enumeration values)
         enum_info = attributes.get("enum", [])
         if enum_info:
             enum_str = ", ".join(map(str, enum_info))
-            description += f" Must be one of: **{enum_str}**."
+            description += f" Must be one of: {enum_str}."
 
         # Handle example value
         example_info = attributes.get("example", "N/A")
@@ -52,11 +52,15 @@ def extract_definitions(definitions):
     for key, attributes in definitions.items():
         type_info = attributes.get("type", "Unknown")
 
+        # Handle $ref in definitions as a clickable link
+        ref_info = attributes.get("$ref")
+        ref_link = f" [See here]({ref_info})" if ref_info else ""
+
         # Extract properties if available
         properties_info = attributes.get("properties", {})
         property_keys = ", ".join(f"`{p}`" for p in properties_info.keys()) if properties_info else "None"
 
-        definition_content += f"- **`{key}`** *(type: {type_info})* - Properties: {property_keys}\n"
+        definition_content += f"- **`{key}`** *(type: {type_info})*{ref_link} - Properties: {property_keys}\n"
 
     return definition_content
 
@@ -88,7 +92,7 @@ def save_schema_as_markdown(json_file_path, markdown_file_path):
     markdown_content += "| Parameter | Type | Description | Example |\n|---|---|---|---|\n"
 
     for entry in extracted_data:
-        markdown_content += f"| **`{entry['key']}`** | {entry['type']} | {entry['description']} | {entry['example']} |\n"
+        markdown_content += f"| - **`{entry['key']}`** | {entry['type']} | {entry['description']} | {entry['example']} |\n"
 
     # Append definitions
     markdown_content += definitions_content
