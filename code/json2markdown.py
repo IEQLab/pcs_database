@@ -16,7 +16,7 @@ def extract_properties(properties):
         # Handle $ref (reference to another schema) - Make it a clickable link
         ref_info = attributes.get("$ref")
         if ref_info:
-            description += f" [See {ref_info}]"
+            description += f" See {ref_info}"
 
         # Handle enum (enumeration values)
         enum_info = attributes.get("enum", [])
@@ -54,7 +54,7 @@ def extract_definitions(definitions):
 
         # Handle $ref in definitions as a clickable link
         ref_info = attributes.get("$ref")
-        ref_link = f" [See {ref_info}]" if ref_info else ""
+        ref_link = f" See {ref_info}" if ref_info else ""
 
         # Extract properties if available
         properties_info = attributes.get("properties", {})
