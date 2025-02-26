@@ -1,332 +1,110 @@
 {
-    "DateTime": {
-        "description": "Timestamp of the record",
-        "type": "datetime",
-        "unit": null,
-        "category": "time"
-    },
-    "Place": {
-        "description": "Measurement place",
-        "type": "string",
-        "unit": null,
-        "category": "place"
-    },
-    "PCS": {
-        "description": "Personal Comfort System",
-        "type": "string",
-        "unit": null,
-        "category": "comfort"
-    },
-    "State": {
-        "description": "State of manikin",
-        "type": "string",
-        "unit": null,
-        "category": "state"
-    },
-    "Situation": {
-        "description": "Simulated situation",
-        "type": "string",
-        "unit": null,
-        "category": "state"
-    },
-    "Ta": {
-        "description": "Air temperature",
-        "type": "float",
-        "unit": "oC",
-        "category": "environment"
-    },
-    "MRT": {
-        "description": "Mean Radiant Temperature",
-        "type": "float",
-        "unit": "oC",
-        "category": "environment"
-    },
-    "RH": {
-        "description": "Relative Humidity",
-        "type": "float",
-        "unit": "%",
-        "category": "environment"
-    },
-    "V": {
-        "description": "Air velocity",
-        "type": "float",
-        "unit": "m/s",
-        "category": "environment"
-    },
-    "Clo": {
-        "description": "Clothing insulation",
-        "type": "float",
-        "unit": "clo",
-        "category": "clothing"
-    },
-    "Posture": {
-        "description": "Posture of the subject",
-        "type": "string",
-        "unit": null,
-        "category": "state"
-    },
-    "Delta_Teq_Crown": {
-        "description": "Delta equivalent temperature for Crown",
-        "type": "float",
-        "unit": "oC",
-        "category": "body_temperature"
-    },
-    "Delta_Teq_Head": {
-        "description": "Delta equivalent temperature for Head",
-        "type": "float",
-        "unit": "oC",
-        "category": "body_temperature"
-    },
-    "Delta_Teq_Left_Chest": {
-        "description": "Delta equivalent temperature for Left Chest",
-        "type": "float",
-        "unit": "oC",
-        "category": "body_temperature"
-    },
-    "Delta_Teq_Right_Chest": {
-        "description": "Delta equivalent temperature for Right Chest",
-        "type": "float",
-        "unit": "oC",
-        "category": "body_temperature"
-    },
-    "Delta_Teq_Left_Back": {
-        "description": "Delta equivalent temperature for Left Back",
-        "type": "float",
-        "unit": "oC",
-        "category": "body_temperature"
-    },
-    "Delta_Teq_Right_Back": {
-        "description": "Delta equivalent temperature for Right Back",
-        "type": "float",
-        "unit": "oC",
-        "category": "body_temperature"
-    },
-    "Delta_Teq_Abdomen": {
-        "description": "Delta equivalent temperature for Abdomen",
-        "type": "float",
-        "unit": "oC",
-        "category": "body_temperature"
-    },
-    "Delta_Teq_Buttocks": {
-        "description": "Delta equivalent temperature for Buttocks",
-        "type": "float",
-        "unit": "oC",
-        "category": "body_temperature"
-    },
-    "Delta_Teq_Left_Upper_Arm": {
-        "description": "Delta equivalent temperature for Left Upper Arm",
-        "type": "float",
-        "unit": "oC",
-        "category": "body_temperature"
-    },
-    "Delta_Teq_Right_Upper_Arm": {
-        "description": "Delta equivalent temperature for Right Upper Arm",
-        "type": "float",
-        "unit": "oC",
-        "category": "body_temperature"
-    },
-    "Delta_Teq_Left_Forearm": {
-        "description": "Delta equivalent temperature for Left Forearm",
-        "type": "float",
-        "unit": "oC",
-        "category": "body_temperature"
-    },
-    "Delta_Teq_Right_Forearm": {
-        "description": "Delta equivalent temperature for Right Forearm",
-        "type": "float",
-        "unit": "oC",
-        "category": "body_temperature"
-    },
-    "Delta_Teq_Left_Hand": {
-        "description": "Delta equivalent temperature for Left Hand",
-        "type": "float",
-        "unit": "oC",
-        "category": "body_temperature"
-    },
-    "Delta_Teq_Right_Hand": {
-        "description": "Delta equivalent temperature for Right Hand",
-        "type": "float",
-        "unit": "oC",
-        "category": "body_temperature"
-    },
-    "Delta_Teq_Left_Front_Thigh": {
-        "description": "Delta equivalent temperature for Left Front Thigh",
-        "type": "float",
-        "unit": "oC",
-        "category": "body_temperature"
-    },
-    "Delta_Teq_Right_Front_Thigh": {
-        "description": "Delta equivalent temperature for Right Front Thigh",
-        "type": "float",
-        "unit": "oC",
-        "category": "body_temperature"
-    },
-    "Delta_Teq_Left_Back_Thigh": {
-        "description": "Delta equivalent temperature for Left Back Thigh",
-        "type": "float",
-        "unit": "oC",
-        "category": "body_temperature"
-    },
-    "Delta_Teq_Right_Back_Thigh": {
-        "description": "Delta equivalent temperature for Right Back Thigh",
-        "type": "float",
-        "unit": "oC",
-        "category": "body_temperature"
-    },
-    "Delta_Teq_Left_Lower_Leg": {
-        "description": "Delta equivalent temperature for Left Lower Leg",
-        "type": "float",
-        "unit": "oC",
-        "category": "body_temperature"
-    },
-    "Delta_Teq_Right_Lower_Leg": {
-        "description": "Delta equivalent temperature for Right Lower Leg",
-        "type": "float",
-        "unit": "oC",
-        "category": "body_temperature"
-    },
-    "Delta_Teq_Left_Foot": {
-        "description": "Delta equivalent temperature for Left Foot",
-        "type": "float",
-        "unit": "oC",
-        "category": "body_temperature"
-    },
-    "Delta_Teq_Right_Foot": {
-        "description": "Delta equivalent temperature for Right Foot",
-        "type": "float",
-        "unit": "oC",
-        "category": "body_temperature"
-    },
-    "Clo_Crown": {
-        "description": "Clo value for Crown",
-        "type": "float",
-        "unit": "clo",
-        "category": "clothing"
-    },
-    "Clo_Head": {
-        "description": "Clo value for Head",
-        "type": "float",
-        "unit": "clo",
-        "category": "clothing"
-    },
-    "Clo_Left_Chest": {
-        "description": "Clo value for Left Chest",
-        "type": "float",
-        "unit": "clo",
-        "category": "clothing"
-    },
-    "Clo_Right_Chest": {
-        "description": "Clo value for Right Chest",
-        "type": "float",
-        "unit": "clo",
-        "category": "clothing"
-    },
-    "Clo_Left_Back": {
-        "description": "Clo value for Left Back",
-        "type": "float",
-        "unit": "clo",
-        "category": "clothing"
-    },
-    "Clo_Right_Back": {
-        "description": "Clo value for Right Back",
-        "type": "float",
-        "unit": "clo",
-        "category": "clothing"
-    },
-    "Clo_Abdomen": {
-        "description": "Clo value for Abdomen",
-        "type": "float",
-        "unit": "clo",
-        "category": "clothing"
-    },
-    "Clo_Buttocks": {
-        "description": "Clo value for Buttocks",
-        "type": "float",
-        "unit": "clo",
-        "category": "clothing"
-    },
-    "Clo_Left_Upper_Arm": {
-        "description": "Clo value for Left Upper Arm",
-        "type": "float",
-        "unit": "clo",
-        "category": "clothing"
-    },
-    "Clo_Right_Upper_Arm": {
-        "description": "Clo value for Right Upper Arm",
-        "type": "float",
-        "unit": "clo",
-        "category": "clothing"
-    },
-    "Clo_Left_Forearm": {
-        "description": "Clo value for Left Forearm",
-        "type": "float",
-        "unit": "clo",
-        "category": "clothing"
-    },
-    "Clo_Right_Forearm": {
-        "description": "Clo value for Right Forearm",
-        "type": "float",
-        "unit": "clo",
-        "category": "clothing"
-    },
-    "Clo_Left_Hand": {
-        "description": "Clo value for Left Hand",
-        "type": "float",
-        "unit": "clo",
-        "category": "clothing"
-    },
-    "Clo_Right_Hand": {
-        "description": "Clo value for Right Hand",
-        "type": "float",
-        "unit": "clo",
-        "category": "clothing"
-    },
-    "Clo_Left_Front_Thigh": {
-        "description": "Clo value for Left Front Thigh",
-        "type": "float",
-        "unit": "clo",
-        "category": "clothing"
-    },
-    "Clo_Right_Front_Thigh": {
-        "description": "Clo value for Right Front Thigh",
-        "type": "float",
-        "unit": "clo",
-        "category": "clothing"
-    },
-    "Clo_Left_Back_Thigh": {
-        "description": "Clo value for Left Back Thigh",
-        "type": "float",
-        "unit": "clo",
-        "category": "clothing"
-    },
-    "Clo_Right_Back_Thigh": {
-        "description": "Clo value for Right Back Thigh",
-        "type": "float",
-        "unit": "clo",
-        "category": "clothing"
-    },
-    "Clo_Left_Lower_Leg": {
-        "description": "Clo value for Left Lower Leg",
-        "type": "float",
-        "unit": "clo",
-        "category": "clothing"
-    },
-    "Clo_Right_Lower_Leg": {
-        "description": "Clo value for Right Lower Leg",
-        "type": "float",
-        "unit": "clo",
-        "category": "clothing"
-    },
-    "Clo_Left_Foot": {
-        "description": "Clo value for Left Foot",
-        "type": "float",
-        "unit": "clo",
-        "category": "clothing"
-    },
-    "Clo_Right_Foot": {
-        "description": "Clo value for Right Foot",
-        "type": "float",
-        "unit": "clo",
-        "category": "clothing"
+  "type": "object",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "description": "Schema for PCS database metadata",
+  "definitions": {
+    "BodyPart": {
+      "type": "object",
+      "description": "Body parts affected by PCS.",
+      "properties": {
+        "Crown": {"type": "number"},
+        "Head": {"type": "number"},
+        "Left_Chest": {"type": "number"},
+        "Right_Chest": {"type": "number"},
+        "Left_Back": {"type": "number"},
+        "Right_Back": {"type": "number"},
+        "Abdomen": {"type": "number"},
+        "Buttocks": {"type": "number"},
+        "Left_Upper_Arm": {"type": "number"},
+        "Right_Upper_Arm": {"type": "number"},
+        "Left_Forearm": {"type": "number"},
+        "Right_Forearm": {"type": "number"},
+        "Left_Hand": {"type": "number"},
+        "Right_Hand": {"type": "number"},
+        "Left_Front_Thigh": {"type": "number"},
+        "Right_Front_Thigh": {"type": "number"},
+        "Left_Back_Thigh": {"type": "number"},
+        "Right_Back_Thigh": {"type": "number"},
+        "Left_Lower_Leg": {"type": "number"},
+        "Right_Lower_Leg": {"type": "number"},
+        "Left_Foot": {"type": "number"},
+        "Right_Foot": {"type": "number"}
+      }
     }
+  },
+  "properties": {
+    "columns": {
+      "type": "object",
+      "description": "Metadata for each column in the PCS database CSV",
+      "properties": {
+        "ID": {"type": "integer", "description": "Unique identifier for each PCS."},
+        "Category": {"type": "string", "description": "Category of the PCS (e.g., cooling, heating)."},
+        "Type": {"type": "string", "description": "Type of PCS (e.g., fan, vest)."},
+        "Brand": {"type": "string", "description": "Brand name of the PCS."},
+        "PCS_Reference": {"type": "string", "description": "Reference number or model identifier of PCS."},
+        "PCS_Intensity": {"type": "string", "description": "Intensity level of the PCS."},
+        "Price_USD": {"type": "number", "description": "Price of the PCS in US dollars."},
+        "Angle": {"type": "number", "description": "Angle of the PCS air or radiation.", "unit": "degrees"},
+        "Distance": {"type": "number", "description": "Distance from PCS to target.", "unit": "m"},
+        "Target_Body": {"type": "string", "description": "Targeted body region for PCS application."},
+        "Power_W": {"type": "number", "description": "Power consumption of the PCS.", "unit": "W"},
+        "DateTime": {"type": "string", "format": "date-time", "description": "Timestamp of data entry."},
+        "Place": {"type": "string", "description": "Location where the measurement was taken."},
+        "Posture": {"type": "string", "description": "Posture of the manikin during measurement (e.g., standing, sitting)."},
+        "Situation": {"type": "string", "description": "Description of the environment where PCS is used (e.g., office, car)."},
+        "Manikin_Company": {"type": "string", "description": "Manufacturer of the thermal manikin used."},
+        "Manikin_Gender": {"type": "string", "enum": ["Male", "Female"], "description": "Gender representation of the thermal manikin."},
+        "Manikin_Body_Segments": {"type": "integer", "description": "Number of body segments modeled in the thermal manikin."},
+        "Control_Method": {"type": "string", "description": "Method used to control the PCS (e.g., manual, automatic)."},
+        "Ta": {"type": "number", "description": "Ambient air temperature.", "unit": "°C"},
+        "MRT": {"type": "number", "description": "Mean radiant temperature.", "unit": "°C"},
+        "RH": {"type": "number", "description": "Relative humidity.", "unit": "%"},
+        "V": {"type": "number", "description": "Air velocity.", "unit": "m/s"},
+        "Delta_Teq": {
+          "type": "object",
+          "description": "Equivalent temperature change for specific body parts.",
+          "$ref": "#/definitions/BodyPart"
+        },
+        "Delta_P": {
+          "type": "object",
+          "description": "Change in perceived temperature or power supply for specific body parts.",
+          "$ref": "#/definitions/BodyPart"
+        },
+        "Clo": {
+          "type": "object",
+          "description": "Clothing insulation value for specific body parts.",
+          "$ref": "#/definitions/BodyPart"
+        },
+        "Image_Path": {"type": "string", "description": "File path of related images."}
+      }
+    }
+  },
+  "examples": [
+    {
+      "ID": 1,
+      "Category": "Fan",
+      "Type": "Small desk fan",
+      "Brand": "Simpeak",
+      "PCS_Reference": "Reference link",
+      "PCS_Intensity": "Low",
+      "Price_USD": 10,
+      "Angle": 125.0,
+      "Distance": 60.0,
+      "Target_Body": "Face",
+      "Power_W": 2,
+      "DateTime": "2025-02-01T17:18:00Z",
+      "Place": "The University of Sydney",
+      "Posture": "Sitting",
+      "Situation": "Office",
+      "Manikin_Company": "PT Manikins",
+      "Manikin_Gender": "Female",
+      "Manikin_Body_Segments": 22,
+      "Control_Method": "TskControl34",
+      "Ta": 25,
+      "MRT": 25,
+      "RH": 50,
+      "V": 0.1
+    }
+  ],
+  "required": ["columns"]
 }

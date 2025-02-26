@@ -2,6 +2,7 @@ import os
 
 # Project directory
 PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
+README_PATH = os.path.join(PROJECT_DIR, "README.md")
 DATA_DIR = os.path.join(PROJECT_DIR, "data")
 RAW_DATA_DIR = os.path.join(DATA_DIR, "raw data")
 MANIKIN_DATA_DIR = os.path.join(RAW_DATA_DIR, "manikin_data")
@@ -13,3 +14,7 @@ FIGURE_DIR = os.path.join(PROJECT_DIR, "figure")
 # Paths for specific files
 METADATA_FILE = os.path.join(DATA_DIR, "metadata.json")
 DATABASE_CSV_FILE = os.path.join(DATA_DIR, "PCS_database.csv")
+
+
+METADATA_JSON_FILE_PATH = os.path.join(DATA_DIR, "metadata.json")
+METADATA_MARKDOWN_FILE_PATH = os.path.join(DATA_DIR, "metadata.markdown")
