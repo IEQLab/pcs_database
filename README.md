@@ -35,7 +35,7 @@ This is a characteristic of the free hosting service we currently use, which put
 <!-- METADATA_START -->
 # Database Metadata
 
-Schema Description (Generated on 2025-02-27 10:32:12)
+Schema Description (Generated on 2025-02-27 10:33:39)
 
 | Parameter | Type | Description | Example |
 |---|---|---|---|
@@ -62,9 +62,9 @@ Schema Description (Generated on 2025-02-27 10:32:12)
 | **`MRT`** | *number* | Mean radiant temperature (°C). | 25 |
 | **`RH`** | *number* | Relative humidity (%). | 50 |
 | **`V`** | *number* | Air velocity (m/s). | 0.1 |
-| **`Delta_Teq_`** | *object* | Equivalent temperature change for specific body parts. [See here](#/definitions/BodyPart) | N/A |
-| **`Delta_P_`** | *object* | Change in perceived temperature or power supply for specific body parts. [See here](#/definitions/BodyPart) | N/A |
-| **`Clo_`** | *object* | Clothing insulation value for specific body parts. [See here](#/definitions/BodyPart) | N/A |
+| **`Delta_Teq_`** | *object* | Equivalent temperature change for specific body parts. [See #/definitions/BodyPart] | N/A |
+| **`Delta_P_`** | *object* | Change in perceived temperature or power supply for specific body parts. [See #/definitions/BodyPart] | N/A |
+| **`Clo_`** | *object* | Clothing insulation value for specific body parts. [See #/definitions/BodyPart] | N/A |
 | **`Image_Path`** | *string* | File path of related images. | N/A |
 
 ## Definitions
