@@ -38,16 +38,16 @@
       "description": "Metadata for each column in the PCS database CSV",
       "properties": {
         "ID": {"type": "integer", "description": "Unique identifier for each PCS."},
-        "Category": {"type": "string", "description": "Category of the PCS (e.g., cooling, heating)."},
-        "Type": {"type": "string", "description": "Type of PCS (e.g., fan, vest)."},
+        "Category": {"type": "string", "enum": ["Cooling", "Heating"], "description": "Category of the PCS."},
+        "Type": {"type": "string", "description": "Type of PCS (e.g., fan, foot warmer)."},
         "Brand": {"type": "string", "description": "Brand name of the PCS."},
-        "PCS_Reference": {"type": "string", "description": "Reference number or model identifier of PCS."},
+        "PCS_Reference": {"type": "string", "description": "Reference URL of PCS."},
         "PCS_Intensity": {"type": "string", "description": "Intensity level of the PCS."},
         "Price_USD": {"type": "number", "description": "Price of the PCS in US dollars."},
-        "Angle": {"type": "number", "description": "Angle of the PCS air or radiation.", "unit": "degrees"},
-        "Distance": {"type": "number", "description": "Distance from PCS to target.", "unit": "m"},
+        "Angle": {"type": "number", "description": "Angle of the PCS air or radiation (degrees)."},
+        "Distance": {"type": "number", "description": "Distance from PCS to target (m)."},
         "Target_Body": {"type": "string", "description": "Targeted body region for PCS application."},
-        "Power_W": {"type": "number", "description": "Power consumption of the PCS.", "unit": "W"},
+        "Power_W": {"type": "number", "description": "Power consumption of the PCS (W)."},
         "DateTime": {"type": "string", "format": "date-time", "description": "Timestamp of data entry."},
         "Place": {"type": "string", "description": "Location where the measurement was taken."},
         "Posture": {"type": "string", "description": "Posture of the manikin during measurement (e.g., standing, sitting)."},
@@ -56,10 +56,10 @@
         "Manikin_Gender": {"type": "string", "enum": ["Male", "Female"], "description": "Gender representation of the thermal manikin."},
         "Manikin_Body_Segments": {"type": "integer", "description": "Number of body segments modeled in the thermal manikin."},
         "Control_Method": {"type": "string", "description": "Method used to control the PCS (e.g., manual, automatic)."},
-        "Ta": {"type": "number", "description": "Ambient air temperature.", "unit": "°C"},
-        "MRT": {"type": "number", "description": "Mean radiant temperature.", "unit": "°C"},
-        "RH": {"type": "number", "description": "Relative humidity.", "unit": "%"},
-        "V": {"type": "number", "description": "Air velocity.", "unit": "m/s"},
+        "Ta": {"type": "number", "description": "Ambient air temperature (°C)."},
+        "MRT": {"type": "number", "description": "Mean radiant temperature (°C)."},
+        "RH": {"type": "number", "description": "Relative humidity (%)."},
+        "V": {"type": "number", "description": "Air velocity (m/s)."},
         "Delta_Teq": {
           "type": "object",
           "description": "Equivalent temperature change for specific body parts.",
@@ -103,7 +103,28 @@
       "Ta": 25,
       "MRT": 25,
       "RH": 50,
-      "V": 0.1
+      "V": 0.1,
+      "Delta_Teq_": {
+        "Crown": -1.5,
+        "Head": -1.0,
+        "Left_Chest": -0.8,
+        "Right_Chest": -0.8,
+        "OTHER BODY PARTS": -0.8
+        },
+      "Delta_P_": {
+        "Crown": -10,
+        "Head": -10,
+        "Left_Chest": 0,
+        "Right_Chest": 0,
+        "OTHER BODY PARTS": 0
+        },
+      "Clo_": {
+        "Crown": 0.6,
+        "Head": 0.6,
+        "Left_Chest": 1.0,
+        "Right_Chest": 1.0,
+        "OTHER BODY PARTS": 1.0
+        }
     }
   ],
   "required": ["columns"]

@@ -4,9 +4,6 @@ import jsonschema2md
 from datetime import datetime
 import configuration
 
-METADATA_START_TAG = "<!-- METADATA_START -->\n"
-METADATA_END_TAG = "<!-- METADATA_END -->\n"
-
 def save_schema_as_markdown(json_file_path, markdown_file_path):
     """
     Converts a JSON schema to a Markdown file and appends the current time to the description.
@@ -38,39 +35,58 @@ def save_schema_as_markdown(json_file_path, markdown_file_path):
 def update_readme_with_metadata(readme_path, markdown_file_path):
     """
     Inserts metadata.markdown content into README.md between METADATA_START and METADATA_END tags.
+    If the metadata is already up-to-date, no changes are made.
+    Ensures that the metadata is updated in-place without duplication.
     """
+    METADATA_START_TAG = "<!-- METADATA_START -->"
+    METADATA_END_TAG = "<!-- METADATA_END -->"
+
     with open(markdown_file_path, "r", encoding="utf-8") as md_file:
-        metadata_content = md_file.read()
+        new_metadata_content = md_file.read().strip()
 
     with open(readme_path, "r", encoding="utf-8") as readme_file:
         readme_lines = readme_file.readlines()
 
     new_readme_content = []
     inside_metadata_section = False
+    existing_metadata = []
+    metadata_found = False
 
     for line in readme_lines:
         if line.strip() == METADATA_START_TAG.strip():
-            new_readme_content.append(line)
-            new_readme_content.append(metadata_content + "\n")  # メタデータを追加
+            # Start of metadata section
             inside_metadata_section = True
+            metadata_found = True
+            existing_metadata = []
+            new_readme_content.append(line)  # Keep METADATA_START tag
         elif line.strip() == METADATA_END_TAG.strip():
+            # End of metadata section
             inside_metadata_section = False
-            new_readme_content.append(line)  # 終了タグを追加
-        elif not inside_metadata_section:
-            new_readme_content.append(line)  # 既存の行をそのまま保持
+            if existing_metadata and "\n".join(existing_metadata).strip() == new_metadata_content:
+                # If existing metadata matches the new content, no update is needed
+                print("README.md is already up-to-date. No changes made.")
+                return
+            new_readme_content.append(new_metadata_content + "\n")
+            new_readme_content.append(line)  # Keep METADATA_END tag
+        elif inside_metadata_section:
+            # Collect existing metadata for comparison
+            existing_metadata.append(line.strip())
+        else:
+            # Keep other lines unchanged
+            new_readme_content.append(line)
 
-    # METADATA タグがなかった場合、新しく追加
-    if METADATA_START_TAG.strip() not in readme_lines:
-        new_readme_content.append("\n" + METADATA_START_TAG)
-        new_readme_content.append(metadata_content + "\n")
-        new_readme_content.append(METADATA_END_TAG)
-    else:
-        pass
+    # If metadata section is not found, add a new section at the end
+    if not metadata_found:
+        new_readme_content.append("\n" + METADATA_START_TAG + "\n")
+        new_readme_content.append(new_metadata_content + "\n")
+        new_readme_content.append(METADATA_END_TAG + "\n")
 
     with open(readme_path, "w", encoding="utf-8") as readme_file:
         readme_file.writelines(new_readme_content)
 
-    print(f"README.md successfully updated with metadata.")
+    print("README.md successfully updated with metadata.")
+
+
 
 if __name__ == "__main__":
     save_schema_as_markdown(
