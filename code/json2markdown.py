@@ -34,7 +34,7 @@ def save_schema_as_markdown(json_file_path, markdown_file_path):
 
 def update_readme_with_metadata(readme_path, markdown_file_path):
     """
-    Inserts metadata.markdown content into README.md between METADATA_START and METADATA_END tags.
+    Inserts metadata.markdown content into README.md as a table between METADATA_START and METADATA_END tags.
     If the metadata is already up-to-date, no changes are made.
     Ensures that the metadata is updated in-place without duplication.
     """
@@ -42,7 +42,13 @@ def update_readme_with_metadata(readme_path, markdown_file_path):
     METADATA_END_TAG = "<!-- METADATA_END -->"
 
     with open(markdown_file_path, "r", encoding="utf-8") as md_file:
-        new_metadata_content = md_file.read().strip()
+        metadata_lines = md_file.readlines()
+
+    # Convert metadata into a Markdown table format
+    table_header = "| Key | Value |\n|---|---|\n"
+    table_rows = [f"| {line.split(':')[0].strip()} | {line.split(':')[1].strip()} |"
+                  for line in metadata_lines if ":" in line]
+    new_metadata_content = table_header + "\n".join(table_rows)
 
     with open(readme_path, "r", encoding="utf-8") as readme_file:
         readme_lines = readme_file.readlines()
@@ -84,7 +90,7 @@ def update_readme_with_metadata(readme_path, markdown_file_path):
     with open(readme_path, "w", encoding="utf-8") as readme_file:
         readme_file.writelines(new_readme_content)
 
-    print("README.md successfully updated with metadata.")
+    print("README.md successfully updated with metadata in table format.")
 
 
 
