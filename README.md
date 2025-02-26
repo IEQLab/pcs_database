@@ -35,7 +35,7 @@ This is a characteristic of the free hosting service we currently use, which put
 <!-- METADATA_START -->
 # Database Metadata
 
-Schema Description (Generated on 2025-02-26 19:40:36)
+Schema Description (Generated on 2025-02-26 19:42:46)
 
 | Parameter | Description |
 |---|---|
@@ -62,9 +62,9 @@ Schema Description (Generated on 2025-02-26 19:40:36)
 | - **`MRT`** | Mean radiant temperature (°C). |
 | - **`RH`** | Relative humidity (%). |
 | - **`V`** | Air velocity (m/s). |
-| - **`Delta_Teq`** | Equivalent temperature change for specific body parts. |
-| - **`Delta_P`** | Change in perceived temperature or power supply for specific body parts. |
-| - **`Clo`** | Clothing insulation value for specific body parts. |
+| - **`Delta_Teq_`** | Equivalent temperature change for specific body parts. |
+| - **`Delta_P_`** | Change in perceived temperature or power supply for specific body parts. |
+| - **`Clo_`** | Clothing insulation value for specific body parts. |
 | - **`Image_Path`** | File path of related images. |
 
 ## Definitions
@@ -94,3 +94,5 @@ Schema Description (Generated on 2025-02-26 19:40:36)
   - **`Right_Foot`** *(number)*
 
 <!-- METADATA_END -->
+
+There is [an example PCS database](PCS_database_example.csv)

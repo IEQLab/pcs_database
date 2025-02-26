@@ -59,17 +59,17 @@
         "MRT": {"type": "number", "description": "Mean radiant temperature (°C).", "example": 25},
         "RH": {"type": "number", "description": "Relative humidity (%).", "example": 50},
         "V": {"type": "number", "description": "Air velocity (m/s).", "example": 0.1},
-        "Delta_Teq": {
+        "Delta_Teq_": {
           "type": "object",
           "description": "Equivalent temperature change for specific body parts.",
           "$ref": "#/definitions/BodyPart"
         },
-        "Delta_P": {
+        "Delta_P_": {
           "type": "object",
           "description": "Change in perceived temperature or power supply for specific body parts.",
           "$ref": "#/definitions/BodyPart"
         },
-        "Clo": {
+        "Clo_": {
           "type": "object",
           "description": "Clothing insulation value for specific body parts.",
           "$ref": "#/definitions/BodyPart"
