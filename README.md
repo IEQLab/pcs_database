@@ -35,13 +35,13 @@ This is a characteristic of the free hosting service we currently use, which put
 <!-- METADATA_START -->
 # Database Metadata
 
-Schema Description (Generated on 2025-02-27 10:21:51)
+Schema Description (Generated on 2025-02-27 10:23:48)
 
 | Parameter | Type | Description | Example |
 |---|---|---|---|
 | **`ID`** | integer | Unique identifier for each PCS. | 1 |
-| **`Category`** | string | Category of the PCS. Must be one of: **`Cooling, Heating`**. | Cooling |
-| **`Type`** | string | Type of PCS (e.g., fan, foot warmer). Must be one of: **`Cooling, Heating`**. | Small desk fan |
+| **`Category`** | string | Category of the PCS. Must be one of: **Cooling, Heating**. | Cooling |
+| **`Type`** | string | Type of PCS (e.g., fan, foot warmer). Must be one of: **Cooling, Heating**. | Small desk fan |
 | **`Brand`** | string | Brand name of the PCS. | Simpeak |
 | **`PCS_Reference`** | string | Reference URL of PCS. | Reference link |
 | **`PCS_Intensity`** | string | Intensity level of the PCS. | Low |
@@ -55,9 +55,9 @@ Schema Description (Generated on 2025-02-27 10:21:51)
 | **`Posture`** | string | Posture of the manikin during measurement (e.g., standing, sitting). | Sitting |
 | **`Situation`** | string | Description of the environment where PCS is used (e.g., office, car). | Office |
 | **`Manikin_Company`** | string | Manufacturer of the thermal manikin used. | PT Manikins |
-| **`Manikin_Gender`** | string | Gender representation of the thermal manikin. Must be one of: **`Male, Female`**. | Female |
+| **`Manikin_Gender`** | string | Gender representation of the thermal manikin. Must be one of: **Male, Female**. | Female |
 | **`Manikin_Body_Segments`** | integer | Number of body segments of the thermal manikin. | 22 |
-| **`Control_Method`** | string | Method used to control the PCS (e.g., manual, automatic). Must be one of: **`TskControl, HeatFluxControl, ComfortControl`**. | TskControl34 |
+| **`Control_Method`** | string | Method used to control the PCS (e.g., manual, automatic). Must be one of: **TskControl, HeatFluxControl, ComfortControl**. | TskControl34 |
 | **`Ta`** | number | Ambient air temperature (°C). | 25 |
 | **`MRT`** | number | Mean radiant temperature (°C). | 25 |
 | **`RH`** | number | Relative humidity (%). | 50 |
