@@ -1,26 +1,33 @@
 {
   "type": "object",
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "description": "Schema for PCS database metadata",
   "definitions": {
     "BodyPart": {
       "type": "object",
       "description": "Body parts affected by PCS.",
       "properties": {
-        "Crown": {"type": "number", "example": -1.5},
-        "Head": {"type": "number", "example": -1.0},
-        "Left_Chest": {"type": "number", "example": -0.8},
-        "Right_Chest": {"type": "number", "example": -0.8},
-        "Left_Back": {"type": "number", "example": -0.8},
-        "Right_Back": {"type": "number", "example": -0.8},
-        "Abdomen": {"type": "number", "example": -0.8},
-        "Buttocks": {"type": "number", "example": -0.8},
-        "Left_Upper_Arm": {"type": "number", "example": -0.8},
-        "Right_Upper_Arm": {"type": "number", "example": -0.8},
-        "Left_Forearm": {"type": "number", "example": -0.8},
-        "Right_Forearm": {"type": "number", "example": -0.8},
-        "Left_Hand": {"type": "number", "example": -0.8},
-        "Right_Hand": {"type": "number", "example": -0.8}
+        "Crown": {"type": "number"},
+        "Head": {"type": "number"},
+        "Left_Chest": {"type": "number"},
+        "Right_Chest": {"type": "number"},
+        "Left_Back": {"type": "number"},
+        "Right_Back": {"type": "number"},
+        "Abdomen": {"type": "number"},
+        "Buttocks": {"type": "number"},
+        "Left_Upper_Arm": {"type": "number"},
+        "Right_Upper_Arm": {"type": "number"},
+        "Left_Forearm": {"type": "number"},
+        "Right_Forearm": {"type": "number"},
+        "Left_Hand": {"type": "number"},
+        "Right_Hand": {"type": "number"},
+        "Left_Front_Thigh": {"type": "number"},
+        "Right_Front_Thigh": {"type": "number"},
+        "Left_Back_Thigh": {"type": "number"},
+        "Right_Back_Thigh": {"type": "number"},
+        "Left_Lower_Leg": {"type": "number"},
+        "Right_Lower_Leg": {"type": "number"},
+        "Left_Foot": {"type": "number"},
+        "Right_Foot": {"type": "number"}
       }
     }
   },
