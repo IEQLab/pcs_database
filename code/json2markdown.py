@@ -22,7 +22,7 @@ def extract_properties(properties):
         enum_info = attributes.get("enum", [])
         if enum_info:
             enum_str = ", ".join(map(str, enum_info))
-            description += f" Must be one of: **`{enum_str}`**."
+            description += f" Must be one of: `{enum_str}`."
 
         # Handle example value
         example_info = attributes.get("example", "N/A")
