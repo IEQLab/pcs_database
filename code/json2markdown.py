@@ -22,7 +22,7 @@ def extract_properties(properties):
         enum_info = attributes.get("enum", [])
         if enum_info:
             enum_str = ", ".join(map(str, enum_info))
-            description += f" Must be one of: {enum_str}."
+            description += f" Must be one of: **`{enum_str}`**."
 
         # Handle example value
         example_info = attributes.get("example", "N/A")
@@ -88,7 +88,7 @@ def save_schema_as_markdown(json_file_path, markdown_file_path):
     markdown_content += "| Parameter | Type | Description | Example |\n|---|---|---|---|\n"
 
     for entry in extracted_data:
-        markdown_content += f"| - **`{entry['key']}`** | {entry['type']} | {entry['description']} | {entry['example']} |\n"
+        markdown_content += f"| **`{entry['key']}`** | {entry['type']} | {entry['description']} | {entry['example']} |\n"
 
     # Append definitions
     markdown_content += definitions_content
