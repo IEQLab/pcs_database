@@ -54,7 +54,7 @@
         "Manikin_Company": {"type": "string", "description": "Manufacturer of the thermal manikin used.", "example": "PT Manikins"},
         "Manikin_Gender": {"type": "string", "enum": ["Male", "Female"], "description": "Gender representation of the thermal manikin.", "example": "Female"},
         "Manikin_Body_Segments": {"type": "integer", "description": "Number of body segments of the thermal manikin.", "example": 22},
-        "Control_Method": {"type": "string", "enum": ["TskControl", "HeatFluxControl", "ComfortControl"], "description": "Method used to control the PCS (e.g., manual, automatic).", "example": "TskControl34"},
+        "Control_Method": {"type": "string", "enum": ["TskControl", "HeatFluxControl", "ComfortControl"], "description": "Method used to control the PCS (e.g., manual, automatic).", "example": "TskControl"},
         "Ta": {"type": "number", "description": "Ambient air temperature (°C).", "example": 25},
         "MRT": {"type": "number", "description": "Mean radiant temperature (°C).", "example": 25},
         "RH": {"type": "number", "description": "Relative humidity (%).", "example": 50},
