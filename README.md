@@ -33,57 +33,36 @@ This is a characteristic of the free hosting service we currently use, which put
 
 
 <!-- METADATA_START -->
-| Key | Value | Example |
-|---|---|---|
-| - **`columns`** *(object)* | Metadata for each column in the PCS database CSV. |  |
-| - **`ID`** *(integer)* | Unique identifier for each PCS. |  |
-| - **`Category`** *(string)* | Category of the PCS. Must be one of: `["Cooling", "Heating"]`. |  |
-| - **`Type`** *(string)* | Type of PCS (e.g., fan, foot warmer). |  |
-| - **`Brand`** *(string)* | Brand name of the PCS. |  |
-| - **`PCS_Reference`** *(string)* | Reference URL of PCS. |  |
-| - **`PCS_Intensity`** *(string)* | Intensity level of the PCS. |  |
-| - **`Price_USD`** *(number)* | Price of the PCS in US dollars. |  |
-| - **`Angle`** *(number)* | Angle of the PCS air or radiation (degrees). |  |
-| - **`Distance`** *(number)* | Distance from PCS to target (m). |  |
-| - **`Target_Body`** *(string)* | Targeted body region for PCS application. |  |
-| - **`Power_W`** *(number)* | Power consumption of the PCS (W). |  |
-| - **`DateTime`** *(string, format | date-time)*: Timestamp of data entry. |  |
-| - **`Place`** *(string)* | Location where the measurement was taken. |  |
-| - **`Posture`** *(string)* | Posture of the manikin during measurement (e.g., standing, sitting). |  |
-| - **`Situation`** *(string)* | Description of the environment where PCS is used (e.g., office, car). |  |
-| - **`Manikin_Company`** *(string)* | Manufacturer of the thermal manikin used. |  |
-| - **`Manikin_Gender`** *(string)* | Gender representation of the thermal manikin. Must be one of: `["Male", "Female"]`. |  |
-| - **`Manikin_Body_Segments`** *(integer)* | Number of body segments modeled in the thermal manikin. |  |
-| - **`Control_Method`** *(string)* | Method used to control the PCS (e.g., manual, automatic). |  |
-| - **`Ta`** *(number)* | Ambient air temperature (ﾂｰC). |  |
-| - **`MRT`** *(number)* | Mean radiant temperature (ﾂｰC). |  |
-| - **`RH`** *(number)* | Relative humidity (%). |  |
-| - **`V`** *(number)* | Air velocity (m/s). |  |
-
-**Definitions:**
-Examples:
-```json
-{
-"Crown": -1.5,
-"Head": -1.0,
-"Left_Chest": -0.8,
-"Right_Chest": -0.8,
-"OTHER BODY PARTS": -0.8
-}
-```
-- **`Image_Path`** *(string)*: File path of related images.
-- **`Crown`** *(number)*
-- **`Head`** *(number)*
-- **`Left_Chest`** *(number)*
-- **`Right_Chest`** *(number)*
-- **`Left_Back`** *(number)*
-- **`Right_Back`** *(number)*
-- **`Abdomen`** *(number)*
-- **`Buttocks`** *(number)*
-- **`Left_Upper_Arm`** *(number)*
-- **`Right_Upper_Arm`** *(number)*
-- **`Left_Forearm`** *(number)*
-- **`Right_Forearm`** *(number)*
-- **`Left_Hand`** *(number)*
-- **`Right_Hand`** *(number)*
+| Key | Value |
+|---|---|
+| *Schema for PCS database metadata (Generated on 2025-02-26 19 | 22 |
+| - **`columns`** *(object)* | Metadata for each column in the PCS database CSV. |
+| - **`ID`** *(integer)* | Unique identifier for each PCS. |
+| - **`Category`** *(string)* | Category of the PCS. Must be one of |
+| - **`Type`** *(string)* | Type of PCS (e.g., fan, foot warmer). |
+| - **`Brand`** *(string)* | Brand name of the PCS. |
+| - **`PCS_Reference`** *(string)* | Reference URL of PCS. |
+| - **`PCS_Intensity`** *(string)* | Intensity level of the PCS. |
+| - **`Price_USD`** *(number)* | Price of the PCS in US dollars. |
+| - **`Angle`** *(number)* | Angle of the PCS air or radiation (degrees). |
+| - **`Distance`** *(number)* | Distance from PCS to target (m). |
+| - **`Target_Body`** *(string)* | Targeted body region for PCS application. |
+| - **`Power_W`** *(number)* | Power consumption of the PCS (W). |
+| - **`DateTime`** *(string, format | date-time)* |
+| - **`Place`** *(string)* | Location where the measurement was taken. |
+| - **`Posture`** *(string)* | Posture of the manikin during measurement (e.g., standing, sitting). |
+| - **`Situation`** *(string)* | Description of the environment where PCS is used (e.g., office, car). |
+| - **`Manikin_Company`** *(string)* | Manufacturer of the thermal manikin used. |
+| - **`Manikin_Gender`** *(string)* | Gender representation of the thermal manikin. Must be one of |
+| - **`Manikin_Body_Segments`** *(integer)* | Number of body segments modeled in the thermal manikin. |
+| - **`Control_Method`** *(string)* | Method used to control the PCS (e.g., manual, automatic). |
+| - **`Ta`** *(number)* | Ambient air temperature (ﾂｰC). |
+| - **`MRT`** *(number)* | Mean radiant temperature (ﾂｰC). |
+| - **`RH`** *(number)* | Relative humidity (%). |
+| - **`V`** *(number)* | Air velocity (m/s). |
+| - **`Delta_Teq`** *(object)* | Equivalent temperature change for specific body parts. Refer to *[#/definitions/BodyPart](#definitions/BodyPart)*. |
+| - **`Delta_P`** *(object)* | Change in perceived temperature or power supply for specific body parts. Refer to *[#/definitions/BodyPart](#definitions/BodyPart)*. |
+| - **`Clo`** *(object)* | Clothing insulation value for specific body parts. Refer to *[#/definitions/BodyPart](#definitions/BodyPart)*. |
+| - **`Image_Path`** *(string)* | File path of related images. |
+| - <a id="definitions/BodyPart"></a>**`BodyPart`** *(object)* | Body parts affected by PCS. |
 <!-- METADATA_END -->

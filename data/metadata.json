@@ -55,14 +55,7 @@
         "Delta_Teq": {
           "type": "object",
           "description": "Equivalent temperature change for specific body parts.",
-          "$ref": "#/definitions/BodyPart",
-          "examples": [{
-        "Crown": -1.5,
-        "Head": -1.0,
-        "Left_Chest": -0.8,
-        "Right_Chest": -0.8,
-        "OTHER BODY PARTS": -0.8
-        }]
+          "$ref": "#/definitions/BodyPart"
         },
         "Delta_P": {
           "type": "object",
