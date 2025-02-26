@@ -16,7 +16,7 @@ def extract_properties(properties):
         # Handle $ref (reference to another schema) - Make it a clickable link
         ref_info = attributes.get("$ref")
         if ref_info:
-            description += f" `Body part information follows this parameter. See: {ref_info}`"
+            description += f" Body part information follows this parameter. See: `{ref_info}`"
 
         # Handle enum (enumeration values)
         enum_info = attributes.get("enum", [])
