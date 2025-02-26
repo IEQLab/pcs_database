@@ -32,11 +32,14 @@ def save_schema_as_markdown(json_file_path, markdown_file_path):
 
     print(f"Markdown content successfully written to {markdown_file_path}")
 
+import re
+
 def update_readme_with_metadata(readme_path, markdown_file_path):
     """
     Inserts metadata.markdown content into README.md as a table between METADATA_START and METADATA_END tags.
     If the metadata is already up-to-date, no changes are made.
     Ensures that the metadata is updated in-place without duplication.
+    Formats metadata into a table with 'Key', 'Value', and 'Example' columns.
     """
     METADATA_START_TAG = "<!-- METADATA_START -->"
     METADATA_END_TAG = "<!-- METADATA_END -->"
@@ -44,10 +47,43 @@ def update_readme_with_metadata(readme_path, markdown_file_path):
     with open(markdown_file_path, "r", encoding="utf-8") as md_file:
         metadata_lines = md_file.readlines()
 
-    # Convert metadata into a Markdown table format
-    table_header = "| Key | Value |\n|---|---|\n"
-    table_rows = [f"| {line.split(':')[0].strip()} | {line.split(':')[1].strip()} |"
-                  for line in metadata_lines if ":" in line]
+    # Extract definitions separately
+    definitions_section = []
+    metadata_entries = []
+    collecting_definitions = False
+
+    for line in metadata_lines:
+        line = line.strip()
+        if not line or line.startswith("*Schema for PCS database metadata"):
+            continue  # Skip empty lines and unnecessary schema header
+
+        if "definitions" in line.lower():
+            collecting_definitions = True
+            continue  # Start collecting definitions
+
+        if collecting_definitions:
+            definitions_section.append(line)
+        else:
+            metadata_entries.append(line)
+
+    # Convert metadata into a Markdown table with "Key", "Value", and "Example"
+    table_header = "| Key | Value | Example |\n|---|---|---|\n"
+    table_rows = []
+
+    for entry in metadata_entries:
+        match = re.match(r"(.+?):\s*(.+)", entry)
+        if match:
+            key, value = match.groups()
+            example = ""  # Default empty example
+
+            # Extract example if present
+            for ex in metadata_lines:
+                if ex.startswith(f"{key}:") and "Example:" in ex:
+                    example = ex.split("Example:")[-1].strip()
+                    break
+
+            table_rows.append(f"| {key} | {value} | {example} |")
+
     new_metadata_content = table_header + "\n".join(table_rows)
 
     with open(readme_path, "r", encoding="utf-8") as readme_file:
@@ -73,6 +109,8 @@ def update_readme_with_metadata(readme_path, markdown_file_path):
                 print("README.md is already up-to-date. No changes made.")
                 return
             new_readme_content.append(new_metadata_content + "\n")
+            if definitions_section:
+                new_readme_content.append("\n**Definitions:**\n" + "\n".join(definitions_section) + "\n")
             new_readme_content.append(line)  # Keep METADATA_END tag
         elif inside_metadata_section:
             # Collect existing metadata for comparison
@@ -85,12 +123,15 @@ def update_readme_with_metadata(readme_path, markdown_file_path):
     if not metadata_found:
         new_readme_content.append("\n" + METADATA_START_TAG + "\n")
         new_readme_content.append(new_metadata_content + "\n")
+        if definitions_section:
+            new_readme_content.append("\n**Definitions:**\n" + "\n".join(definitions_section) + "\n")
         new_readme_content.append(METADATA_END_TAG + "\n")
 
     with open(readme_path, "w", encoding="utf-8") as readme_file:
         readme_file.writelines(new_readme_content)
 
     print("README.md successfully updated with metadata in table format.")
+
 
 
 
