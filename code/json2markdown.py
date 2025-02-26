@@ -54,7 +54,7 @@ def extract_definitions(definitions):
 
         # Handle $ref in definitions as a clickable link
         ref_info = attributes.get("$ref")
-        ref_link = f" [See here]({ref_info})" if ref_info else ""
+        ref_link = f" [See {ref_info}]" if ref_info else ""
 
         # Extract properties if available
         properties_info = attributes.get("properties", {})
@@ -92,7 +92,7 @@ def save_schema_as_markdown(json_file_path, markdown_file_path):
     markdown_content += "| Parameter | Type | Description | Example |\n|---|---|---|---|\n"
 
     for entry in extracted_data:
-        markdown_content += f"| - **`{entry['key']}`** | {entry['type']} | {entry['description']} | {entry['example']} |\n"
+        markdown_content += f"| **`{entry['key']}`** | *{entry['type']}* | {entry['description']} | {entry['example']} |\n"
 
     # Append definitions
     markdown_content += definitions_content
