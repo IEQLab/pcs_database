@@ -35,7 +35,7 @@ This is a characteristic of the free hosting service we currently use, which put
 <!-- METADATA_START -->
 # Database Metadata
 
-Schema Description (Generated on 2025-02-27 10:49:02)
+Schema Description (Generated on 2025-02-27 16:26:17)
 
 | Parameter | Type | Description | Example |
 |---|---|---|---|
@@ -57,14 +57,14 @@ Schema Description (Generated on 2025-02-27 10:49:02)
 | **`Manikin_Company`** | *string* | Manufacturer of the thermal manikin used. | PT Manikins |
 | **`Manikin_Gender`** | *string* | Gender representation of the thermal manikin. Must be one of: `Male, Female`. | Female |
 | **`Manikin_Body_Segments`** | *integer* | Number of body segments of the thermal manikin. | 22 |
-| **`Control_Method`** | *string* | Method used to control the PCS (e.g., manual, automatic). Must be one of: `TskControl, HeatFluxControl, ComfortControl`. | TskControl34 |
+| **`Control_Method`** | *string* | Method used to control the PCS (e.g., manual, automatic). Must be one of: `TskControl, HeatFluxControl, ComfortControl`. | TskControl |
 | **`Ta`** | *number* | Ambient air temperature (°C). | 25 |
 | **`MRT`** | *number* | Mean radiant temperature (°C). | 25 |
 | **`RH`** | *number* | Relative humidity (%). | 50 |
 | **`V`** | *number* | Air velocity (m/s). | 0.1 |
-| **`Delta_Teq_`** | *object* | Equivalent temperature change for specific body parts. Body part information follows this parameter. See: `#/definitions/BodyPart` | N/A |
-| **`Delta_P_`** | *object* | Change in perceived temperature or power supply for specific body parts. Body part information follows this parameter. See: `#/definitions/BodyPart` | N/A |
-| **`Clo_`** | *object* | Clothing insulation value for specific body parts. Body part information follows this parameter. See: `#/definitions/BodyPart` | N/A |
+| **`Delta_Teq_`** | *object* | Change in equivalent temperature for each body part. Body part information follows this parameter. See: `#/definitions/BodyPart` | N/A |
+| **`Delta_P_`** | *object* | Change in power supply from the manikin for each body part. Body part information follows this parameter. See: `#/definitions/BodyPart` | N/A |
+| **`Clo_`** | *object* | Clothing insulation for each body part. Body part information follows this parameter. See: `#/definitions/BodyPart` | N/A |
 | **`Image_Path`** | *string* | File path of related images. | N/A |
 
 ## Definitions
