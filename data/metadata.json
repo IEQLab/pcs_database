@@ -74,7 +74,7 @@
           "description": "Clothing insulation for each body part.",
           "$ref": "#/definitions/BodyPart"
         },
-        "Image_Path": {"type": "string", "description": "File path of related images."}
+        "Image_Path": {"type": "string", "description": "File path of related images.", "example": "example.jpg"}
       }
     }
   },
