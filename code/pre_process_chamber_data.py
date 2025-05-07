@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 import numpy as np
-import configuration as config
+from configuration import Config
 from datetime import datetime
 from pythermalcomfort.utilities import mean_radiant_tmp
 import logging
@@ -121,8 +121,8 @@ def save_data(df, output_path):
 
 def main():
     """Main function to process chamber thermal environment data."""
-    input_file = os.path.join(config.CHAMBER_DATA_DIR, "Chamber_ThermalEnvironment_RawData.csv")
-    output_file = os.path.join(config.PROCESSED_DATA_DIR, "chamber_thermal_environment.csv")
+    input_file = os.path.join(Config.DataPaths.CHAMBER_DATA_DIR, "Chamber_ThermalEnvironment_RawData.csv")
+    output_file = os.path.join(Config.DataPaths.PROCESSED_DATA_DIR, "chamber_thermal_environment.csv")
 
     df = load_data(file_path=input_file)
     df = filter_valid_dates(df=df)
@@ -134,7 +134,7 @@ def main():
 
     # PLEASE CHANGE THE DATES AS NEEDED
     start_date = "2025-02-01"
-    end_date = "2025-02-14"
+    end_date = "2025-03-06"
     df = filter_by_date_range(df=df, start_date=start_date, end_date=end_date)
 
     df = df.reindex()
