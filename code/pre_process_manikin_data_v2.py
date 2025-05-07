@@ -325,76 +325,49 @@ def reorder_columns(df):
 def calculate_deltas(df, condition_pairs):
     """
     Compute the difference (delta) between condition pairs while preserving Reference_time.
-
-    Args:
-        df (pd.DataFrame): DataFrame containing averaged sensor data.
-        condition_pairs (list of tuples): List of (with_PCS, without_PCS) condition pairs.
-
-    Returns:
-        pd.DataFrame: DataFrame containing delta values for P_ columns and Reference_time.
+    Includes PCS and Baseline values for P_, Tsk, Ta, RH, and ET.
     """
     results = []
 
-    # Ensure 'File_name' exists in the DataFrame
     if 'File_name' not in df.columns:
         if df.index.name == 'File_name':
             df = df.reset_index()
         else:
             raise KeyError("'File_name' is missing from both columns and index!")
 
-    # Extract only columns containing 'P_', excluding GroupA and GroupB
-    keyword = "P_"
-    exclude_keywords = ["GroupA", "GroupB"]
-    p_columns = [col for col in df.columns if col.startswith(keyword) and not any(ex in col for ex in exclude_keywords)]
+    # Identify relevant columns
+    p_columns = [col for col in df.columns if col.startswith("P_") and not any(x in col for x in ["Group A", "Group B"])]
+    tsk_columns = [col for col in df.columns if col.startswith("Tsk_")]
+    env_columns = ["Ta", "RH", "ET"]
 
-    # Ensure Reference_time is included if it exists in the DataFrame
-    if "Reference_time" in df.columns:
-        p_columns.append("Reference_time")
+    for base_fname, pcs_fname in condition_pairs:
+        base_row = df[df["File_name"].str.contains(base_fname, na=False, regex=False)]
+        pcs_row = df[df["File_name"].str.contains(pcs_fname, na=False, regex=False)]
 
-    for condition_without_pcs, condition_with_pcs in condition_pairs:
-        # Find matching rows for each condition using File_name
-        matched_files_without_pcs = df["File_name"].str.contains(condition_without_pcs, case=False, na=False, regex=False)
-        matched_files_with_pcs = df["File_name"].str.contains(condition_with_pcs, case=False, na=False, regex=False)
+        if base_row.empty or pcs_row.empty:
+            print(f"Skipped: base='{base_fname}', pcs='{pcs_fname}'")
+            continue
 
-        if matched_files_with_pcs.any() and matched_files_without_pcs.any():
-            # Extract the first matching row for each condition
-            row_condition_without_pcs = df.loc[matched_files_without_pcs, p_columns].iloc[0]
-            row_condition_with_pcs = df.loc[matched_files_with_pcs, p_columns].iloc[0]
+        base_row = base_row.iloc[0]
+        pcs_row = pcs_row.iloc[0]
 
-            # Identify numeric columns (excluding Reference_time)
-            numeric_columns = [col for col in p_columns if col != "Reference_time"]
+        delta_row = {"Reference_time": pcs_row["Reference_time"],
+                     "Condition_without_PCS": base_fname,
+                     "Condition_with_PCS": pcs_fname}
 
-            # Convert numerical columns to float
-            row_condition_without_pcs[numeric_columns] = row_condition_without_pcs[numeric_columns].astype(float)
-            row_condition_with_pcs[numeric_columns] = row_condition_with_pcs[numeric_columns].astype(float)
+        # Delta P
+        for col in p_columns:
+            delta_row[f"Delta_{col}"] = pcs_row[col] - base_row[col]
 
-            # Compute deltas (difference between with_PCS and without_PCS)
-            delta_values = (row_condition_without_pcs[numeric_columns] - row_condition_with_pcs[numeric_columns]).round(2)
+        # Add PCS and Baseline values
+        for col in p_columns + tsk_columns + env_columns:
+            delta_row[f"PCS_{col}"] = pcs_row.get(col, np.nan)
+            delta_row[f"Baseline_{col}"] = base_row.get(col, np.nan)
 
-            # Ensure Reference_time is preserved without modification
-            reference_time_value = row_condition_with_pcs["Reference_time"] if "Reference_time" in p_columns else None
+        results.append(delta_row)
 
-            # Rename columns to add 'Delta_' prefix (excluding Reference_time)
-            prefix = "Delta"
-            delta_values = delta_values.rename(lambda col: f"{prefix}_{col}" if col != "Reference_time" else col)
+    return pd.DataFrame(results)
 
-            # Store results as a DataFrame row
-            delta_values["Condition_without_PCS"] = condition_without_pcs
-            delta_values["Condition_with_PCS"] = condition_with_pcs
-
-            delta_values["RH"] = condition_with_pcs
-
-            # Convert results to DataFrame and reorder columns
-            delta_df = pd.DataFrame([delta_values])
-
-            # Ensure Reference_time is the first column
-            if "Reference_time" in p_columns:
-                delta_df.insert(0, "Reference_time", reference_time_value)
-
-            results.append(delta_df)
-
-    # Combine all results into a single DataFrame
-    return pd.concat(results, ignore_index=True) if results else pd.DataFrame()
 
 
 # Main function
