@@ -3,8 +3,9 @@
 
 import pandas as pd
 import os
-import configuration as config
-import utilities
+from config.configuration import Config
+from code.utils import utilities
+
 
 def generate_columns(body_parts=utilities.BodyPartTemporary):
 
@@ -59,7 +60,7 @@ def main():
     df = create_dataframe(columns)
 
     # Define the output file path
-    output_file = os.path.join(config.DATA_DIR, "columns_format.csv")
+    output_file = os.path.join(Config.DataPaths, "columns_format.csv")
 
     # Save the DataFrame to a CSV file
     save_dataframe_to_csv(df, output_file)

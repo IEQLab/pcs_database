@@ -2,7 +2,8 @@ import pandas as pd
 import json
 from collections import OrderedDict
 from manikin_body_part_names import BodyPart
-import configuration as config
+from code.config import configuration as config
+
 
 # Function to generate metadata template
 def generate_metadata_template(body_parts, general_columns):

@@ -1,8 +1,8 @@
 import os
-import create_columns_format
-import pre_process_manikin_data
-import plot_pcs_efffects
-import configuration as config
+from code.config import database_columns_names, configuration as config
+from code.data_processing import pre_process_manikin_data
+from code.analysis import plot_pcs_efffects
+
 
 def main():
     """

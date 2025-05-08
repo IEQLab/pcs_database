@@ -3,13 +3,15 @@ import logging
 import numpy as np
 import pandas as pd
 import chardet
-from datetime import timedelta
 import re
 from collections import defaultdict
-from configuration import Config
-import utilities
-import create_columns_format
-import pre_process_chamber_data
+
+import config.database_columns_names
+import preprocess_chamber
+import code.utils as utilities
+import utils.utilities
+
+from config.configuration import Config
 
 
 # TODO: Add chamber info to this dataset
@@ -312,7 +314,7 @@ def reorder_columns(df):
     Ensures that 'Reference_time' is preserved.
     """
     # Generate ordered list of columns based on body parts
-    new_columns_list = create_columns_format.generate_columns(body_parts=utilities.BodyPart)
+    new_columns_list = config.database_columns_names.generate_columns(body_parts=utils.utilities.BodyPart)
 
     print(f"new_columns_list: {new_columns_list}")
 
@@ -380,7 +382,7 @@ def main():
         columns_format_file = os.path.join(Config.DataPaths.DATA_DIR, "columns_format.csv")
         columns_format = pd.read_csv(columns_format_file).columns.tolist()
 
-        df_chamber = pre_process_chamber_data.main()
+        df_chamber = preprocess_chamber.main()
 
         # print("df_chamber:", df_chamber)
 
@@ -443,7 +445,7 @@ def main():
 
             file_name_to_save = os.path.join(Config.DataPaths.PROCESSED_DATA_DIR, "delta_results.csv")
             delta_results_with_extracted_info.to_csv(file_name_to_save, index=False)
-            logging.info(f"Saved delta results to {file_name_to_save}")
+            print(f"Saved delta results to {file_name_to_save}")
 
             # # Extract Teq-related columns and save
             # teq_data = extract_columns(delta_results)

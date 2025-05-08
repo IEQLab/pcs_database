@@ -1,8 +1,8 @@
 import os
 import logging
 
-# Define base directory globally so it's available for nested classes
-PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
+# Define base project directory (two levels up from this file)
+PROJECT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 
 class Config:
     """Central configuration for directory structure and file paths."""

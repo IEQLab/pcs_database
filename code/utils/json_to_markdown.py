@@ -1,6 +1,6 @@
 import json
 from datetime import datetime
-import configuration
+from code.config import configuration
 
 
 def extract_properties(properties):

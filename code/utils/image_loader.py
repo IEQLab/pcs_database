@@ -1,6 +1,6 @@
 import os
 import glob
-from configuration import Config
+from code.config.configuration import Config
 
 def load_device_image(target_id):
     """

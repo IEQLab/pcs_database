@@ -1,9 +1,8 @@
 from flask import Flask, render_template, request, send_file, jsonify, send_from_directory
 import pandas as pd
 import os
-import configuration
+from code.config import configuration
 from io import BytesIO
-import plotly.express as px
 
 app = Flask(__name__)
 
