@@ -1,7 +1,7 @@
 import os
 from code.config import database_columns_names, configuration as config
-from code.data_processing import pre_process_manikin_data
-from code.analysis import plot_pcs_efffects
+from data_processing import preprocess_manikin
+from visualization import plot_pcs_effects
 
 
 def main():
@@ -13,16 +13,16 @@ def main():
     """
     # Step 1: Generate and save columns format
     print("Step 1: Generating columns format...")
-    create_columns_format.main()
+    database_columns_names.main()
 
     # Step 2: Preprocess the database and generate metadata
     print("Step 2: Preprocessing the database and generating metadata...")
-    pre_process_manikin_data.main()
+    preprocess_manikin.main()
 
     # Step 3: Plot PCS effects
     print("Step 3: Plotting PCS effects...")
     if os.path.exists(os.path.join(config.PROCESSED_DATA_DIR, "delta_teq.csv")):
-        plot_pcs_efffects.main()
+        plot_pcs_effects.main()
     else:
         print("Processed data (delta_teq.csv) not found. Skipping plotting.")
 

@@ -5,9 +5,13 @@ import pandas as pd
 import chardet
 import re
 from collections import defaultdict
-from code.config.configuration import Config
-import utilities
-import create_columns_format
+
+import config.database_columns_names
+import preprocess_chamber
+import code.utils as utilities
+import utils.utilities
+
+from config.configuration import Config
 
 
 # TODO: Add chamber info to this dataset
@@ -23,69 +27,86 @@ def detect_encoding(file_path):
 
 
 # Step 2: Load CSV file
-def load_data_with_custom_columns(file_path, custom_columns):
+from dateutil import parser
+
+from dateutil import parser
+
+def load_data_with_custom_columns(file_path, custom_columns, strict_datetime=True):
     """
-    Load CSV file and apply custom columns format.
+    Load a CSV file, assign custom column names, and set the datetime index.
+    Allows for flexible fallback parsing of datetime when strict parsing fails.
 
     Args:
         file_path (str): Path to the CSV file.
-        custom_columns (list): List of custom column names.
+        custom_columns (list): Custom column names to apply.
+        strict_datetime (bool): If True, use strict format; if False, use auto-detection.
     Returns:
-        pd.DataFrame: Loaded DataFrame with custom columns.
+        pd.DataFrame: A cleaned DataFrame with proper column names and datetime index.
     """
-    # Detect encoding and load data
+    # Detect encoding to ensure correct loading
     encoding = detect_encoding(file_path)
-    df = pd.read_csv(
-        file_path,
-        encoding=encoding,
-        skiprows=5,  # Skip unnecessary rows
-        header=None
-    )
 
-    # Remove unnecessary columns and assign custom column names
-    # Remove the rightmost column only if it is empty
+    # Read CSV, skipping the first 5 rows (likely metadata or notes)
+    df = pd.read_csv(file_path, encoding=encoding, skiprows=5, header=None)
+
+    # Drop the last column if it is completely empty (artifact from Excel-like tools)
     if df.iloc[:, -1].isnull().all():
         df = df.iloc[:, :-1]
 
+    # Assign consistent column names
     df.columns = custom_columns
 
-    # Convert 'Datetime' column and set it as index
-    df["Datetime"] = pd.to_datetime(df["Datetime"], format="%d/%m/%Y %I:%M:%S %p", errors='coerce')
+    # Try parsing the 'Datetime' column
+    if strict_datetime:
+        # Use strict parsing for speed and consistency (format must match exactly)
+        df["Datetime"] = pd.to_datetime(df["Datetime"], format="%d/%m/%Y %I:%M:%S %p", errors="coerce")
+    else:
+        # Fallback: let pandas guess the format (slower but handles inconsistent formats)
+        df["Datetime"] = pd.to_datetime(df["Datetime"], errors="coerce")
+
+    # Use Datetime as the DataFrame index
     df.set_index("Datetime", inplace=True)
 
-    # Replace empty cells to NaN
+    # Replace any empty string cells with proper NaN
     df.replace(r'^\s*$', np.nan, regex=True, inplace=True)
 
     return df
 
 
+
+
 # Step 3: Calculate averages for the last minute of data
 def average_last_five_minute(file_path, custom_columns):
     """
-    Calculate averages for the last five minute of data.
-
-    Args:
-        file_path (str): Path to the CSV file.
-        custom_columns (list): List of custom column names.
-    Returns:
-        pd.DataFrame: DataFrame containing averages and additional information.
+    Calculate averages for the last five minutes of data.
+    [IMPORTANT!!!} If strict datetime format fails, fallback to flexible parsing to avoid skipping files.
+    For some reason the datetime format in the manikin's csv files are different, the code try to read fast but not having too much warming!
     """
-    df = load_data_with_custom_columns(file_path, custom_columns)
+    try:
+        # Step 1: Try loading data using a strict datetime format (fast and predictable)
+        df = load_data_with_custom_columns(file_path, custom_columns, strict_datetime=True)
 
-    # Get
-    last_five_minute_start = df.index.max() - pd.Timedelta(minutes=5)
-    last_five_minute_data = df[df.index > last_five_minute_start]
+        # Step 2: If the result is empty or all datetimes failed to parse, try again without format
+        if df.empty or df.index.isna().all():
+            # This fallback uses automatic datetime parsing (more tolerant but slower)
+            df = load_data_with_custom_columns(file_path, custom_columns, strict_datetime=False)
 
-    if not last_five_minute_data.empty:
-        # Calculate averages and round to 2 decimal places
-        averages = last_five_minute_data.mean(numeric_only=True).to_frame().T
-        averages["Reference_time"] = last_five_minute_data.index.mean().strftime("%Y-%m-%d %H:%M:%S") # remove milliseconds
-        averages["File_name"] = os.path.basename(file_path)
-        # averages.set_index('File_name', inplace=True)
-        return averages
+        # Step 3: Calculate averages over the last 5 minutes of available data
+        last_five_minute_start = df.index.max() - pd.Timedelta(minutes=5)
+        last_five_minute_data = df[df.index > last_five_minute_start]
+
+        if not last_five_minute_data.empty:
+            # Step 4: Compute column-wise mean and add metadata
+            averages = last_five_minute_data.mean(numeric_only=True).to_frame().T
+            averages["Reference_time"] = last_five_minute_data.index.mean().strftime("%Y-%m-%d %H:%M:%S")
+            averages["File_name"] = os.path.basename(file_path)
+            return averages
+
+    except Exception as e:
+        # Log and skip any file that causes unexpected errors
+        print(f"[SKIPPED] {file_path} - Error: {e}")
 
     return None
-
 
 # Step 4: Search for files by keyword
 def find_files_with_keyword(folder_path, keyword, exclude_folders=["Old", "UFAD"]):
@@ -310,7 +331,7 @@ def reorder_columns(df):
     Ensures that 'Reference_time' is preserved.
     """
     # Generate ordered list of columns based on body parts
-    new_columns_list = create_columns_format.generate_columns(body_parts=utilities.BodyPart)
+    new_columns_list = config.database_columns_names.generate_columns(body_parts=utils.utilities.BodyPart)
 
     print(f"new_columns_list: {new_columns_list}")
 
@@ -323,76 +344,49 @@ def reorder_columns(df):
 def calculate_deltas(df, condition_pairs):
     """
     Compute the difference (delta) between condition pairs while preserving Reference_time.
-
-    Args:
-        df (pd.DataFrame): DataFrame containing averaged sensor data.
-        condition_pairs (list of tuples): List of (with_PCS, without_PCS) condition pairs.
-
-    Returns:
-        pd.DataFrame: DataFrame containing delta values for P_ columns and Reference_time.
+    Includes PCS and Baseline values for P_, Tsk, Ta, RH, and ET.
     """
     results = []
 
-    # Ensure 'File_name' exists in the DataFrame
     if 'File_name' not in df.columns:
         if df.index.name == 'File_name':
             df = df.reset_index()
         else:
             raise KeyError("'File_name' is missing from both columns and index!")
 
-    # Extract only columns containing 'P_', excluding GroupA and GroupB
-    keyword = "P_"
-    exclude_keywords = ["GroupA", "GroupB"]
-    p_columns = [col for col in df.columns if col.startswith(keyword) and not any(ex in col for ex in exclude_keywords)]
+    # Identify relevant columns
+    p_columns = [col for col in df.columns if col.startswith("P_") and not any(x in col for x in ["Group A", "Group B"])]
+    tsk_columns = [col for col in df.columns if col.startswith("Tsk_")]
+    env_columns = ["Ta", "RH", "ET"]
 
-    # Ensure Reference_time is included if it exists in the DataFrame
-    if "Reference_time" in df.columns:
-        p_columns.append("Reference_time")
+    for base_fname, pcs_fname in condition_pairs:
+        base_row = df[df["File_name"].str.contains(base_fname, na=False, regex=False)]
+        pcs_row = df[df["File_name"].str.contains(pcs_fname, na=False, regex=False)]
 
-    for condition_without_pcs, condition_with_pcs in condition_pairs:
-        # Find matching rows for each condition using File_name
-        matched_files_without_pcs = df["File_name"].str.contains(condition_without_pcs, case=False, na=False, regex=False)
-        matched_files_with_pcs = df["File_name"].str.contains(condition_with_pcs, case=False, na=False, regex=False)
+        if base_row.empty or pcs_row.empty:
+            print(f"Skipped: base='{base_fname}', pcs='{pcs_fname}'")
+            continue
 
-        if matched_files_with_pcs.any() and matched_files_without_pcs.any():
-            # Extract the first matching row for each condition
-            row_condition_without_pcs = df.loc[matched_files_without_pcs, p_columns].iloc[0]
-            row_condition_with_pcs = df.loc[matched_files_with_pcs, p_columns].iloc[0]
+        base_row = base_row.iloc[0]
+        pcs_row = pcs_row.iloc[0]
 
-            # Identify numeric columns (excluding Reference_time)
-            numeric_columns = [col for col in p_columns if col != "Reference_time"]
+        delta_row = {"Reference_time": pcs_row["Reference_time"],
+                     "Condition_without_PCS": base_fname,
+                     "Condition_with_PCS": pcs_fname}
 
-            # Convert numerical columns to float
-            row_condition_without_pcs[numeric_columns] = row_condition_without_pcs[numeric_columns].astype(float)
-            row_condition_with_pcs[numeric_columns] = row_condition_with_pcs[numeric_columns].astype(float)
+        # Delta P
+        for col in p_columns:
+            delta_row[f"Delta_{col}"] = pcs_row[col] - base_row[col]
 
-            # Compute deltas (difference between with_PCS and without_PCS)
-            delta_values = (row_condition_without_pcs[numeric_columns] - row_condition_with_pcs[numeric_columns]).round(2)
+        # Add PCS and Baseline values
+        for col in p_columns + tsk_columns + env_columns:
+            delta_row[f"PCS_{col}"] = pcs_row.get(col, np.nan)
+            delta_row[f"Baseline_{col}"] = base_row.get(col, np.nan)
 
-            # Ensure Reference_time is preserved without modification
-            reference_time_value = row_condition_with_pcs["Reference_time"] if "Reference_time" in p_columns else None
+        results.append(delta_row)
 
-            # Rename columns to add 'Delta_' prefix (excluding Reference_time)
-            prefix = "Delta"
-            delta_values = delta_values.rename(lambda col: f"{prefix}_{col}" if col != "Reference_time" else col)
+    return pd.DataFrame(results)
 
-            # Store results as a DataFrame row
-            delta_values["Condition_without_PCS"] = condition_without_pcs
-            delta_values["Condition_with_PCS"] = condition_with_pcs
-
-            delta_values["RH"] = condition_with_pcs
-
-            # Convert results to DataFrame and reorder columns
-            delta_df = pd.DataFrame([delta_values])
-
-            # Ensure Reference_time is the first column
-            if "Reference_time" in p_columns:
-                delta_df.insert(0, "Reference_time", reference_time_value)
-
-            results.append(delta_df)
-
-    # Combine all results into a single DataFrame
-    return pd.concat(results, ignore_index=True) if results else pd.DataFrame()
 
 
 # Main function
@@ -405,7 +399,7 @@ def main():
         columns_format_file = os.path.join(Config.DataPaths.DATA_DIR, "columns_format.csv")
         columns_format = pd.read_csv(columns_format_file).columns.tolist()
 
-        df_chamber = pre_process_chamber_data.main()
+        df_chamber = preprocess_chamber.main()
 
         # print("df_chamber:", df_chamber)
 
@@ -468,7 +462,7 @@ def main():
 
             file_name_to_save = os.path.join(Config.DataPaths.PROCESSED_DATA_DIR, "delta_results.csv")
             delta_results_with_extracted_info.to_csv(file_name_to_save, index=False)
-            logging.info(f"Saved delta results to {file_name_to_save}")
+            print(f"Saved delta results to {file_name_to_save}")
 
             # # Extract Teq-related columns and save
             # teq_data = extract_columns(delta_results)
