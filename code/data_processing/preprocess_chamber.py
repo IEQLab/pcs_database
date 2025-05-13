@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 from code.config.configuration import Config
-from pythermalcomfort.utilities import mean_radiant_tmp
+from pythermalcomfort.utilities import mean_radiant_tmp, operative_tmp
 import logging
 
 # Set up logging
@@ -99,9 +99,25 @@ def calculate_mrt(df):
     return df
 
 
+def calculate_to(df: pd.DataFrame) -> pd.DataFrame:
+    """Calculate operative temperature (To) using pythermalcomfort based on ISO 7726."""
+    required_cols = ["Ta", "MRT", "V"]
+
+    if all(col in df.columns for col in required_cols):
+        df["To"] = df.apply(
+            lambda row: round(operative_tmp(tdb=row["Ta"], tr=row["MRT"], v=row["V"], standard="ISO"), 2),
+            axis=1
+        )
+        logging.info("Operative temperature (To) calculation completed.")
+    else:
+        missing = [col for col in required_cols if col not in df.columns]
+        logging.warning(f"Operative temperature (To) calculation skipped due to missing columns: {missing}")
+
+    return df
+
 def reorder_columns(df):
     """Reorder columns for better readability."""
-    column_order = ["Ta", "Tg", "Twb", "MRT", "RH", "V", "WBGT", "ET"]
+    column_order = ["Ta", "Tg", "Twb", "To", "MRT", "RH", "V", "WBGT", "ET"]
     df = df[[col for col in column_order if col in df.columns]]
     logging.info("Columns reordered for readability.")
     return df
@@ -128,6 +144,7 @@ def main():
     df = find_and_rename_columns(df=df)
     df = rename_columns(df=df)
     df = calculate_mrt(df=df)
+    df = calculate_to(df=df)
     df = reorder_columns(df=df)
 
     # PLEASE CHANGE THE DATES AS NEEDED
