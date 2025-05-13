@@ -346,6 +346,9 @@ def calculate_deltas(df, condition_pairs):
     Compute the difference (delta) between condition pairs while preserving Reference_time.
     Includes PCS and Baseline values for P_, Tsk, Ta, RH, and ET.
     """
+    import pandas as pd
+    import numpy as np
+
     results = []
 
     if 'File_name' not in df.columns:
@@ -357,7 +360,7 @@ def calculate_deltas(df, condition_pairs):
     # Identify relevant columns
     p_columns = [col for col in df.columns if col.startswith("P_") and not any(x in col for x in ["Group A", "Group B"])]
     tsk_columns = [col for col in df.columns if col.startswith("Tsk_")]
-    env_columns = ["Ta", "RH", "ET"]
+    env_columns = ["Ta", "MRT", "RH", "V", "ET"]
 
     for base_fname, pcs_fname in condition_pairs:
         base_row = df[df["File_name"].str.contains(base_fname, na=False, regex=False)]
@@ -370,22 +373,28 @@ def calculate_deltas(df, condition_pairs):
         base_row = base_row.iloc[0]
         pcs_row = pcs_row.iloc[0]
 
-        delta_row = {"Reference_time": pcs_row["Reference_time"],
-                     "Condition_without_PCS": base_fname,
-                     "Condition_with_PCS": pcs_fname}
+        delta_row = {
+            "Reference_time": pcs_row["Reference_time"],
+            "Condition_without_PCS": base_fname,
+            "Condition_with_PCS": pcs_fname
+        }
 
-        # Delta P
+        # Add Delta values first
         for col in p_columns:
             delta_row[f"Delta_{col}"] = pcs_row[col] - base_row[col]
 
-        # Add PCS and Baseline values
-        for col in p_columns + tsk_columns + env_columns:
+        # Then PCS values (first env, then Tsk, then P_)
+        for col in env_columns + tsk_columns + p_columns:
             delta_row[f"PCS_{col}"] = pcs_row.get(col, np.nan)
+
+        # Then Baseline values (same order)
+        for col in env_columns + tsk_columns + p_columns:
             delta_row[f"Baseline_{col}"] = base_row.get(col, np.nan)
 
         results.append(delta_row)
 
     return pd.DataFrame(results)
+
 
 
 
