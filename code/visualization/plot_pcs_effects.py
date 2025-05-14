@@ -99,13 +99,13 @@ def plot_dual_delta_p_with_theoretical_fit(df, target_id, body_part="Delta_P_Lef
     delta_p_columns = [col for col in df.columns if col.startswith("Delta_P_")]
     body_labels = [col.replace("Delta_P_", "") for col in delta_p_columns]
 
-    df_22 = df_level[df_level["Ta"] == 22]
-    df_25 = df_level[df_level["Ta"] == 25]
+    df_22 = df_level[df_level["Tset"] == 22]
+    df_25 = df_level[df_level["Tset"] == 25]
     y_22 = df_22[delta_p_columns].mean().values
     y_25 = df_25[delta_p_columns].mean().values
 
     df_filtered = df_level[df_level["Delta_P_Crown"].notna()]
-    x_vals = df_filtered["Ta"].values
+    x_vals = df_filtered["PCS_Ta"].values
     y_vals = df_filtered["Delta_P_Crown"].values
 
     all_y_values = np.concatenate([y_22, y_25, y_vals])

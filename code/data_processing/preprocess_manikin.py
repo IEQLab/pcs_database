@@ -5,12 +5,12 @@ import pandas as pd
 import chardet
 import re
 from collections import defaultdict
-
+from dataclasses import asdict
 import config.database_columns_names
-import preprocess_chamber
 import code.utils as utilities
 import utils.utilities
-
+from data_processing import calc_equivalent_temperature
+from data_processing import preprocess_chamber
 from config.configuration import Config
 
 
@@ -27,10 +27,6 @@ def detect_encoding(file_path):
 
 
 # Step 2: Load CSV file
-from dateutil import parser
-
-from dateutil import parser
-
 def load_data_with_custom_columns(file_path, custom_columns, strict_datetime=True):
     """
     Load a CSV file, assign custom column names, and set the datetime index.
@@ -260,7 +256,7 @@ def add_extracted_info_to_dataframe(df):
             "Level": with_pcs_info["Level"],
             "Angle": with_pcs_info["Angle"],
             "Distance": with_pcs_info["Distance"],
-            "Ta": with_pcs_info["Ta"],
+            "Tset": with_pcs_info["Ta"],
             "Control method": with_pcs_info["Control method"],
         })
 
@@ -268,7 +264,7 @@ def add_extracted_info_to_dataframe(df):
     updated_df = pd.DataFrame(extracted_data)
 
     # Reorder columns to ensure extracted info is at the left
-    extracted_columns = ["ID", "PCS_name", "Level", "Angle", "Distance", "Ta", "Control method"]
+    extracted_columns = ["ID", "PCS_name", "Level", "Angle", "Distance", "Tset", "Control method"]
     remaining_columns = [col for col in updated_df.columns if col not in extracted_columns]
 
     # Reorder DataFrame
@@ -346,8 +342,6 @@ def calculate_deltas(df, condition_pairs):
     Compute the difference (delta) between condition pairs while preserving Reference_time.
     Includes PCS and Baseline values for P_, Tsk, Ta, RH, and ET.
     """
-    import pandas as pd
-    import numpy as np
 
     results = []
 
@@ -360,7 +354,7 @@ def calculate_deltas(df, condition_pairs):
     # Identify relevant columns
     p_columns = [col for col in df.columns if col.startswith("P_") and not any(x in col for x in ["Group A", "Group B"])]
     tsk_columns = [col for col in df.columns if col.startswith("Tsk_")]
-    env_columns = ["Ta", "MRT", "RH", "V", "ET"]
+    env_columns = ["Ta", "MRT", "RH", "V", "To", "ET"]
 
     for base_fname, pcs_fname in condition_pairs:
         base_row = df[df["File_name"].str.contains(base_fname, na=False, regex=False)]
@@ -395,7 +389,92 @@ def calculate_deltas(df, condition_pairs):
 
     return pd.DataFrame(results)
 
+def apply_htc_and_teq_calculation(
+    df: pd.DataFrame,
+    body_parts=None,
+    q_prefix_pcs='PCS_P_', t_prefix_pcs='PCS_Tsk_', to_col_pcs='PCS_To',
+    q_prefix_base='Baseline_P_', t_prefix_base='Baseline_Tsk_', to_col_base='Baseline_To'
+) -> pd.DataFrame:
+    """
+    Calculate HTC and Teq for PCS and Baseline, and their differences.
+    Adds: PCS_ht_{part}, Baseline_ht_{part}, Delta_ht_{part},
+          PCS_Teq_{part}, Baseline_Teq_{part}, Delta_Teq_{part}
+    """
+    if body_parts is None:
+        body_parts = list(asdict(utils.utilities.BodyPart()).values())
 
+    for part in body_parts:
+        q_pcs = f"{q_prefix_pcs}{part}"
+        tsk_pcs = f"{t_prefix_pcs}{part}"
+        q_base = f"{q_prefix_base}{part}"
+        tsk_base = f"{t_prefix_base}{part}"
+
+        pcs_ht = f"PCS_ht_{part}"
+        base_ht = f"Baseline_ht_{part}"
+        delta_ht = f"Delta_ht_{part}"
+
+        pcs_teq = f"PCS_Teq_{part}"
+        base_teq = f"Baseline_Teq_{part}"
+        delta_teq = f"Delta_Teq_{part}"
+
+        # HTC
+        df[pcs_ht] = df.apply(
+            lambda row: calc_equivalent_temperature.calculate_total_heat_transfer_coefficient(
+                q_skin=row[q_pcs], t_skin=row[tsk_pcs], t_o=row[to_col_pcs]
+            ),
+            axis=1
+        )
+        df[base_ht] = df.apply(
+            lambda row: calc_equivalent_temperature.calculate_total_heat_transfer_coefficient(
+                q_skin=row[q_base], t_skin=row[tsk_base], t_o=row[to_col_base]
+            ),
+            axis=1
+        )
+        df[delta_ht] = df[pcs_ht] - df[base_ht]
+
+        # Teq
+        df[pcs_teq] = df.apply(
+            lambda row: row[tsk_pcs] - row[q_pcs] / row[pcs_ht] if row[pcs_ht] != 0 else np.nan,
+            axis=1
+        )
+        df[base_teq] = df.apply(
+            lambda row: row[tsk_base] - row[q_base] / row[base_ht] if row[base_ht] != 0 else np.nan,
+            axis=1
+        )
+        df[delta_teq] = df[pcs_teq] - df[base_teq]
+
+    return df
+
+def reorder_final_columns(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Reorder final DataFrame columns in logical sequence:
+    Reference info → environment → P/Tsk/ht/Teq (Delta → PCS → Baseline)
+    """
+    body_parts = list(asdict(utils.utilities.BodyPart()).values())
+
+    # Step 1: Base information (always at the front)
+    base_cols = ["Reference_time", "Condition_without_PCS", "Condition_with_PCS"]
+
+    # Step 2: Environmental variables (include only if they exist in the DataFrame)
+    env_cols = ["Ta", "RH", "MRT", "V", "To", "ET", "WBGT"]
+    env_cols = [col for col in env_cols if col in df.columns]
+
+    # Step 3: Physiological/heat-related variables in preferred order
+    variable_groups = ["P_", "Tsk_", "ht_", "Teq_"]
+    ordered_data_cols = []
+    for var in variable_groups:
+        for part in body_parts:
+            for label in ["Delta", "PCS", "Baseline"]:
+                col = f"{label}_{var}{part}"
+                if col in df.columns:
+                    ordered_data_cols.append(col)
+
+    # Step 4: Collect any remaining columns not explicitly ordered
+    known_cols = base_cols + env_cols + ordered_data_cols
+    remaining = [col for col in df.columns if col not in known_cols]
+
+    # Step 5: Return the DataFrame with columns reordered
+    return df[base_cols + env_cols + ordered_data_cols + remaining]
 
 
 # Main function
@@ -456,6 +535,7 @@ def main():
 
             # Calculate the difference between with PCS and without PCS
             delta_results = calculate_deltas(df=reordered_combined_averages, condition_pairs=condition_pairs)
+            delta_results = apply_htc_and_teq_calculation(df=delta_results)
             logging.info("delta results are calculated.")
             delta_results_with_extracted_info = add_extracted_info_to_dataframe(df=delta_results)
 
@@ -468,6 +548,8 @@ def main():
             delta_results_with_extracted_info = delta_results_with_extracted_info.fillna(np.nan)
             print(f"delta_results_with_extracted_info: {delta_results_with_extracted_info}")
             print(f"columns of delta_results_with_extracted_info: {delta_results_with_extracted_info.columns}")
+
+            delta_results_with_extracted_info = reorder_final_columns(df=delta_results_with_extracted_info)
 
             file_name_to_save = os.path.join(Config.DataPaths.PROCESSED_DATA_DIR, "delta_results.csv")
             delta_results_with_extracted_info.to_csv(file_name_to_save, index=False)

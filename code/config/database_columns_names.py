@@ -55,12 +55,11 @@ def main():
     tmp_columns = generate_columns(body_parts=utilities.BodyPart)
     print(tmp_columns)
 
-
     # Create an empty DataFrame with these columns
     df = create_dataframe(columns)
 
     # Define the output file path
-    output_file = os.path.join(Config.DataPaths, "columns_format.csv")
+    output_file = os.path.join(Config.DataPaths.DATA_DIR, "columns_format.csv")
 
     # Save the DataFrame to a CSV file
     save_dataframe_to_csv(df, output_file)
