@@ -82,6 +82,7 @@ const config = {
           src: 'img/logo.jpg',
         },
         items: [
+        {to: '/graph', label: 'Data', position: 'left'},
           {
             type: 'docSidebar',
             sidebarId: 'tutorialSidebar',
@@ -89,6 +90,7 @@ const config = {
             label: 'Tutorial',
           },
           {to: '/blog', label: 'Blog', position: 'left'},
+
           {
             href: 'https://github.com/IEQLab/pcs_database',
             label: 'GitHub',
