@@ -1,12 +1,19 @@
-yangshun:
-  name: Yangshun Tay
-  title: Front End Engineer @ Facebook
-  url: https://github.com/yangshun
-  image_url: https://github.com/yangshun.png
+akihisanomoto:
+  name: Akihisa Nomoto
+  title: Maintainer
+  url: https://github.com/AkihisaNomoto
+  image_url: https://github.com/akihisanomoto.png
   page: true
   socials:
-    x: yangshunz
-    github: yangshun
+    x: XXXXX
+    github: AkihisaNomoto
+
+yangshun:
+  name: Yangshun Tay
+  title: Front End Engineer
+  url: https://github.com/yangshun
+  image_url: https://github.com/yangshun.png
+
 
 slorber:
   name: Sébastien Lorber

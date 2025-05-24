@@ -549,8 +549,6 @@ def main():
             print(f"delta_results_with_extracted_info: {delta_results_with_extracted_info}")
             print(f"columns of delta_results_with_extracted_info: {delta_results_with_extracted_info.columns}")
 
-            delta_results_with_extracted_info = reorder_final_columns(df=delta_results_with_extracted_info)
-
             file_name_to_save = os.path.join(Config.DataPaths.PROCESSED_DATA_DIR, "delta_results.csv")
             delta_results_with_extracted_info.to_csv(file_name_to_save, index=False)
             print(f"Saved delta results to {file_name_to_save}")

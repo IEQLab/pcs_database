@@ -10,6 +10,7 @@ import warnings
 # Suppress RankWarning from np.polyfit safely across NumPy versions
 warnings.simplefilter("ignore", getattr(np, "RankWarning", Warning))
 
+# TODO: Add each device performance to the whole body
 
 def select_default_level(available_levels):
     available_levels = sorted(available_levels)

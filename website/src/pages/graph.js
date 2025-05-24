@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Layout from '@theme/Layout';
 import {
   LineChart,
@@ -6,50 +6,156 @@ import {
   CartesianGrid,
   XAxis,
   YAxis,
-  Tooltip
+  Tooltip,
+  Legend,
+  ResponsiveContainer
 } from 'recharts';
+import html2canvas from 'html2canvas';
+import * as d3 from 'd3';
 
-// サンプルデータ
-const allData = [
-  { category: 'Cooling', name: 'Jan', value: 30 },
-  { category: 'Cooling', name: 'Feb', value: 50 },
-  { category: 'Heating', name: 'Mar', value: 40 },
-  { category: 'Cooling', name: 'Apr', value: 80 },
-  { category: 'Heating', name: 'May', value: 20 }
-];
+function getColor(index) {
+  const colors = [
+    '#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#d0ed57', '#a4de6c', '#8dd1e1', '#83a6ed'
+  ];
+  return colors[index % colors.length];
+}
 
 export default function GraphPage() {
-  const [filter, setFilter] = useState('All');
+  const [allData, setAllData] = useState([]);
+  const [selectedIdPCS, setSelectedIdPCS] = useState('');
+  const [selectedLevel, setSelectedLevel] = useState('All');
+  const [selectedAngle, setSelectedAngle] = useState('All');
+  const [selectedDistance, setSelectedDistance] = useState('All');
+  const [temperatureFilter, setTemperatureFilter] = useState(25);
+  const [selectedMetric, setSelectedMetric] = useState('Delta_ht');
+  const chartRef = useRef();
 
-  const filteredData = allData.filter(d => {
-    if (filter === 'All') return true;
-    return d.category === filter;
+  useEffect(() => {
+    d3.csv('/data/delta_results.csv').then(rawData => {
+      const expanded = [];
+      rawData.forEach(row => {
+        const baseInfo = {};
+        for (const [key, value] of Object.entries(row)) {
+          baseInfo[key] = isNaN(+value) || key.startsWith('Delta_') ? value : +value;
+        }
+        for (const key in row) {
+          if ((key.startsWith('Delta_ht_') || key.startsWith('Delta_P_') || key.startsWith('Delta_Teq_')) && row[key] !== '') {
+            const metric = key.split('_')[1];
+            const metricKey = `Delta_${metric}`;
+            expanded.push({
+              ...baseInfo,
+              BodyPart: key.replace(/^Delta_.*?_/, '').trim(),
+              [metricKey]: +row[key],
+              Level: row.Level.trim()
+            });
+          }
+        }
+      });
+      setAllData(expanded);
+    });
+  }, []);
+
+  const uniqueIdPCS = Array.from(new Set(allData.map(row => `${row.ID} - ${row.PCS_name}`)));
+  const currentPCSData = selectedIdPCS === '' ? [] : allData.filter(d => `${d.ID} - ${d.PCS_name}` === selectedIdPCS);
+  const uniqueLevels = Array.from(new Set(currentPCSData.map(row => row.Level)));
+  const uniqueAngles = Array.from(new Set(currentPCSData.map(row => row.Angle)));
+  const uniqueDistances = Array.from(new Set(currentPCSData.map(row => row.Distance)));
+
+  const filteredData = currentPCSData.filter(d => {
+    const matchesLevel = selectedLevel === 'All' || d.Level === selectedLevel;
+    const matchesAngle = selectedAngle === 'All' || d.Angle === Number(selectedAngle);
+    const matchesDistance = selectedDistance === 'All' || d.Distance === Number(selectedDistance);
+    const matchesTemp = Number(d.Tset) === temperatureFilter;
+    return matchesLevel && matchesAngle && matchesDistance && matchesTemp && d[selectedMetric] !== undefined;
   });
 
-  return (
-    <Layout title="Graph Page" description="Interactive graph with filtering">
-      <main style={{ padding: '2rem' }}>
-        <h1 style={{ textAlign: 'center' }}>PCS Sample Graph</h1>
+  const groupedByLevel = filteredData.reduce((acc, cur) => {
+    if (!acc[cur.Level]) acc[cur.Level] = [];
+    acc[cur.Level].push(cur);
+    return acc;
+  }, {});
 
-        {/* フィルター選択 */}
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <label style={{ marginRight: '1rem' }}>Filter by Category:</label>
-          <select value={filter} onChange={e => setFilter(e.target.value)}>
-            <option value="All">All</option>
-            <option value="Cooling">Cooling</option>
-            <option value="Heating">Heating</option>
+  const downloadCSV = () => {
+    const headers = ['BodyPart', 'Level', 'Angle', 'Distance', 'Tset', selectedMetric];
+    const rows = filteredData.map(row => headers.map(h => row[h]));
+    const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `${selectedMetric}_data.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const downloadImage = () => {
+    if (!chartRef.current) return;
+    html2canvas(chartRef.current).then(canvas => {
+      const link = document.createElement('a');
+      link.download = `${selectedMetric}_graph.png`;
+      link.href = canvas.toDataURL();
+      link.click();
+    });
+  };
+
+  return (
+    <Layout title="PCS Graph" description="Filter by PCS and Level">
+      <main style={{ padding: '2rem' }}>
+        <h1 style={{ textAlign: 'center' }}>{selectedMetric} by Body Part</h1>
+
+        <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
+          <label>ID & PCS: </label>
+          <select value={selectedIdPCS} onChange={e => setSelectedIdPCS(e.target.value)}>
+            <option value="" disabled hidden>Select a PCS</option>
+            {uniqueIdPCS.map(val => <option key={val} value={val}>{val}</option>)}
           </select>
+          <label style={{ marginLeft: '1rem' }}>Level: </label>
+          <select value={selectedLevel} onChange={e => setSelectedLevel(e.target.value)}>
+            <option value="All">All</option>
+            {uniqueLevels.map(val => <option key={val} value={val}>{val}</option>)}
+          </select>
+          <label style={{ marginLeft: '1rem' }}>Angle: </label>
+          <select value={selectedAngle} onChange={e => setSelectedAngle(e.target.value)}>
+            <option value="All">All</option>
+            {uniqueAngles.map(val => <option key={val} value={val}>{val}</option>)}
+          </select>
+          <label style={{ marginLeft: '1rem' }}>Distance: </label>
+          <select value={selectedDistance} onChange={e => setSelectedDistance(e.target.value)}>
+            <option value="All">All</option>
+            {uniqueDistances.map(val => <option key={val} value={val}>{val}</option>)}
+          </select>
+          <label style={{ marginLeft: '1rem' }}>Result: </label>
+          <select value={selectedMetric} onChange={e => setSelectedMetric(e.target.value)}>
+            <option value="Delta_ht">Delta_ht</option>
+            <option value="Delta_P">Delta_P</option>
+            <option value="Delta_Teq">Delta_Teq</option>
+          </select>
+          <button style={{ marginLeft: '2rem' }} onClick={downloadCSV}>Download CSV</button>
+          <button style={{ marginLeft: '1rem' }} onClick={downloadImage}>Download Image</button>
         </div>
 
-        {/* グラフ */}
-        <div style={{ display: 'flex', justifyContent: 'center' }}>
-          <LineChart width={600} height={300} data={filteredData}>
-            <Line type="monotone" dataKey="value" stroke="#8884d8" />
-            <CartesianGrid stroke="#ccc" />
-            <XAxis dataKey="name" />
-            <YAxis />
-            <Tooltip />
-          </LineChart>
+        <div ref={chartRef} style={{ width: '100%', height: 400 }}>
+          <ResponsiveContainer>
+            <LineChart>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="BodyPart" type="category" interval={0} allowDuplicatedCategory={false} angle={-45} textAnchor="end" height={70} />
+              <YAxis label={{ value: selectedMetric, angle: -90, position: 'insideLeft' }} />
+              <Tooltip />
+              <Legend layout="horizontal" verticalAlign="top" align="center" />
+              {Object.entries(groupedByLevel).map(([level, data], index) => (
+                <Line
+                  key={level}
+                  data={data}
+                  type="monotone"
+                  dataKey={selectedMetric}
+                  name={`Level ${level}`}
+                  stroke={getColor(index)}
+                  dot={{ r: 2 }}
+                />
+              ))}
+            </LineChart>
+          </ResponsiveContainer>
         </div>
       </main>
     </Layout>
