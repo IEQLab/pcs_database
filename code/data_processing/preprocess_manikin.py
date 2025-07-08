@@ -476,7 +476,6 @@ def reorder_final_columns(df: pd.DataFrame) -> pd.DataFrame:
     # Step 5: Return the DataFrame with columns reordered
     return df[base_cols + env_cols + ordered_data_cols + remaining]
 
-
 # Main function
 def main():
     """
@@ -484,7 +483,7 @@ def main():
     """
     try:
         # Load column format
-        columns_format_file = os.path.join(Config.DataPaths.DATA_DIR, "columns_format.csv")
+        columns_format_file = os.path.join(Config.DataPaths.BASE_DIR, "columns_format.csv")
         columns_format = pd.read_csv(columns_format_file).columns.tolist()
 
         df_chamber = preprocess_chamber.main()
@@ -561,6 +560,8 @@ def main():
 
         else:
             logging.info("No averages to save.")
+
+
 
     except Exception as e:
         print(f"An error occurred: {e}")

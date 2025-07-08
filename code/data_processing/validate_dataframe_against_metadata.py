@@ -46,7 +46,7 @@ def validate_dataframe_against_metadata(df, metadata: dict, label: str = "DataFr
 
 def main():
 
-    metadata_file_path = os.path.join(Config.DataPaths.DATA_DIR, "metadata.json")
+    metadata_file_path = os.path.join(Config.DataPaths.BASE_DIR, "metadata.json")
 
     # Load metadata and your dataframe
     with open(metadata_file_path, "r", encoding="utf-8") as f:
