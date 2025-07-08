@@ -23,12 +23,16 @@ winter_clothing_file_path = os.path.join(Config.DataPaths.CLOTHING_DATA_DIR,
 def load_and_process_data(file_path, columns_format):
     """Average the data for the last 5 min and reorder the columns"""
     df = average_last_five_minute(file_path, columns_format)
-    return reorder_columns(df)
+    df_reordered = reorder_columns(df)
+    df_reordered_with_chamber_data = match_nearest_datetime(df_manikin=df_reordered, df_chamber=df_chamber)
+    return df_reordered_with_chamber_data
 
 df_nude = load_and_process_data(file_path=nude_file_path, columns_format=columns_format)
 df_summer = load_and_process_data(file_path=summer_clothing_file_path, columns_format=columns_format)
 df_winter = load_and_process_data(file_path=winter_clothing_file_path, columns_format=columns_format)
 # df_nude = match_nearest_datetime(df_nude, df_chamber)
+
+print(f"df_winter:{df_winter.columns}")
 def main():
     t_o_fixed = 21.0
     def is_valid_body_part(col):
@@ -43,6 +47,20 @@ def main():
 
     def compute_icls(df_clothed, condition_label):
         results = []
+
+        env_keys = ['Ta', 'Tg', 'Twb', 'To', 'MRT', 'RH', 'V']
+        env_values = {
+            key: float(df_clothed[key].iloc[0]) for key in env_keys if key in df_clothed.columns
+        }
+        # Get operative temperature in each condition
+        try:
+            t_o_nude = float(df_nude["To"].iloc[0])
+            t_o_clothed = float(df_clothed["To"].iloc[0])
+            print(f"[INFO] To values for {condition_label}: t_o_nude = {t_o_nude}, t_o_clothed = {t_o_clothed}")
+        except Exception as e:
+            print(f"[Warning] Could not retrieve To values for {condition_label}: {e}")
+            return pd.DataFrame([])
+
         for part in body_parts:
             try:
                 def extract_single_value(df, key):
@@ -56,8 +74,8 @@ def main():
                 dict_results = calc_intrinsic_clothing_insulation(
                     t_skin_clothed=tsk_clothed,
                     t_skin_nude=tsk_nude,
-                    t_o_clothed=t_o_fixed,
-                    t_o_nude=t_o_fixed,
+                t_o_clothed=t_o_clothed,
+                t_o_nude=t_o_nude,
                     q_total_clothed=p_clothed,
                     q_total_nude=p_nude
                 )
@@ -72,7 +90,8 @@ def main():
                     "It": dict_results["It"],
                     "Ia": dict_results["Ia"],
                     "Icl": dict_results["Icl"],
-                    "fcl": dict_results["fcl"]
+                    "fcl": dict_results["fcl"],
+                    **env_values
                 })
 
             except Exception as e:

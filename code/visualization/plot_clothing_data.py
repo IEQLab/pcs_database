@@ -57,7 +57,7 @@ def average_symmetric_parts(df, value_col="Icl"):
     return remaining
 
 
-def plot_icls_bar(df, annotate=True):
+def plot_overall_and_local_clo_values(df, annotate=True):
     """
     Bar plot of Icl values by body part.
     Adds optional annotation on top of each bar.
@@ -76,6 +76,7 @@ def plot_icls_bar(df, annotate=True):
             for j, (cond, val) in enumerate(row.items()):
                 if pd.notna(val):
                     ax.text(i + (j - 0.5) * 0.4, val + 0.02, f"{val:.2f}", ha='center', va='bottom', fontsize=Config.PlotConfig.FONT_SIZE_SMALL)
+                    # ax.text(10, 3, "Body parts with both left and right sides were averaged.", ha="center")
 
     ax.set_ylabel("Intrinsic Clothing Insulation, $\it{I}_{cl}$ (clo)")
     ax.set_xlabel("")  # Remove x-axis label
@@ -83,7 +84,6 @@ def plot_icls_bar(df, annotate=True):
     ax.legend(title="")
     plt.xticks(rotation=45, ha="right")
     plt.yticks()
-    plt.figtext(0.5, -0.05, "※ Body parts with both left and right sides were averaged.", ha="center")
     plt.tight_layout()
     plt.savefig(os.path.join(Config.FigurePaths.CLOTHING_DIR, "clothing_measurement_data.svg"), format="svg")
     plt.show()
@@ -91,4 +91,4 @@ def plot_icls_bar(df, annotate=True):
 
 # Main execution
 df_avg = average_symmetric_parts(df, value_col="Icl")
-plot_icls_bar(df_avg, annotate=True)
+plot_overall_and_local_clo_values(df_avg, annotate=True)

@@ -149,7 +149,7 @@ def main():
 
     # PLEASE CHANGE THE DATES AS NEEDED
     start_date = "2025-02-01"
-    end_date = "2025-03-06"
+    end_date = "2025-05-31"
     df = filter_by_date_range(df=df, start_date=start_date, end_date=end_date)
 
     df = df.reindex()
