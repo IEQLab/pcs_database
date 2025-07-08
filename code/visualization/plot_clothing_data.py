@@ -85,7 +85,7 @@ def plot_icls_bar(df, annotate=True):
     plt.yticks()
     plt.figtext(0.5, -0.05, "※ Body parts with both left and right sides were averaged.", ha="center")
     plt.tight_layout()
-    plt.savefig("icl_by_bodypart_bar.svg", format="svg")
+    plt.savefig(os.path.join(Config.FigurePaths.CLOTHING_DIR, "clothing_measurement_data.svg"), format="svg")
     plt.show()
 
 
