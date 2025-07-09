@@ -396,12 +396,19 @@ def apply_htc_and_teq_calculation(
     q_prefix_base='Baseline_P_', t_prefix_base='Baseline_Tsk_', to_col_base='Baseline_To'
 ) -> pd.DataFrame:
     """
-    Calculate HTC and Teq for PCS and Baseline, and their differences.
+    Calculate htc and Teq for PCS and Baseline, and their differences.
     Adds: PCS_ht_{part}, Baseline_ht_{part}, Delta_ht_{part},
           PCS_Teq_{part}, Baseline_Teq_{part}, Delta_Teq_{part}
     """
+
+    # If no specific body parts are provided, use the default body part list
     if body_parts is None:
         body_parts = list(asdict(utils.utilities.BodyPart()).values())
+
+    # Dictionary to temporarily store all new columns
+    # This avoids WARNING to repeatedly modify the DataFrame during the loop,
+    # which can lead to memory fragmentation and performance degradation.
+    new_cols = {}
 
     for part in body_parts:
         q_pcs = f"{q_prefix_pcs}{part}"
@@ -412,38 +419,41 @@ def apply_htc_and_teq_calculation(
         pcs_ht = f"PCS_ht_{part}"
         base_ht = f"Baseline_ht_{part}"
         delta_ht = f"Delta_ht_{part}"
-
         pcs_teq = f"PCS_Teq_{part}"
         base_teq = f"Baseline_Teq_{part}"
         delta_teq = f"Delta_Teq_{part}"
 
-        # HTC
-        df[pcs_ht] = df.apply(
+        # Compute total heat transfer coefficient (htc) for PCS and Baseline
+        new_cols[pcs_ht] = df.apply(
             lambda row: calc_equivalent_temperature.calculate_total_heat_transfer_coefficient(
                 q_skin=row[q_pcs], t_skin=row[tsk_pcs], t_o=row[to_col_pcs]
             ),
             axis=1
         )
-        df[base_ht] = df.apply(
+        new_cols[base_ht] = df.apply(
             lambda row: calc_equivalent_temperature.calculate_total_heat_transfer_coefficient(
                 q_skin=row[q_base], t_skin=row[tsk_base], t_o=row[to_col_base]
             ),
             axis=1
         )
-        df[delta_ht] = df[pcs_ht] - df[base_ht]
+        new_cols[delta_ht] = new_cols[pcs_ht] - new_cols[base_ht]
 
-        # Teq
-        df[pcs_teq] = df.apply(
-            lambda row: row[tsk_pcs] - row[q_pcs] / row[pcs_ht] if row[pcs_ht] != 0 else np.nan,
+        # Calculate Teq using pre-computed HTC values
+        new_cols[pcs_teq] = df.apply(
+            lambda row: row[tsk_pcs] - row[q_pcs] / new_cols[pcs_ht][row.name]
+            if new_cols[pcs_ht][row.name] != 0 else np.nan,
             axis=1
         )
-        df[base_teq] = df.apply(
-            lambda row: row[tsk_base] - row[q_base] / row[base_ht] if row[base_ht] != 0 else np.nan,
+        new_cols[base_teq] = df.apply(
+            lambda row: row[tsk_base] - row[q_base] / new_cols[base_ht][row.name]
+            if new_cols[base_ht][row.name] != 0 else np.nan,
             axis=1
         )
-        df[delta_teq] = df[pcs_teq] - df[base_teq]
+        new_cols[delta_teq] = new_cols[pcs_teq] - new_cols[base_teq]
 
-    return df
+    df = pd.concat([df, pd.DataFrame(new_cols, index=df.index)], axis=1)
+
+    return df.copy()
 
 def reorder_final_columns(df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -517,14 +527,14 @@ def main():
         # Combine and save results if there is data
         if all_averages:
             combined_averages = pd.concat(all_averages)
-            print(f"combined_averages: {combined_averages}")
-            print(f"columns of combined_averages: {combined_averages.columns}")
+            logging.info(f"combined_averages: {combined_averages}")
+            logging.info(f"columns of combined_averages: {combined_averages.columns}")
 
             # Reorder
             reordered_combined_averages = reorder_columns(df=combined_averages.copy())
             reordered_combined_averages = match_nearest_datetime(df_manikin=reordered_combined_averages, df_chamber=df_chamber)
-            print(f"reordered_combined_averages: {reordered_combined_averages}")
-            print(f"columns of reordered_combined_averages: {reordered_combined_averages.columns}")
+            logging.info(f"reordered_combined_averages: {reordered_combined_averages}")
+            logging.info(f"columns of reordered_combined_averages: {reordered_combined_averages.columns}")
 
             # Summary of average data of each file
             file_name_to_save = os.path.join(Config.DataPaths.PROCESSED_DATA_DIR, "all_average_data.csv")
@@ -545,8 +555,8 @@ def main():
 
             # Handle missing values
             delta_results_with_extracted_info = delta_results_with_extracted_info.fillna(np.nan)
-            print(f"delta_results_with_extracted_info: {delta_results_with_extracted_info}")
-            print(f"columns of delta_results_with_extracted_info: {delta_results_with_extracted_info.columns}")
+            logging.info(f"delta_results_with_extracted_info: {delta_results_with_extracted_info}")
+            logging.info(f"columns of delta_results_with_extracted_info: {delta_results_with_extracted_info.columns}")
 
             file_name_to_save = os.path.join(Config.DataPaths.PROCESSED_DATA_DIR, "delta_results.csv")
             delta_results_with_extracted_info.to_csv(file_name_to_save, index=False)
