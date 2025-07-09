@@ -177,7 +177,7 @@ def plot_dual_delta_p_with_theoretical_fit(df, target_id, body_part="Delta_P_Lef
     plt.tight_layout()
     if save:
         filename = f"delta_p_plot_ID{target_id}.svg"
-        save_path = os.path.join(Config.FIGURE_DIR, filename)
+        save_path = os.path.join(Config.FigurePaths.BASE_DIR, filename)
         plt.savefig(save_path)
         print(f"[SAVED] {save_path}")
     plt.close()

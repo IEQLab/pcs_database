@@ -329,7 +329,7 @@ def reorder_columns(df):
     # Generate ordered list of columns based on body parts
     new_columns_list = config.database_columns_names.generate_columns(body_parts=utils.utilities.BodyPart)
 
-    print(f"new_columns_list: {new_columns_list}")
+    logging.info(f"new_columns_list: {new_columns_list}")
 
     ordered_columns = [col for col in new_columns_list if col in df.columns]
     remaining_columns = [col for col in df.columns if col not in ordered_columns]
