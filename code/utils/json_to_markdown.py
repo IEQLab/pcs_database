@@ -146,10 +146,10 @@ def update_readme_with_metadata(readme_path, markdown_file_path):
 
 if __name__ == "__main__":
     save_schema_as_markdown(
-        json_file_path=configuration.METADATA_JSON_FILE_PATH,
-        markdown_file_path=configuration.METADATA_MARKDOWN_FILE_PATH,
+        json_file_path=configuration.Config.DataPaths.METADATA_JSON_FILE,
+        markdown_file_path=configuration.Config.DataPaths.METADATA_MARKDOWN_FILE,
     )
     update_readme_with_metadata(
-        readme_path=configuration.README_PATH,
-        markdown_file_path=configuration.METADATA_MARKDOWN_FILE_PATH
+        readme_path=configuration.Config.README_PATH,
+        markdown_file_path=configuration.Config.DataPaths.METADATA_MARKDOWN_FILE
     )

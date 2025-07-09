@@ -6,28 +6,87 @@
       "type": "object",
       "description": "Body parts affected by PCS.",
       "properties": {
-        "Crown": {"type": "number"},
-        "Head": {"type": "number"},
-        "Left_Chest": {"type": "number"},
-        "Right_Chest": {"type": "number"},
-        "Left_Back": {"type": "number"},
-        "Right_Back": {"type": "number"},
-        "Abdomen": {"type": "number"},
-        "Buttocks": {"type": "number"},
-        "Left_Upper_Arm": {"type": "number"},
-        "Right_Upper_Arm": {"type": "number"},
-        "Left_Forearm": {"type": "number"},
-        "Right_Forearm": {"type": "number"},
-        "Left_Hand": {"type": "number"},
-        "Right_Hand": {"type": "number"},
-        "Left_Front_Thigh": {"type": "number"},
-        "Right_Front_Thigh": {"type": "number"},
-        "Left_Back_Thigh": {"type": "number"},
-        "Right_Back_Thigh": {"type": "number"},
-        "Left_Lower_Leg": {"type": "number"},
-        "Right_Lower_Leg": {"type": "number"},
-        "Left_Foot": {"type": "number"},
-        "Right_Foot": {"type": "number"}
+        "Crown": {
+          "type": "number"
+        },
+        "Head": {
+          "type": "number"
+        },
+        "Left_Chest": {
+          "type": "number"
+        },
+        "Right_Chest": {
+          "type": "number"
+        },
+        "Left_Back": {
+          "type": "number"
+        },
+        "Right_Back": {
+          "type": "number"
+        },
+        "Abdomen": {
+          "type": "number"
+        },
+        "Buttocks": {
+          "type": "number"
+        },
+        "Left_Upper_Arm": {
+          "type": "number"
+        },
+        "Right_Upper_Arm": {
+          "type": "number"
+        },
+        "Left_Forearm": {
+          "type": "number"
+        },
+        "Right_Forearm": {
+          "type": "number"
+        },
+        "Left_Hand": {
+          "type": "number"
+        },
+        "Right_Hand": {
+          "type": "number"
+        },
+        "Left_Front_Thigh": {
+          "type": "number"
+        },
+        "Right_Front_Thigh": {
+          "type": "number"
+        },
+        "Left_Back_Thigh": {
+          "type": "number"
+        },
+        "Right_Back_Thigh": {
+          "type": "number"
+        },
+        "Left_Lower_Leg": {
+          "type": "number"
+        },
+        "Right_Lower_Leg": {
+          "type": "number"
+        },
+        "Left_Foot": {
+          "type": "number"
+        },
+        "Right_Foot": {
+          "type": "number"
+        }
+      }
+    },
+    "Condition": {
+      "type": "object",
+      "description": "Measurement conditions",
+      "enum": ["Baseline", "PCS"],
+      "properties": {
+        "Baseline": {
+          "type": "number",
+          "description": "Baseline condition"
+        },
+        "PCS": {
+          "type": "number",
+          "description": "PCS condition"
+        }
       }
     }
   },
@@ -35,51 +94,61 @@
     "columns": {
       "type": "object",
       "description": "Metadata for each column in the PCS database CSV",
-      "required": ["Test"],
+      "required": ["ID"],
       "properties": {
-        "ID": {"type": "integer", "description": "Unique PCS identifier (integer number)", "example": 1},
+        "PCS_ID": {"type": "integer", "description": "Unique PCS identifier (integer number)", "example": 1},
         "Category": {"type": "string", "enum": ["Cooling", "Heating"], "description": "Category of the PCS.", "example": "Cooling"},
         "Physical_Effect": {"type": "string", "description": "Physical effect of the PCS. Must be one or more: Convective, Conductive, Radiant, Evaporative.", "example": "Convective"},
         "Type": {"type": "string", "description": "Type of PCS (e.g., fan, foot warmer).", "example": "Small desk fan"},
         "Size": {"type": "number", "description": "PCS dimensions in the following format: height, length, width (cm)", "example": "20, 20, 3"},
         "Brand": {"type": "string", "description": "Brand name of the PCS. If it is a prototype, give it a name.", "example": "Simpeak"},
-        "PCS_Reference": {"type": "string", "description": "Reference product URL or project landing page.", "example": "Reference link"},
+        "Product_Reference": {"type": "string", "description": "Reference product URL or project landing page.", "example": "http://..."},
         "Availability": {"type": "string", "enum": ["Market-ready", "Prototype"], "description": "Market availability.", "example": "Market-ready"},
-        "Image_Path": {"type": "string", "description": "Name of the image file of the PCS in JPEG or PNG format (preference for high resolution 300dpi)", "example": "example.jpg"},
+        "Image": {"type": "string", "description": "Name of the image file of the PCS in JPEG or PNG format (preference for high resolution 300dpi)", "example": "example.jpg"},
         "Publication": {"type": "string", "description": "DOI or URL for a publication where this data is presented.", "example": "10.53540/tjer.vol18iss2pp62-71"},
         "PCS_Level": {"type": "string", "description": "Selected level for the test/total PEC control available levels. Example, for a fan with 10 speed levels, level 3 is selected: 3/10.", "example": "Low"},
         "Price_USD": {"type": "number", "description": "Price of the PCS in US dollars.", "example": 10},
         "Year": {"type": "number", "description": "Year of the study", "example": 10},
-        "Angle": {"type": "number", "description": "Angle of the PCS and target (degrees).", "example": 125.0},
-        "Distance": {"type": "number", "description": "Distance from PCS to target (m).", "example": 60.0},
-        "Target_Body": {"type": "string", "description": "Targeted body segment for PCS application.", "example": "Face"},
-        "Power_W": {"type": "number", "description": "Energy consumption of the PCS (W).", "example": 2},
-        "DateTime": {"type": "string", "format": "date-time", "description": "Timestamp of data entry.", "example": "2025-02-01T17:18:00Z"},
-        "Place": {"type": "string", "description": "Location where the measurement was taken.", "example": "The University of Sydney"},
+        "Angle_Horizontal": {"type": "number", "description": "Horizontal angle between the middle of PCS and the middle of target body part (degrees).", "example": 125.0},
+        "Distance_Horizontal": {"type": "number", "description": "Horizontal distance between the middle of the PCS and target body part (cm).", "example": 60.0},
+        "Distance_Vertical": {"type": "number", "description": "Vertical distance between the middle of the PCS and target body part (cm).", "example": 10.0},
+        "Target_Body": {"type": "string", "description": "Body Segment targeted by PCS.", "example": "Face"},
+        "Plug_Power": {"type": "number", "description": "Power supply of the PCS (W). ", "example": 10},
+        "Research_Center": {"type": "string", "description": "Facility where the measurement was taken.", "example": "The University of Sydney"},
+        "Country": {"type": "string", "description": "Country where the study was performed.", "example": "Australia"},
         "Posture": {"type": "string", "description": "Posture of the manikin during measurement (e.g., standing, sitting).", "example": "Sitting"},
-        "Situation": {"type": "string", "description": "Description of the environment where PCS is used (e.g., office, car).", "example": "Office"},
+        "Context": {"type": "string", "description": "Type of building or vehicle considered in the experiment (e.g., office, car).", "example": "Office"},
         "Manikin_Company": {"type": "string", "description": "Manufacturer of the thermal manikin used.", "example": "PT Manikins"},
+        "Manikin_Type": {"type": "string", "enum": ["Thermal", "Sweating"], "description": "Manikin capability. Non-wired manikins should not be included.", "example": "Thermal"},
         "Manikin_Gender": {"type": "string", "enum": ["Male", "Female"], "description": "Gender representation of the thermal manikin.", "example": "Female"},
         "Manikin_Body_Segments": {"type": "integer", "description": "Number of body segments of the thermal manikin.", "example": 22},
         "Control_Method": {"type": "string", "enum": ["TskControl", "HeatFluxControl", "ComfortControl"], "description": "Method used to control the PCS (e.g., manual, automatic).", "example": "TskControl"},
         "{Condition}_Ta": {"type": "number", "description": "Ambient air temperature (°C).", "example": 25},
         "{Condition}_MRT": {"type": "number", "description": "Mean radiant temperature (°C).", "example": 25},
         "{Condition}_RH": {"type": "number", "description": "Relative humidity (%).", "example": 50},
-        "{Condition}_V": {"type": "number", "description": "Air velocity (m/s).", "example": 0.1},
-        "Delta_Teq_": {
-          "type": "object",
-          "description": "Change in equivalent temperature for each body part.",
-          "$ref": "#/definitions/BodyPart"
+        "{Condition}_V": {
+          "type": "number",
+          "description": "Air velocity (m/s).",
+          "example": 0.1,
+          "$ref": "#/definitions/Condition"
         },
-        "Delta_P_": {
-          "type": "object",
-          "description": "Change in power supply from the manikin for each body part.",
-          "$ref": "#/definitions/BodyPart"
+        "Delta_Teq_{BodyPart}": {
+          "type": "number",
+          "description": "Change in equivalent temperature for each body part (°C).",
+          "$ref": "#/definitions/BodyPart",
+          "example": 1
         },
-        "Clo_": {
-          "type": "object",
+        "Delta_P_{BodyPart}": {
+          "type": "number",
+          "description": "Change in power supply from the manikin for each body part (W).",
+          "$ref": "#/definitions/BodyPart",
+          "example": 10
+        },
+        "Clo_{BodyPart}": {
+          "type": "number",
           "description": "Clothing insulation for each body part.",
-          "$ref": "#/definitions/BodyPart"
+          "$ref": "#/definitions/BodyPart",
+          "example": 1
         },
         "Condition_without_PCS": {
           "type": "string",
