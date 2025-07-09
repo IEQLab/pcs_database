@@ -1,6 +1,6 @@
 # Database Metadata
 
-Schema Description (Generated on 2025-07-09 13:52:23)
+Schema Description (Generated on 2025-07-09 14:28:57)
 
 | Parameter | Type | Description | Example |
 |---|---|---|---|
@@ -35,11 +35,13 @@ Schema Description (Generated on 2025-07-09 13:52:23)
 | **`{Condition}_MRT`** | *number* | Mean radiant temperature (°C). | 25 |
 | **`{Condition}_RH`** | *number* | Relative humidity (%). | 50 |
 | **`{Condition}_V`** | *number* | Air velocity (m/s). Body part information follows this parameter. See: `#/definitions/Condition` | 0.1 |
+| **`{Condition}_Tsk_{BodyPart}`** | *number* | Skin temperature for each body part(°C). Body part information follows this parameter. See: `#/definitions/Condition and #/definitions/BodyPart` | 34 |
+| **`{Condition}_P_{BodyPart}`** | *number* | Power supply for each body part (W). Body part information follows this parameter. See: `#/definitions/Condition and #/definitions/BodyPart` | 100 |
 | **`Delta_Teq_{BodyPart}`** | *number* | Change in equivalent temperature for each body part (°C). Body part information follows this parameter. See: `#/definitions/BodyPart` | 1 |
 | **`Delta_P_{BodyPart}`** | *number* | Change in power supply from the manikin for each body part (W). Body part information follows this parameter. See: `#/definitions/BodyPart` | 10 |
 | **`Clo_{BodyPart}`** | *number* | Clothing insulation for each body part. Body part information follows this parameter. See: `#/definitions/BodyPart` | 1 |
-| **`Condition_without_PCS`** | *string* | File path to the raw data without PCS. | 2025-02-01_ID0_NoPCS_Ta25_TskControl34.csv |
-| **`Condition_with_PCS`** | *string* | File path to the raw data with PCS. | 2025-02-01_ID1_Small desk fan (grey)_Mid_Angle135_Distance60_Ta25_TskControl34.csv |
+| **`Condition_without_PCS`** | *string* | File path to the raw data without PCS. | ID0_NoPCS.csv |
+| **`Condition_with_PCS`** | *string* | File path to the raw data with PCS. | ID1_Small desk fan (grey).csv |
 
 ## Definitions
 - **`BodyPart`** *(type: object)* - Properties: `Crown`, `Head`, `Left_Chest`, `Right_Chest`, `Left_Back`, `Right_Back`, `Abdomen`, `Buttocks`, `Left_Upper_Arm`, `Right_Upper_Arm`, `Left_Forearm`, `Right_Forearm`, `Left_Hand`, `Right_Hand`, `Left_Front_Thigh`, `Right_Front_Thigh`, `Left_Back_Thigh`, `Right_Back_Thigh`, `Left_Lower_Leg`, `Right_Lower_Leg`, `Left_Foot`, `Right_Foot`

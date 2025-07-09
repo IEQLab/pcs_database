@@ -132,6 +132,18 @@
           "example": 0.1,
           "$ref": "#/definitions/Condition"
         },
+        "{Condition}_Tsk_{BodyPart}": {
+          "type": "number",
+          "description": "Skin temperature for each body part(°C).",
+          "example": 34,
+          "$ref": "#/definitions/Condition and #/definitions/BodyPart"
+        },
+        "{Condition}_P_{BodyPart}": {
+          "type": "number",
+          "description": "Power supply for each body part (W).",
+          "example": 100,
+          "$ref": "#/definitions/Condition and #/definitions/BodyPart"
+        },
         "Delta_Teq_{BodyPart}": {
           "type": "number",
           "description": "Change in equivalent temperature for each body part (°C).",
@@ -153,12 +165,12 @@
         "Condition_without_PCS": {
           "type": "string",
           "description": "File path to the raw data without PCS.",
-          "example": "2025-02-01_ID0_NoPCS_Ta25_TskControl34.csv"
+          "example": "ID0_NoPCS.csv"
         },
         "Condition_with_PCS": {
           "type": "string",
           "description": "File path to the raw data with PCS.",
-          "example": "2025-02-01_ID1_Small desk fan (grey)_Mid_Angle135_Distance60_Ta25_TskControl34.csv"
+          "example": "ID1_Small desk fan (grey).csv"
         }
       }
     }
