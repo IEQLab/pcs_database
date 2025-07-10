@@ -9,6 +9,10 @@ __pycache__/
 *.png
 * dng
 
+# Data
+data/raw data/
+data/processed_data/*.csv
+#*.xlsx
 # C extensions
 *.so
 
