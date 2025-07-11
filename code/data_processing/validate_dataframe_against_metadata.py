@@ -3,19 +3,24 @@ import pandas as pd
 import os
 from config.configuration import Config
 
-def validate_dataframe_against_metadata(df, metadata: dict, label: str = "DataFrame") -> None:
-    """
-    Validate DataFrame columns against metadata and print missing/unexpected columns.
 
-    Args:
-        df (pd.DataFrame): The DataFrame to check.
-        metadata (dict): Metadata loaded from metadata.json.
-        label (str): Optional label for logging clarity.
-    """
+def get_default_values(df: pd.DataFrame) -> dict:
+    """Extracts column names and the first row values from a DataFrame as default values."""
+    if df.empty:
+        raise ValueError("DataFrame is empty. At least one row is required.")
+    return df.iloc[0].to_dict()
+
+
+def validate_dataframe_against_metadata(
+    df, metadata: dict, label: str = "DataFrame"
+) -> None:
+    """Validate DataFrame columns against metadata and print missing/unexpected columns."""
     expected_columns = set()
 
     # 1. Get top-level column names
-    column_props = metadata.get("properties", {}).get("columns", {}).get("properties", {})
+    column_props = (
+        metadata.get("properties", {}).get("columns", {}).get("properties", {})
+    )
     for col, col_meta in column_props.items():
         if "$ref" in col_meta:
             # If reference to body parts, expand with body part names
@@ -44,17 +49,23 @@ def validate_dataframe_against_metadata(df, metadata: dict, label: str = "DataFr
         for col in sorted(unexpected):
             print(f"  + {col}")
 
-def main():
 
+def main():
+    example_database_file_path = os.path.join(
+        Config.DataPaths.BASE_DIR, "pcs_database_example.csv"
+    )
     metadata_file_path = os.path.join(Config.DataPaths.BASE_DIR, "metadata.json")
+
+    df_example_database = pd.read_csv(example_database_file_path)
 
     # Load metadata and your dataframe
     with open(metadata_file_path, "r", encoding="utf-8") as f:
         metadata = json.load(f)
 
-    df = os.path.join(Config.DataPaths.PROCESSED_DATA_DIR, "delta_results.csv")
-    validate_dataframe_against_metadata(df=df, metadata=metadata, label="DeltaResults")
+    validate_dataframe_against_metadata(
+        df=df_example_database, metadata=metadata, label="DeltaResults"
+    )
+
 
 if __name__ == "__main__":
     main()
-
