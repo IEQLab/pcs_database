@@ -5,6 +5,7 @@ import matplotlib as mpl
 # Define base project directory (two levels up from this file)
 PROJECT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 
+
 class Config:
     """Central configuration for directory structure and file paths."""
 
@@ -25,7 +26,7 @@ class Config:
         # Specific files
         METADATA_JSON_FILE = os.path.join(BASE_DIR, "metadata.json")
         METADATA_MARKDOWN_FILE = os.path.join(BASE_DIR, "metadata.markdown")
-        DATABASE_CSV_FILE = os.path.join(BASE_DIR, "PCS_database.csv")
+        DATABASE_CSV_FILE = os.path.join(BASE_DIR, "pcs_database.csv")
 
     class ImagePaths:
         BASE_DIR = os.path.join(PROJECT_DIR, "image")
@@ -55,6 +56,6 @@ class Config:
 # Configure logging
 logging.basicConfig(
     level=logging.WARNING,
-    format='%(asctime)s [%(levelname)s] %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S'
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
 )
