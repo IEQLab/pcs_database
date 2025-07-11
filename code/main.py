@@ -22,10 +22,13 @@ def main():
 
     # Step 3: Plot PCS effects
     print("Step 3: Plotting PCS effects...")
-    if os.path.exists(os.path.join(Config.DataPaths.PROCESSED_DATA_DIR, "delta_teq.csv")):
+    if os.path.exists(
+        os.path.join(Config.DataPaths.PROCESSED_DATA_DIR, "delta_teq.csv")
+    ):
         plot_pcs_effects.main()
     else:
         print("Processed data (delta_teq.csv) not found. Skipping plotting.")
+
 
 if __name__ == "__main__":
     main()
