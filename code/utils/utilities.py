@@ -1,6 +1,22 @@
 import pandas as pd
 from dataclasses import dataclass
 
+
+def weighted_average(values, weights):
+    return sum(v * w for v, w in zip(values, weights)) / sum(weights)
+
+
+# Capoitalize the first letter of each word with underscores replaced by spaces
+def capitalize_first_letter_with_underscores(string):
+    """Capitalize the first letter of each word in a string with underscores replaced by spaces"""
+    return " ".join(word.capitalize() for word in string.replace("_", " ").split())
+
+
+print(
+    capitalize_first_letter_with_underscores("left_front_thigh")
+)  # Output: Left Front Thigh
+
+
 @dataclass
 class BodyPart:
     Crown: str = "Crown"
@@ -25,6 +41,7 @@ class BodyPart:
     Right_Lower_Leg: str = "Right Lower Leg"
     Left_Foot: str = "Left Foot"
     Right_Foot: str = "Right Foot"
+
 
 rename_map = {
     "All": "All",
@@ -55,6 +72,7 @@ rename_map = {
     "Stability": "Stability",
 }
 
+
 @dataclass
 # This is for manikin's output data format
 class BodyPartTemporary:
@@ -82,6 +100,7 @@ class BodyPartTemporary:
     Left_Back: str = "Left Back"
     Right_Back: str = "Right Back"
 
+
 # Define condition pairs and calculate deltas
 # condition_pairs = [
 #     ("withoutPCS_Ta25", "Daison_Fan_Level2_Ta25"),
@@ -96,4 +115,3 @@ class BodyPartTemporary:
 #     ("2025-02-01_ID0_NoPCS", "2025-02-01_ID1_Small desk fan (grey)_Mid"),
 #     ("2025-02-01_ID0_NoPCS", "2025-02-01_ID1_Small desk fan (grey)_High"),
 # ]
-
