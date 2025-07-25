@@ -1,8 +1,7 @@
 import os
 from visualization import plot_pcs_effects
-from config import database_columns_names
 from config.configuration import Config
-from data_processing import preprocess_manikin
+from data_processing import preprocess_manikin, database_columns_names
 
 
 def main():
