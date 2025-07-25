@@ -23,34 +23,53 @@ def create_empty_database(df_template):
     return pd.DataFrame(columns=df_template.columns)
 
 
-def add_measurements_to_database(df_database, measurements_path):
+# def add_measurements_to_database(df_database, df_measurements):
+#     """Add manikin measurements results to the database."""
+#     if df_measurements is not None:
+#         # Find common columns between the two DataFrames
+#         common_columns = set(df_measurements.columns).intersection(
+#             set(df_database.columns)
+#         )
+#
+#         # Create a list to store non-empty rows
+#         rows_to_append = []
+#         for index, row in df_measurements.iterrows():
+#             new_row = {col: None for col in df_database.columns}
+#             for col in common_columns:
+#                 new_row[col] = row[col]
+#             # Only add rows that have at least one non-NA value
+#             if any(pd.notna(value) for value in new_row.values()):
+#                 rows_to_append.append(new_row)
+#
+#         if rows_to_append:
+#             # Create new DataFrame with the same dtypes as the template
+#             df_to_append = pd.DataFrame(rows_to_append)
+#             # Ensure matching dtypes between the two DataFrames
+#             for col in df_database.columns:
+#                 if col in df_to_append.columns:
+#                     df_to_append[col] = df_to_append[col].astype(df_database[col].dtype)
+#
+#             df_database = pd.concat([df_database, df_to_append], ignore_index=True)
+#
+#     return df_database
+
+
+def add_measurements_to_database(df_database: DataFrame, df_measurements: DataFrame):
     """Add manikin measurements results to the database."""
-    if os.path.exists(measurements_path):
-        df_measurements = pd.read_csv(measurements_path)
-        # Only add values for columns that exist in both dataframes
-        common_columns = set(df_measurements.columns).intersection(
-            set(df_database.columns)
+    if df_measurements is not None:
+        # Find common columns between the two DataFrames
+        common_columns = df_database.columns.intersection(df_measurements.columns)
+
+        # Filter the measurements DataFrame to only include common columns
+        df_measurements_filtered = df_measurements[common_columns]
+
+        # Drop rows in `df_measurements_filtered` that are completely empty
+        df_measurements_filtered.dropna(how="all", inplace=True)
+
+        # Append the filtered rows to the database
+        df_database = pd.concat(
+            [df_database, df_measurements_filtered], ignore_index=True
         )
-
-        # Create a list to store non-empty rows
-        rows_to_append = []
-        for index, row in df_measurements.iterrows():
-            new_row = {col: None for col in df_database.columns}
-            for col in common_columns:
-                new_row[col] = row[col]
-            # Only add rows that have at least one non-NA value
-            if any(pd.notna(value) for value in new_row.values()):
-                rows_to_append.append(new_row)
-
-        if rows_to_append:
-            # Create new DataFrame with the same dtypes as the template
-            df_to_append = pd.DataFrame(rows_to_append)
-            # Ensure matching dtypes between the two DataFrames
-            for col in df_database.columns:
-                if col in df_to_append.columns:
-                    df_to_append[col] = df_to_append[col].astype(df_database[col].dtype)
-
-            df_database = pd.concat([df_database, df_to_append], ignore_index=True)
 
     return df_database
 
@@ -94,15 +113,18 @@ def save_database(df_database, output_path):
 
 
 def create_database():
+    # Define file paths
     template_path = os.path.join(Config.DataPaths.BASE_DIR, "pcs_database_example.csv")
-    measurements_path = os.path.join(
+    measurement_results_path = os.path.join(
         Config.DataPaths.PROCESSED_DATA_DIR, "delta_results.csv"
     )
     output_path = os.path.join(Config.DataPaths.BASE_DIR, "pcs_database.csv")
 
-    df_template = load_template(template_path)
-    df_database = create_empty_database(df_template)
-    df_database = add_measurements_to_database(df_database, measurements_path)
+    # Define the dataframes
+    df_template = load_template(template_path=template_path)
+    df_measurement_results = pd.read_csv(measurement_results_path)
+    df_database = create_empty_database(df_template=df_template)
+    df_database = add_measurements_to_database(df_database, df_measurement_results)
 
     pcs_product_info_path = os.path.join(
         Config.DataPaths.BASE_DIR, "pcs_product_info.csv"
