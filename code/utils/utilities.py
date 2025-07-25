@@ -12,9 +12,9 @@ def capitalize_first_letter_with_underscores(string):
     return " ".join(word.capitalize() for word in string.replace("_", " ").split())
 
 
-print(
-    capitalize_first_letter_with_underscores("left_front_thigh")
-)  # Output: Left Front Thigh
+def change_space_to_underscore(string):
+    """Change spaces in a string to underscores"""
+    return string.replace(" ", "_")
 
 
 @dataclass
@@ -25,8 +25,8 @@ class BodyPart:
     Right_Chest: str = "Right Chest"
     Left_Back: str = "Left Back"
     Right_Back: str = "Right Back"
-    Abdomen: str = "Abdomen"
-    Buttocks: str = "Buttocks"
+    Back_side: str = "Back Side"
+    Pelvis: str = "Pelvis"
     Left_Upper_Arm: str = "Left Upper Arm"
     Right_Upper_Arm: str = "Right Upper Arm"
     Left_Forearm: str = "Left Forearm"
@@ -73,9 +73,10 @@ rename_map = {
 }
 
 
+# Todo: [IMPORTANT] Organize the dataclass for the manikin body parts
 @dataclass
 # This is for manikin's output data format
-class BodyPartTemporary:
+class BodyPartLauraOutput:
     # Lower Body
     Left_Foot: str = "Left Foot"
     Right_Foot: str = "Right Foot"
@@ -85,8 +86,8 @@ class BodyPartTemporary:
     Right_Front_Thigh: str = "Right Front Thigh"
     Left_Back_Thigh: str = "Left Back Thigh"
     Right_Back_Thigh: str = "Right Back Thigh"
-    Buttocks: str = "Buttocks"
-    Abdomen: str = "Abdomen"
+    Pelvis: str = "Pelvis"
+    Back_Side: str = "Back Side"
     Head: str = "Head"
     Crown: str = "Crown"
     Left_Hand: str = "Left Hand"
