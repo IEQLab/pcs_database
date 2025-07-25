@@ -4,8 +4,11 @@ import matplotlib.pyplot as plt
 from config.configuration import Config
 
 # Load the data
-file_path = os.path.join(Config.DataPaths.PROCESSED_DATA_DIR, "clothing_measurement_data.csv")
+file_path = os.path.join(
+    Config.DataPaths.PROCESSED_DATA_DIR, "clothing_measurement_data.csv"
+)
 df = pd.read_csv(file_path)
+
 
 def average_symmetric_parts(df, value_col="Icl"):
     """
@@ -28,8 +31,12 @@ def average_symmetric_parts(df, value_col="Icl"):
     # Average or use available values from left/right pairs
     for left, right in symmetric_pairs:
         for condition in df["ClothingCondition"].unique():
-            left_val = df[(df.BodyPart == left) & (df.ClothingCondition == condition)]["Icl"].values
-            right_val = df[(df.BodyPart == right) & (df.ClothingCondition == condition)]["Icl"].values
+            left_val = df[
+                (df.BodyPartLaura == left) & (df.ClothingCondition == condition)
+            ]["Icl"].values
+            right_val = df[
+                (df.BodyPartLaura == right) & (df.ClothingCondition == condition)
+            ]["Icl"].values
 
             if left_val.size > 0 and right_val.size > 0:
                 mean_val = (left_val[0] + right_val[0]) / 2
@@ -40,11 +47,13 @@ def average_symmetric_parts(df, value_col="Icl"):
             else:
                 continue  # No data for this condition
 
-            new_rows.append({
-                "BodyPart": left.replace("Left ", ""),
-                "ClothingCondition": condition,
-                "Icl": mean_val
-            })
+            new_rows.append(
+                {
+                    "BodyPart": left.replace("Left ", ""),
+                    "ClothingCondition": condition,
+                    "Icl": mean_val,
+                }
+            )
 
         processed.add(left)
         processed.add(right)
@@ -65,7 +74,9 @@ def plot_overall_and_local_clo_values(df, annotate=True):
     Config.PlotConfig.apply()
 
     ordered_parts = df["BodyPart"].drop_duplicates().tolist()
-    df["ClothingCondition"] = df["ClothingCondition"].replace({"Summer": "Summer Clothing", "Winter": "Winter Clothing"})
+    df["ClothingCondition"] = df["ClothingCondition"].replace(
+        {"Summer": "Summer Clothing", "Winter": "Winter Clothing"}
+    )
     df_pivot = df.pivot(index="BodyPart", columns="ClothingCondition", values="Icl")
     df_pivot = df_pivot.reindex(ordered_parts)
 
@@ -75,17 +86,29 @@ def plot_overall_and_local_clo_values(df, annotate=True):
         for i, (idx, row) in enumerate(df_pivot.iterrows()):
             for j, (cond, val) in enumerate(row.items()):
                 if pd.notna(val):
-                    ax.text(i + (j - 0.5) * 0.4, val + 0.02, f"{val:.2f}", ha='center', va='bottom', fontsize=Config.PlotConfig.FONT_SIZE_SMALL)
+                    ax.text(
+                        i + (j - 0.5) * 0.4,
+                        val + 0.02,
+                        f"{val:.2f}",
+                        ha="center",
+                        va="bottom",
+                        fontsize=Config.PlotConfig.FONT_SIZE_SMALL,
+                    )
                     # ax.text(10, 3, "Body parts with both left and right sides were averaged.", ha="center")
 
     ax.set_ylabel("Intrinsic Clothing Insulation, $\it{I}_{cl}$ (clo)")
     ax.set_xlabel("")  # Remove x-axis label
-    ax.set_title("Local Clothing Insulation", fontsize=Config.PlotConfig.FONT_SIZE_LARGE)
+    ax.set_title(
+        "Local Clothing Insulation", fontsize=Config.PlotConfig.FONT_SIZE_LARGE
+    )
     ax.legend(title="")
     plt.xticks(rotation=45, ha="right")
     plt.yticks()
     plt.tight_layout()
-    plt.savefig(os.path.join(Config.FigurePaths.CLOTHING_DIR, "clothing_measurement_data.svg"), format="svg")
+    plt.savefig(
+        os.path.join(Config.FigurePaths.CLOTHING_DIR, "clothing_measurement_data.svg"),
+        format="svg",
+    )
     plt.show()
 
 
