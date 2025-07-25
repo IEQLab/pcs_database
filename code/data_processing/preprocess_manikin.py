@@ -6,8 +6,7 @@ import chardet
 import re
 from collections import defaultdict
 from dataclasses import asdict
-import config.database_columns_names
-import code.utils as utilities
+import data_processing.database_columns_names
 import utils.utilities
 from data_processing import calc_equivalent_temperature
 from data_processing import preprocess_chamber
@@ -21,9 +20,9 @@ def detect_encoding(file_path):
     """
     Detect the file encoding using chardet.
     """
-    with open(file_path, 'rb') as file:
+    with open(file_path, "rb") as file:
         raw_data = file.read()
-        return chardet.detect(raw_data)['encoding']
+        return chardet.detect(raw_data)["encoding"]
 
 
 # Step 2: Load CSV file
@@ -55,7 +54,9 @@ def load_data_with_custom_columns(file_path, custom_columns, strict_datetime=Tru
     # Try parsing the 'Datetime' column
     if strict_datetime:
         # Use strict parsing for speed and consistency (format must match exactly)
-        df["Datetime"] = pd.to_datetime(df["Datetime"], format="%d/%m/%Y %I:%M:%S %p", errors="coerce")
+        df["Datetime"] = pd.to_datetime(
+            df["Datetime"], format="%d/%m/%Y %I:%M:%S %p", errors="coerce"
+        )
     else:
         # Fallback: let pandas guess the format (slower but handles inconsistent formats)
         df["Datetime"] = pd.to_datetime(df["Datetime"], errors="coerce")
@@ -64,11 +65,9 @@ def load_data_with_custom_columns(file_path, custom_columns, strict_datetime=Tru
     df.set_index("Datetime", inplace=True)
 
     # Replace any empty string cells with proper NaN
-    df.replace(r'^\s*$', np.nan, regex=True, inplace=True)
+    df.replace(r"^\s*$", np.nan, regex=True, inplace=True)
 
     return df
-
-
 
 
 # Step 3: Calculate averages for the last minute of data
@@ -80,12 +79,16 @@ def average_last_five_minute(file_path, custom_columns):
     """
     try:
         # Step 1: Try loading data using a strict datetime format (fast and predictable)
-        df = load_data_with_custom_columns(file_path, custom_columns, strict_datetime=True)
+        df = load_data_with_custom_columns(
+            file_path, custom_columns, strict_datetime=True
+        )
 
         # Step 2: If the result is empty or all datetimes failed to parse, try again without format
         if df.empty or df.index.isna().all():
             # This fallback uses automatic datetime parsing (more tolerant but slower)
-            df = load_data_with_custom_columns(file_path, custom_columns, strict_datetime=False)
+            df = load_data_with_custom_columns(
+                file_path, custom_columns, strict_datetime=False
+            )
 
         # Step 3: Calculate averages over the last 5 minutes of available data
         last_five_minute_start = df.index.max() - pd.Timedelta(minutes=5)
@@ -94,7 +97,9 @@ def average_last_five_minute(file_path, custom_columns):
         if not last_five_minute_data.empty:
             # Step 4: Compute column-wise mean and add metadata
             averages = last_five_minute_data.mean(numeric_only=True).to_frame().T
-            averages["Reference_time"] = last_five_minute_data.index.mean().strftime("%Y-%m-%d %H:%M:%S")
+            averages["Reference_time"] = last_five_minute_data.index.mean().strftime(
+                "%Y-%m-%d %H:%M:%S"
+            )
             averages["File_name"] = os.path.basename(file_path)
             return averages
 
@@ -103,6 +108,7 @@ def average_last_five_minute(file_path, custom_columns):
         print(f"[SKIPPED] {file_path} - Error: {e}")
 
     return None
+
 
 # Step 4: Search for files by keyword
 def find_files_with_keyword(folder_path, keyword, exclude_folders=["Old", "UFAD"]):
@@ -128,96 +134,120 @@ def find_files_with_keyword(folder_path, keyword, exclude_folders=["Old", "UFAD"
 
         # Add files that contain the keyword in their names
         result_files.extend(
-            os.path.join(root, file)
-            for file in files if keyword in file
+            os.path.join(root, file) for file in files if keyword in file
         )
 
     return result_files
 
 
 def extract_info_from_filename(filename):
-    filename = os.path.basename(filename).split('.')[0]
-    parts = filename.split('_')
+    filename = os.path.basename(filename).split(".")[0]
+    parts = filename.split("_")
 
     dict_extracted_info = {
         "ID": None,
-        "PCS_name": None,
-        "Level": None,
-        "Angle": None,
-        "Distance": None,
+        "PCS_Name": None,
+        "PCS_Level": None,
+        "Angle_Horizontal": None,
+        "Distance_Horizontal": None,
         "Ta": None,
-        "Control method": None
+        "Control_Method": None,
     }
 
     try:
         # ID: Extract with regex
-        match = re.search(r'ID(\d+)', filename)
+        match = re.search(r"ID(\d+)", filename)
         if match:
             dict_extracted_info["ID"] = int(match.group(1))
         else:
-            logging.warning(f"[extract_info_from_filename] No valid ID found in: {filename}")
+            logging.warning(
+                f"[extract_info_from_filename] No valid ID found in: {filename}"
+            )
 
         # PCS_name and Level (parts[2], parts[3]) with safety check
-        dict_extracted_info["PCS_name"] = parts[2] if len(parts) > 2 else None
-        dict_extracted_info["Level"] = parts[3] if len(parts) > 3 else None
+        dict_extracted_info["PCS_Name"] = parts[2] if len(parts) > 2 else None
+        dict_extracted_info["PCS_Level"] = parts[3] if len(parts) > 3 else None
 
         for part in parts[4:]:
-            if part.startswith("Angle"):
-                dict_extracted_info["Angle"] = int(part.replace("Angle", ""))
-            elif part.startswith("Distance"):
-                dict_extracted_info["Distance"] = int(part.replace("Distance", ""))
+            if part.startswith("Angle_Horizontal"):
+                dict_extracted_info["Angle_Horizontal"] = int(part.replace("Angle", ""))
+            elif part.startswith("Distance_Horizontal"):
+                dict_extracted_info["Distance_Horizontal"] = int(
+                    part.replace("Distance", "")
+                )
             elif part.startswith("Ta"):
                 dict_extracted_info["Ta"] = int(part.replace("Ta", ""))
             elif "Control" in part:
-                dict_extracted_info["Control method"] = part
+                dict_extracted_info["Control_Method"] = part
 
     except Exception as e:
         logging.error(f"[extract_info_from_filename] Failed to parse: {filename} ({e})")
 
     return dict_extracted_info
 
+
 def match_nearest_datetime(df_manikin, df_chamber):
     # Ensure a copy is made to avoid SettingWithCopyWarning
     df_manikin = df_manikin.copy()
 
     # Convert date columns to datetime format
-    df_manikin.loc[:, "Reference_time"] = pd.to_datetime(df_manikin["Reference_time"], errors='coerce')
+    df_manikin.loc[:, "Reference_time"] = pd.to_datetime(
+        df_manikin["Reference_time"], errors="coerce"
+    )
 
     # Ensure df_chamber's index is DatetimeIndex
-    df_chamber.index = pd.to_datetime(df_chamber.index, errors='coerce')
+    df_chamber.index = pd.to_datetime(df_chamber.index, errors="coerce")
 
     # Drop NaT values to prevent errors
-    df_manikin = df_manikin.dropna(subset=["Reference_time"]).sort_values("Reference_time").reset_index(drop=True)
+    df_manikin = (
+        df_manikin.dropna(subset=["Reference_time"])
+        .sort_values("Reference_time")
+        .reset_index(drop=True)
+    )
     df_chamber = df_chamber.dropna().sort_index()  # Sort by index
 
     # Function to find the nearest Datetime
     def find_nearest(row, df_chamber):
         if pd.isna(row["Reference_time"]):
-            return pd.Series(dtype='object')  # Return an empty row if Reference_time is NaT
+            return pd.Series(
+                dtype="object"
+            )  # Return an empty row if Reference_time is NaT
 
-        reference_time = pd.to_datetime(row["Reference_time"], errors='coerce')  # Ensure datetime format
+        reference_time = pd.to_datetime(
+            row["Reference_time"], errors="coerce"
+        )  # Ensure datetime format
 
         # Check if reference_time is within the range of df_chamber.index
-        if reference_time < df_chamber.index.min() or reference_time > df_chamber.index.max():
+        if (
+            reference_time < df_chamber.index.min()
+            or reference_time > df_chamber.index.max()
+        ):
             logging.info(
-                f"Reference Time {reference_time} is out of range ({df_chamber.index.min()} - {df_chamber.index.max()})")
-            return pd.Series(dtype='object')  # Return an empty row if out of range
+                f"Reference Time {reference_time} is out of range ({df_chamber.index.min()} - {df_chamber.index.max()})"
+            )
+            return pd.Series(dtype="object")  # Return an empty row if out of range
 
         # Compute time differences (Convert Index to Series)
-        timedelta_values = pd.Series((df_chamber.index - reference_time) / pd.Timedelta(seconds=1),
-                                     index=df_chamber.index)
+        timedelta_values = pd.Series(
+            (df_chamber.index - reference_time) / pd.Timedelta(seconds=1),
+            index=df_chamber.index,
+        )
 
         # Find nearest index using idxmin()
         nearest_idx = timedelta_values.abs().idxmin()
 
         logging.info(f"Reference Time: {reference_time}")
         logging.info(f"Nearest Index: {nearest_idx}")
-        logging.info(f"Timedelta Difference: {timedelta_values.loc[nearest_idx]}")  # Debugging
+        logging.info(
+            f"Timedelta Difference: {timedelta_values.loc[nearest_idx]}"
+        )  # Debugging
 
         # Check if nearest time is within ±1 minute (60 seconds)
         min_difference = timedelta_values.abs().min()
         if min_difference > 60:
-            logging.info(f"Warning: Nearest available data for {reference_time} is {min_difference:.1f} seconds away at {nearest_idx}.")
+            logging.info(
+                f"Warning: Nearest available data for {reference_time} is {min_difference:.1f} seconds away at {nearest_idx}."
+            )
 
         return df_chamber.loc[nearest_idx]
 
@@ -225,7 +255,9 @@ def match_nearest_datetime(df_manikin, df_chamber):
     matched_data = df_manikin.apply(lambda row: find_nearest(row, df_chamber), axis=1)
 
     # Merge the matched data
-    df_matched = pd.concat([df_manikin.reset_index(drop=True), matched_data.reset_index()], axis=1)
+    df_matched = pd.concat(
+        [df_manikin.reset_index(drop=True), matched_data.reset_index()], axis=1
+    )
 
     return df_matched
 
@@ -249,33 +281,50 @@ def add_extracted_info_to_dataframe(df):
         with_pcs_info = extract_info_from_filename(row["Condition_with_PCS"])
 
         # Store extracted data along with original row, placing extracted info first
-        extracted_data.append({
-            **row.to_dict(),  # Add original delta values first
-            "ID": with_pcs_info["ID"],
-            "PCS_name": with_pcs_info["PCS_name"],
-            "Level": with_pcs_info["Level"],
-            "Angle": with_pcs_info["Angle"],
-            "Distance": with_pcs_info["Distance"],
-            "Tset": with_pcs_info["Ta"],
-            "Control method": with_pcs_info["Control method"],
-        })
+        extracted_data.append(
+            {
+                **row.to_dict(),  # Add original delta values first
+                "ID": with_pcs_info["ID"],
+                "PCS_Name": with_pcs_info["PCS_Name"],
+                "PCS_Level": with_pcs_info["PCS_Level"],
+                "Angle_Horizontal": with_pcs_info["Angle_Horizontal"],
+                "Distance_Horizontal": with_pcs_info["Distance_Horizontal"],
+                "Tset": with_pcs_info["Ta"],
+                "Control_Method": with_pcs_info["Control_Method"],
+            }
+        )
 
     # Convert list of dictionaries to DataFrame
     updated_df = pd.DataFrame(extracted_data)
 
     # Reorder columns to ensure extracted info is at the left
-    extracted_columns = ["ID", "PCS_name", "Level", "Angle", "Distance", "Tset", "Control method"]
-    remaining_columns = [col for col in updated_df.columns if col not in extracted_columns]
+    extracted_columns = [
+        "ID",
+        "PCS_Name",
+        "PCS_Level",
+        "Angle_Horizontal",
+        "Distance_Horizontal",
+        "Tset",
+        "Control_Method",
+    ]
+    remaining_columns = [
+        col for col in updated_df.columns if col not in extracted_columns
+    ]
 
     # Reorder DataFrame
     updated_df = updated_df[extracted_columns + remaining_columns]
 
     return updated_df
 
+
 def drop_group_a_b_columns(df):
-    cols_to_drop = [col for col in df.columns if ("Group A" in col) or ("Group B" in col)]
+    cols_to_drop = [
+        col for col in df.columns if ("Group A" in col) or ("Group B" in col)
+    ]
     if cols_to_drop:
-        logging.info(f"Dropping columns containing 'Group A' or 'Group B': {cols_to_drop}")
+        logging.info(
+            f"Dropping columns containing 'Group A' or 'Group B': {cols_to_drop}"
+        )
     return df.drop(columns=cols_to_drop)
 
 
@@ -320,6 +369,7 @@ def generate_condition_pairs(matching_files):
 
     return condition_pairs
 
+
 # Step 5: Reorder columns based on the BodyPart dataclass
 def reorder_columns(df):
     """
@@ -327,7 +377,9 @@ def reorder_columns(df):
     Ensures that 'Reference_time' is preserved.
     """
     # Generate ordered list of columns based on body parts
-    new_columns_list = config.database_columns_names.generate_columns(body_parts=utils.utilities.BodyPart)
+    new_columns_list = data_processing.database_columns_names.generate_columns(
+        body_parts=utils.utilities.BodyPart
+    )
 
     logging.info(f"new_columns_list: {new_columns_list}")
 
@@ -335,6 +387,7 @@ def reorder_columns(df):
     remaining_columns = [col for col in df.columns if col not in ordered_columns]
 
     return df[ordered_columns + remaining_columns]
+
 
 # Step 6: Calculate delta between conditions
 def calculate_deltas(df, condition_pairs):
@@ -345,14 +398,18 @@ def calculate_deltas(df, condition_pairs):
 
     results = []
 
-    if 'File_name' not in df.columns:
-        if df.index.name == 'File_name':
+    if "File_name" not in df.columns:
+        if df.index.name == "File_name":
             df = df.reset_index()
         else:
             raise KeyError("'File_name' is missing from both columns and index!")
 
     # Identify relevant columns
-    p_columns = [col for col in df.columns if col.startswith("P_") and not any(x in col for x in ["Group A", "Group B"])]
+    p_columns = [
+        col
+        for col in df.columns
+        if col.startswith("P_") and not any(x in col for x in ["Group A", "Group B"])
+    ]
     tsk_columns = [col for col in df.columns if col.startswith("Tsk_")]
     env_columns = ["Ta", "MRT", "RH", "V", "To", "ET"]
 
@@ -370,7 +427,7 @@ def calculate_deltas(df, condition_pairs):
         delta_row = {
             "Reference_time": pcs_row["Reference_time"],
             "Condition_without_PCS": base_fname,
-            "Condition_with_PCS": pcs_fname
+            "Condition_with_PCS": pcs_fname,
         }
 
         # Add Delta values first
@@ -389,11 +446,16 @@ def calculate_deltas(df, condition_pairs):
 
     return pd.DataFrame(results)
 
+
 def apply_htc_and_teq_calculation(
     df: pd.DataFrame,
     body_parts=None,
-    q_prefix_pcs='PCS_P_', t_prefix_pcs='PCS_Tsk_', to_col_pcs='PCS_To',
-    q_prefix_base='Baseline_P_', t_prefix_base='Baseline_Tsk_', to_col_base='Baseline_To'
+    q_prefix_pcs="PCS_P_",
+    t_prefix_pcs="PCS_Tsk_",
+    to_col_pcs="PCS_To",
+    q_prefix_base="Baseline_P_",
+    t_prefix_base="Baseline_Tsk_",
+    to_col_base="Baseline_To",
 ) -> pd.DataFrame:
     """
     Calculate htc and Teq for PCS and Baseline, and their differences.
@@ -428,32 +490,39 @@ def apply_htc_and_teq_calculation(
             lambda row: calc_equivalent_temperature.calculate_total_heat_transfer_coefficient(
                 q_skin=row[q_pcs], t_skin=row[tsk_pcs], t_o=row[to_col_pcs]
             ),
-            axis=1
+            axis=1,
         )
         new_cols[base_ht] = df.apply(
             lambda row: calc_equivalent_temperature.calculate_total_heat_transfer_coefficient(
                 q_skin=row[q_base], t_skin=row[tsk_base], t_o=row[to_col_base]
             ),
-            axis=1
+            axis=1,
         )
         new_cols[delta_ht] = new_cols[pcs_ht] - new_cols[base_ht]
 
         # Calculate Teq using pre-computed HTC values
         new_cols[pcs_teq] = df.apply(
-            lambda row: row[tsk_pcs] - row[q_pcs] / new_cols[pcs_ht][row.name]
-            if new_cols[pcs_ht][row.name] != 0 else np.nan,
-            axis=1
+            lambda row: (
+                row[tsk_pcs] - row[q_pcs] / new_cols[pcs_ht][row.name]
+                if new_cols[pcs_ht][row.name] != 0
+                else np.nan
+            ),
+            axis=1,
         )
         new_cols[base_teq] = df.apply(
-            lambda row: row[tsk_base] - row[q_base] / new_cols[base_ht][row.name]
-            if new_cols[base_ht][row.name] != 0 else np.nan,
-            axis=1
+            lambda row: (
+                row[tsk_base] - row[q_base] / new_cols[base_ht][row.name]
+                if new_cols[base_ht][row.name] != 0
+                else np.nan
+            ),
+            axis=1,
         )
         new_cols[delta_teq] = new_cols[pcs_teq] - new_cols[base_teq]
 
     df = pd.concat([df, pd.DataFrame(new_cols, index=df.index)], axis=1)
 
     return df.copy()
+
 
 def reorder_final_columns(df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -486,6 +555,7 @@ def reorder_final_columns(df: pd.DataFrame) -> pd.DataFrame:
     # Step 5: Return the DataFrame with columns reordered
     return df[base_cols + env_cols + ordered_data_cols + remaining]
 
+
 # Main function
 def main():
     """
@@ -493,7 +563,9 @@ def main():
     """
     try:
         # Load column format
-        columns_format_file = os.path.join(Config.DataPaths.BASE_DIR, "columns_format.csv")
+        columns_format_file = os.path.join(
+            Config.DataPaths.BASE_DIR, "columns_format.csv"
+        )
         columns_format = pd.read_csv(columns_format_file).columns.tolist()
 
         df_chamber = preprocess_chamber.main()
@@ -502,7 +574,11 @@ def main():
 
         # Find all target files
         keyword = "TskControl"
-        matching_files = find_files_with_keyword(folder_path=Config.DataPaths.RAW_DATA_DIR, keyword=keyword, exclude_folders=["Old", "UFAD"])
+        matching_files = find_files_with_keyword(
+            folder_path=Config.DataPaths.RAW_DATA_DIR,
+            keyword=keyword,
+            exclude_folders=["Old", "UFAD"],
+        )
         logging.info(f"matching_files: {matching_files}")
         if not matching_files:
             logging.info(f"No files found with the keyword {keyword}")
@@ -516,13 +592,17 @@ def main():
         all_averages = []
         for file_path in matching_files:
             logging.info(f"Processing file: {file_path}")
-            averages = average_last_five_minute(file_path=file_path, custom_columns=columns_format)
+            averages = average_last_five_minute(
+                file_path=file_path, custom_columns=columns_format
+            )
             logging.info(averages)
             if averages is not None:
                 averages = drop_group_a_b_columns(df=averages)
                 all_averages.append(averages)
             else:
-                logging.info(f"No valid data found in the last minute for file: {file_path}")
+                logging.info(
+                    f"No valid data found in the last minute for file: {file_path}"
+                )
 
         # Combine and save results if there is data
         if all_averages:
@@ -532,33 +612,60 @@ def main():
 
             # Reorder
             reordered_combined_averages = reorder_columns(df=combined_averages.copy())
-            reordered_combined_averages = match_nearest_datetime(df_manikin=reordered_combined_averages, df_chamber=df_chamber)
+            reordered_combined_averages = match_nearest_datetime(
+                df_manikin=reordered_combined_averages, df_chamber=df_chamber
+            )
             logging.info(f"reordered_combined_averages: {reordered_combined_averages}")
-            logging.info(f"columns of reordered_combined_averages: {reordered_combined_averages.columns}")
+            logging.info(
+                f"columns of reordered_combined_averages: {reordered_combined_averages.columns}"
+            )
 
             # Summary of average data of each file
-            file_name_to_save = os.path.join(Config.DataPaths.PROCESSED_DATA_DIR, "all_average_data.csv")
+            file_name_to_save = os.path.join(
+                Config.DataPaths.PROCESSED_DATA_DIR, "all_average_data.csv"
+            )
             reordered_combined_averages.to_csv(file_name_to_save)
             logging.info(f"Saved averaged results of each file to {file_name_to_save}")
             logging.info(reordered_combined_averages)
 
             # Calculate the difference between with PCS and without PCS
-            delta_results = calculate_deltas(df=reordered_combined_averages, condition_pairs=condition_pairs)
+            delta_results = calculate_deltas(
+                df=reordered_combined_averages, condition_pairs=condition_pairs
+            )
             delta_results = apply_htc_and_teq_calculation(df=delta_results)
             logging.info("delta results are calculated.")
-            delta_results_with_extracted_info = add_extracted_info_to_dataframe(df=delta_results)
+            delta_results_with_extracted_info = add_extracted_info_to_dataframe(
+                df=delta_results
+            )
 
             logging.info(delta_results)
 
             # Sort by ID
-            delta_results_with_extracted_info = delta_results_with_extracted_info.sort_values(by="ID", ascending=True)
+            delta_results_with_extracted_info = (
+                delta_results_with_extracted_info.sort_values(by="ID", ascending=True)
+            )
 
             # Handle missing values
-            delta_results_with_extracted_info = delta_results_with_extracted_info.fillna(np.nan)
-            logging.info(f"delta_results_with_extracted_info: {delta_results_with_extracted_info}")
-            logging.info(f"columns of delta_results_with_extracted_info: {delta_results_with_extracted_info.columns}")
+            delta_results_with_extracted_info = (
+                delta_results_with_extracted_info.fillna(np.nan)
+            )
+            logging.info(
+                f"delta_results_with_extracted_info: {delta_results_with_extracted_info}"
+            )
+            logging.info(
+                f"columns of delta_results_with_extracted_info: {delta_results_with_extracted_info.columns}"
+            )
 
-            file_name_to_save = os.path.join(Config.DataPaths.PROCESSED_DATA_DIR, "delta_results.csv")
+            # Change spaces to underscores in column names
+            delta_results_with_extracted_info = (
+                delta_results_with_extracted_info.rename(
+                    columns=lambda x: utils.utilities.change_space_to_underscore(x)
+                )
+            )
+
+            file_name_to_save = os.path.join(
+                Config.DataPaths.PROCESSED_DATA_DIR, "delta_results.csv"
+            )
             delta_results_with_extracted_info.to_csv(file_name_to_save, index=False)
             print(f"Saved delta results to {file_name_to_save}")
 
@@ -570,8 +677,6 @@ def main():
 
         else:
             logging.info("No averages to save.")
-
-
 
     except Exception as e:
         print(f"An error occurred: {e}")
