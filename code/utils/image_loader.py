@@ -2,6 +2,7 @@ import os
 import glob
 from code.config.configuration import Config
 
+
 def load_device_image(target_id):
     """
     Search for the most appropriate device_image file for the given ID.
@@ -29,3 +30,10 @@ def load_device_image(target_id):
 
     # No image found
     return None
+
+
+if __name__ == "__main__":
+    # Example usage: Load images for PCS device IDs 1 to 20
+    targeted_ids = range(1, 21)
+    for target_id in targeted_ids:
+        print(load_device_image(target_id=target_id))
