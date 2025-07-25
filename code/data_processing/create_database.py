@@ -5,6 +5,9 @@ This code gets all the nessesarely information from this project directory and f
 import pandas as pd
 import os
 import glob
+
+from pandas.core.interchange.dataframe_protocol import DataFrame
+
 from config.configuration import Config
 
 
@@ -52,15 +55,36 @@ def add_measurements_to_database(df_database, measurements_path):
     return df_database
 
 
-def add_pcs_information_to_database(df_database, pcs_files):
-    """Add PCS information to the database."""
-    for pcs_file in pcs_files:
-        if os.path.exists(pcs_file):
-            df_pcs = pd.read_csv(pcs_file)
-            # Map PCS data to database
-            # Customization needed based on actual data structure
-            # Example: df_database = merge_pcs_data(df_database, df_pcs)
-    return df_database
+# TODO: Can be better implemented with a merge operation
+def add_pcs_information_to_database(
+    df_database: DataFrame, df_pcs_product_info: DataFrame
+):
+    """
+    Add PCS information to the database based on matching IDs. Overwrites
+    only missing values in the database without affecting existing data.
+    """
+    # Perform a merge on the "ID" column to combine the data
+    df_merged = df_database.merge(
+        df_pcs_product_info, on="ID", how="left", suffixes=("", "_new")
+    )
+
+    # Loop through columns in df_pcs_product_info to update missing values in df_database
+    for column in df_pcs_product_info.columns:
+        if column == "ID":
+            continue
+        if column in df_database.columns:
+            # Update only missing values in the database
+            df_merged[column] = df_merged[column].combine_first(
+                df_merged[f"{column}_new"]
+            )
+            # Drop the temporary "_new" column
+            df_merged.drop(columns=[f"{column}_new"], inplace=True)
+        else:
+            # Add new columns from the product info if they don't exist in the database
+            df_merged.rename(columns={f"{column}_new": column}, inplace=True)
+
+    # Return the updated database
+    return df_merged
 
 
 def save_database(df_database, output_path):
@@ -79,6 +103,14 @@ def create_database():
     df_template = load_template(template_path)
     df_database = create_empty_database(df_template)
     df_database = add_measurements_to_database(df_database, measurements_path)
+
+    pcs_product_info_path = os.path.join(
+        Config.DataPaths.BASE_DIR, "pcs_product_info.csv"
+    )
+    df_pcs_product_info = pd.read_csv(pcs_product_info_path)
+    df_database = add_pcs_information_to_database(
+        df_database=df_database, df_pcs_product_info=df_pcs_product_info
+    )
     save_database(df_database, output_path)
 
     return df_database
