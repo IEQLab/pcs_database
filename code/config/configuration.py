@@ -22,6 +22,7 @@ class Config:
         CHAMBER_DATA_DIR = os.path.join(RAW_DATA_DIR, "chamber_data")
         CLOTHING_DATA_DIR = os.path.join(RAW_DATA_DIR, "clothing_measurement_data")
         PROCESSED_DATA_DIR = os.path.join(BASE_DIR, "processed_data")
+        METADATA_DIR = os.path.join(BASE_DIR, "metadata")
 
         # Specific files
         METADATA_JSON_FILE = os.path.join(BASE_DIR, "metadata.json")
@@ -51,6 +52,9 @@ class Config:
             mpl.rcParams["font.size"] = cls.FONT_SIZE_MEDIUM
             mpl.rcParams["figure.figsize"] = cls.FIG_SIZE
             # mpl.rcParams["axes.prop_cycle"] = mpl.cycler(color=cls.COLOR_CYCLE)
+
+    class PCSID:
+        SydneyUniversity = list(range(1, 21))  # PCS ID for Sydney University (1-20)
 
 
 # Configure logging
