@@ -12,9 +12,17 @@ def capitalize_first_letter_with_underscores(string):
     return " ".join(word.capitalize() for word in string.replace("_", " ").split())
 
 
-def change_space_to_underscore(string):
+def replace_space_to_underscore(string):
     """Change spaces in a string to underscores"""
     return string.replace(" ", "_")
+
+
+# Change disimal nummers to 2 decimal places in numerical coloums in a DataFrame
+def change_decimal_places(df: pd.DataFrame, decimal_places: int = 2) -> pd.DataFrame:
+    """Change decimal places of numerical columns in a DataFrame"""
+    for col in df.select_dtypes(include=["float64", "int64"]).columns:
+        df[col] = df[col].round(decimal_places)
+    return df
 
 
 @dataclass
