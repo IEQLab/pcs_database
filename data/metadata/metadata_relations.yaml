@@ -17,6 +17,6 @@ experiment_info:
 trial_info:
   primary_key: PCS_ID
   foreign_keys:
-#    clothing_info: C
-    manikin_info: Manikin_ID
     experiment_info: Experiment_ID
+    manikin_info: Manikin_ID
+    clothing_info: Clothing_ID
