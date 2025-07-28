@@ -75,20 +75,25 @@ def add_measurements_to_database(df_database: DataFrame, df_measurements: DataFr
 
 
 # TODO: Can be better implemented with a merge operation
-def add_pcs_information_to_database(
-    df_database: DataFrame, df_pcs_product_info: DataFrame
+def add_trial_metadata_summary_to_database(
+    df_database: DataFrame, df_trial_metadata_summary: DataFrame
 ):
     """
-    Add PCS information to the database based on matching IDs. Overwrites
+    Add trial metadata summary file (ONLY STATIC DATA) to the database based on matching IDs. Overwrites
     only missing values in the database without affecting existing data.
     """
+    # Find common columns between the database and trial metadata summary
+    common_columns = df_database.columns.intersection(df_trial_metadata_summary.columns)
     # Perform a merge on the "ID" column to combine the data
     df_merged = df_database.merge(
-        df_pcs_product_info, on="PCS_ID", how="left", suffixes=("", "_new")
+        df_trial_metadata_summary[common_columns],
+        on="PCS_ID",
+        how="left",
+        suffixes=("", "_new"),
     )
 
     # Loop through columns in df_pcs_product_info to update missing values in df_database
-    for column in df_pcs_product_info.columns:
+    for column in df_trial_metadata_summary.columns:
         if column == "PCS_ID":
             continue
         if column in df_database.columns:
@@ -149,18 +154,12 @@ def create_database():
     df_database = add_measurements_to_database(df_database, df_measurement_results)
 
     # Add PCS product information
-    pcs_product_info_path = os.path.join(
-        Config.DataPaths.BASE_DIR, "pcs_product_info.csv"
+    trial_metadata_summary_path = os.path.join(
+        Config.DataPaths.METADATA_DIR, "combined_trial_metadata.csv"
     )
-    df_pcs_product_info = pd.read_csv(pcs_product_info_path)
-    df_database = add_pcs_information_to_database(
-        df_database=df_database, df_pcs_product_info=df_pcs_product_info
-    )
-
-    # Add clothing data to the database
-    df_clothing_processed = preprocess_clothing_data(df_clothing=df_clothing)
-    df_database = add_clothing_data_to_database(
-        df_database=df_database, df_clothing_processed=df_clothing_processed
+    df_trial_metadata_summary = pd.read_csv(trial_metadata_summary_path)
+    df_database = add_trial_metadata_summary_to_database(
+        df_database=df_database, df_trial_metadata_summary=df_trial_metadata_summary
     )
     save_database(df_database, output_path)
 
