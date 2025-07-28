@@ -1,4 +1,4 @@
-ID,Category,Physical_Effect,Type,Size,Brand,Model_Name,Model_Number,Product_Reference,Availability,Image,Publication,Price_USD,Target_Body,Plug_Power
+PCS_ID,Category,Physical_Effect,Type,Size,Brand,Model_Name,Model_Number,Product_Reference,Availability,Image,Publication,Price_USD,Target_Body,Plug_Power
 1,Cooling,Convective,Desk fan,"12.8D, 12.6W, 5H",Simpeak,S20,S20,https://a.co/d/54m7ADL,Market-ready,ID1_desk_fan_angled.png,,13,Face,3
 2,Cooling,Convective,Desk fan,20D,,Lileng,,,Market-ready,ID2_desk_fan_angled.png,,,Face,5
 3,Cooling,"Convective, Evaporative",Evaporative cooler,"17, 17, 17",Evapolar,evaCHILL,EV-500L,https://www.evapolar.com/products/evachill,Market-ready,ID3_evaporative_cooler_angled.png,,119,Face,7.5
