@@ -1,0 +1,21 @@
+ID,Category,Physical_Effect,Type,Size,Brand,Model_Name,Model_Number,Product_Reference,Availability,Image,Publication,Price_USD,Target_Body,Plug_Power
+1,Cooling,Convective,Desk fan,"12.8D, 12.6W, 5H",Simpeak,S20,S20,https://a.co/d/54m7ADL,Market-ready,ID1_desk_fan_angled.png,,13,Face,3
+2,Cooling,Convective,Desk fan,20D,,Lileng,,,Market-ready,ID2_desk_fan_angled.png,,,Face,5
+3,Cooling,"Convective, Evaporative",Evaporative cooler,"17, 17, 17",Evapolar,evaCHILL,EV-500L,https://www.evapolar.com/products/evachill,Market-ready,ID3_evaporative_cooler_angled.png,,119,Face,7.5
+4,Cooling,"Convective, Evaporative",Evaporative cooler,"9D, 21W, 26H",Quixnova,Quixnova Air Fan,EJ-JHQ01,https://amzn.asia/d/cBzO26O,Market-ready,ID4_evaporative_cooler_angled.png,,22,Face,10
+5,Cooling,Convective,Desk fan,"5.95, 11.3, 15.3",Dyson,Dyson Hot+Cool Jet Focus,,https://www.dyson.com.au/dyson-hot-cool-jet-focus-fan-heater-white-silver,Market-ready,ID5_desk_fan_angled.png,,,Face,
+6,Cooling,Convective,Neck fan,"19.6D, 19.6W, 5.8H",JisuLife,Neck Fan Life3,FA12,https://jisulife.com/en-jp/products/jisulife-bladeless-neck-fan,Market-ready,ID6_neck_fan_front.png,,46,"Neck, Face",5
+7,Cooling,Convective,Handhend fan,"4D, 8.5W, 16.4H",JisuLife,FA20X,20x,,Market-ready,ID7_handheld_fan_angled.png,,,Face,5
+8,Cooling,Convective,Standing fan,"17.8D, 29.8W , 98.3H",Dyson,Dyson Cool tower fan,,https://www.dyson.com.au/dyson-cool-tower-fan-white-silver,Market-ready,ID8_standing_fan_front.png,,,Trunk,56
+9,Cooling,Convective,Standing fan,"20D, 47W, 63H",Sunbeam,,FA8900,https://www.choice.com.au/products/home-and-living/cooling/fans/sunbeam-infinity-oscillating-pedestal-fan-fa8900,Market-ready,ID9_standing_fan_front.png,,111,Trunk,55
+10,Cooling,"Convective, Evaporative",Evaporative cooler,"17, 17, 17",Evapolar,evaCHILL,EV-500L,https://www.evapolar.com/products/evachill,Market-ready,ID10_standing_fan_angled.png,,119,Face,7.5
+11,Cooling,"Convective, Evaporative",Evaporative cooler,"34D, 31W, 75H",De'Longhi,EV Evaporative Coolers,EV250.WH,https://www.delonghi.com/en-au/p/evaporative-coolers-ev250.wh-evaporative-cooler/EV250.WH.html,Market-ready,ID11_evaporative_cooler_angled.png,,164,Trunk,70
+12,Cooling,"Convective, Evaporative",Evaporative cooler,"17, 17, 17",Evapolar,evaCHILL,EV-500L,https://www.evapolar.com/products/evachill,Market-ready,ID12_evaporative_cooler_angled.png,,119,Face,7.5
+13,Heating,"Convective, Evaporative",Evaporative cooler,"9D, 21W, 26H",Quixnova,Quixnova Air Fan,EJ-JHQ01,https://amzn.asia/d/cBzO26O,Market-ready,ID13_standing_fan_angled.png,,22,Face,10
+14,Heating,"Radiant, Conductive",Heating pad,"76, 40, 2",Koreal,,,https://amzn.asia/d/aTK7cbn,Market-ready,ID14_heating_pad_front.png,,38,Back,120
+15,Heating,Radiant,Foot warmer,"135D, 58W, 2.8H",ESSUNTIAL,,WBX01,https://a.co/d/bhC80Ye,Market-ready,ID15_foot_warmer_front.png,,47,Feet,
+16,Heating,Radiant,Radiant heater,"35D, 18W, 35H",Goldair,,GSIR220,https://amzn.asia/d/93reZKG,Market-ready,ID16_halogen_heater_angled.png,,36,Feet,800
+17,Heating,"Radiant, Conductive",Foot warmer,"35.6, 30.5, 7.6",lomitech,,,https://amzn.asia/d/7ZZV0vL,Market-ready,ID17_foot_warmer_angled.png,,33,Feet,24
+18,Heating,"Radiant, Conductive",Foot warmer,"45, 40, 6",Hodeamy,,XJD-JR01,https://a.co/d/cVuk2Xj,Market-ready,ID18_foot_warmer_front.png,,33,Feet,55
+19,Heating,"Radiant, Conductive",Heating desk mat,"33, 80, 0.5",Konohan,,KQ1511,https://a.co/d/dqTjBHN,Market-ready,ID19_desk_mat_front.png,,17,Hand,
+20,Heating,"Radiant, Convective",Fan heater,"20D, 13W, 12H",NEXTNETIC,,HC113,https://amzn.asia/d/56rptSK,Market-ready,ID20_desk_fan_heater_angled.png,,30,Trunk,1200

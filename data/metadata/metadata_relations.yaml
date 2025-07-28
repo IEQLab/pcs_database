@@ -1,0 +1,22 @@
+# This file defines the relationships between different metadata entities in the database.
+# Each entity has a primary key and may have foreign keys referencing other entities.
+# The primary key is used to uniquely identify each record in the entity.
+
+pcs_product_info:
+  primary_key: PCS_ID
+
+clothing_info:
+  primary_key: Clothing_ID
+
+manikin_info:
+  primary_key: Manikin_ID
+
+experiment_info:
+  primary_key: Experiment_ID
+
+trial_info:
+  primary_key: PCS_ID
+  foreign_keys:
+#    clothing_info: C
+    manikin_info: Manikin_ID
+    experiment_info: Experiment_ID
