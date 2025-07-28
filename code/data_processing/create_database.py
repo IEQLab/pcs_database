@@ -5,7 +5,7 @@ This code gets all the nessesarely information from this project directory and f
 import pandas as pd
 import os
 import glob
-
+import utils.utilities as utils
 from pandas.core.interchange.dataframe_protocol import DataFrame
 
 from config.configuration import Config
@@ -84,12 +84,12 @@ def add_pcs_information_to_database(
     """
     # Perform a merge on the "ID" column to combine the data
     df_merged = df_database.merge(
-        df_pcs_product_info, on="ID", how="left", suffixes=("", "_new")
+        df_pcs_product_info, on="PCS_ID", how="left", suffixes=("", "_new")
     )
 
     # Loop through columns in df_pcs_product_info to update missing values in df_database
     for column in df_pcs_product_info.columns:
-        if column == "ID":
+        if column == "PCS_ID":
             continue
         if column in df_database.columns:
             # Update only missing values in the database
@@ -106,6 +106,24 @@ def add_pcs_information_to_database(
     return df_merged
 
 
+# Merge the clothing data into the database
+def add_clothing_data_to_database(
+    df_database: DataFrame, df_clothing_processed: DataFrame
+) -> DataFrame:
+    """Add the single row of clothing data to all rows in the database with IDs 1-20."""
+    # Define the range of IDs to update
+    target_ids = range(1, 21)
+
+    # Add clothing data to the database for the specified IDs
+    for column in df_clothing_processed.columns:
+        if column != "PCS_ID":
+            df_database.loc[df_database["PCS_ID"].isin(target_ids), column] = (
+                df_clothing_processed.iloc[0][column]
+            )
+
+    return df_database
+
+
 def save_database(df_database, output_path):
     """Save the compiled database to a CSV file."""
     df_database.to_csv(output_path, index=False)
@@ -118,20 +136,31 @@ def create_database():
     measurement_results_path = os.path.join(
         Config.DataPaths.PROCESSED_DATA_DIR, "delta_results.csv"
     )
+    clothing_data_path = os.path.join(
+        Config.DataPaths.PROCESSED_DATA_DIR, "clothing_measurement_data.csv"
+    )
     output_path = os.path.join(Config.DataPaths.BASE_DIR, "pcs_database.csv")
 
     # Define the dataframes
-    df_template = load_template(template_path=template_path)
     df_measurement_results = pd.read_csv(measurement_results_path)
+    df_clothing = pd.read_csv(clothing_data_path)
+    df_template = load_template(template_path=template_path)
     df_database = create_empty_database(df_template=df_template)
     df_database = add_measurements_to_database(df_database, df_measurement_results)
 
+    # Add PCS product information
     pcs_product_info_path = os.path.join(
         Config.DataPaths.BASE_DIR, "pcs_product_info.csv"
     )
     df_pcs_product_info = pd.read_csv(pcs_product_info_path)
     df_database = add_pcs_information_to_database(
         df_database=df_database, df_pcs_product_info=df_pcs_product_info
+    )
+
+    # Add clothing data to the database
+    df_clothing_processed = preprocess_clothing_data(df_clothing=df_clothing)
+    df_database = add_clothing_data_to_database(
+        df_database=df_database, df_clothing_processed=df_clothing_processed
     )
     save_database(df_database, output_path)
 

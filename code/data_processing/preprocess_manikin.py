@@ -145,7 +145,7 @@ def extract_info_from_filename(filename):
     parts = filename.split("_")
 
     dict_extracted_info = {
-        "ID": None,
+        "PCS_ID": None,
         "PCS_Name": None,
         "PCS_Level": None,
         "Angle_Horizontal": None,
@@ -158,7 +158,7 @@ def extract_info_from_filename(filename):
         # ID: Extract with regex
         match = re.search(r"ID(\d+)", filename)
         if match:
-            dict_extracted_info["ID"] = int(match.group(1))
+            dict_extracted_info["PCS_ID"] = int(match.group(1))
         else:
             logging.warning(
                 f"[extract_info_from_filename] No valid ID found in: {filename}"
@@ -285,7 +285,7 @@ def add_extracted_info_to_dataframe(df):
         extracted_data.append(
             {
                 **row.to_dict(),  # Add original delta values first
-                "ID": with_pcs_info["ID"],
+                "PCS_ID": with_pcs_info["PCS_ID"],
                 "PCS_Name": with_pcs_info["PCS_Name"],
                 "PCS_Level": with_pcs_info["PCS_Level"],
                 "Angle_Horizontal": with_pcs_info["Angle_Horizontal"],
@@ -300,7 +300,7 @@ def add_extracted_info_to_dataframe(df):
 
     # Reorder columns to ensure extracted info is at the left
     extracted_columns = [
-        "ID",
+        "PCS_ID",
         "PCS_Name",
         "PCS_Level",
         "Angle_Horizontal",
@@ -643,7 +643,9 @@ def main():
 
             # Sort by ID
             delta_results_with_extracted_info = (
-                delta_results_with_extracted_info.sort_values(by="ID", ascending=True)
+                delta_results_with_extracted_info.sort_values(
+                    by="PCS_ID", ascending=True
+                )
             )
 
             # Handle missing values
@@ -660,7 +662,7 @@ def main():
             # Change spaces to underscores in column names
             delta_results_with_extracted_info = (
                 delta_results_with_extracted_info.rename(
-                    columns=lambda x: utils.utilities.change_space_to_underscore(x)
+                    columns=lambda x: utils.utilities.replace_space_to_underscore(x)
                 )
             )
 
