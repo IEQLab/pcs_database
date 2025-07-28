@@ -169,9 +169,9 @@ def extract_info_from_filename(filename):
         dict_extracted_info["PCS_Level"] = parts[3] if len(parts) > 3 else None
 
         for part in parts[4:]:
-            if part.startswith("Angle_Horizontal"):
+            if part.startswith("Angle"):
                 dict_extracted_info["Angle_Horizontal"] = int(part.replace("Angle", ""))
-            elif part.startswith("Distance_Horizontal"):
+            elif part.startswith("Distance"):
                 dict_extracted_info["Distance_Horizontal"] = int(
                     part.replace("Distance", "")
                 )
@@ -279,6 +279,7 @@ def add_extracted_info_to_dataframe(df):
     for _, row in df.iterrows():
         # Extract information from the PCS file name
         with_pcs_info = extract_info_from_filename(row["Condition_with_PCS"])
+        print(with_pcs_info)
 
         # Store extracted data along with original row, placing extracted info first
         extracted_data.append(
