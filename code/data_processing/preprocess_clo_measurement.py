@@ -9,6 +9,7 @@ from preprocess_manikin import (
 import preprocess_chamber
 from calc_clothing_insulation import calc_intrinsic_clothing_insulation
 import utils.utilities as utils
+from merge_body_part_data import merge_specific_columns_data
 
 # Config
 columns_format_file = os.path.join(Config.DataPaths.BASE_DIR, "columns_format.csv")
@@ -179,6 +180,12 @@ def main():
 
     # Preprocess the clothing data
     df_clothing_for_metadata = change_df_format_to_match_metadata(df=df_all)
+    df_clothing_for_metadata = merge_specific_columns_data(
+        df=df_clothing_for_metadata, drop_original_data=True
+    )
+    df_clothing_for_metadata = utils.change_decimal_places(
+        df=df_clothing_for_metadata, decimal_places=2
+    )
     df_clothing_for_metadata.to_csv(
         os.path.join(Config.DataPaths.METADATA_DIR, "clothing_info.csv"),
         index=True,
