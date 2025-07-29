@@ -25,7 +25,7 @@ This is a characteristic of the free hosting service we currently use, which put
     ├── figure # For generated figures
     ├── image # For images of experiment/each PCS
     ├── manuscript
-    ├── presentation~~~~
+    ├── presentation
     ├── reference
     └── out
     ``
