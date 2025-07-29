@@ -1,34 +1,35 @@
 from dataclasses import dataclass
 from enum import Enum
+from typing import List
 
 
 # TODO: need to be checked carefully
 class BodyPartLaura(Enum):
     CROWN = {"name": "Crown", "area": 0.049}
     HEAD = {"name": "Head", "area": 0.09}
-    LEFT_CHEST = {"name": "Left Chest", "area": 0.07}
-    RIGHT_CHEST = {"name": "Right Chest", "area": 0.07}
-    LEFT_BACK = {"name": "Left Back", "area": 0.07}
-    RIGHT_BACK = {"name": "Right Back", "area": 0.07}
+    LEFT_CHEST = {"name": "Left_Chest", "area": 0.07}
+    RIGHT_CHEST = {"name": "Right_Chest", "area": 0.07}
+    LEFT_BACK = {"name": "Left_Back", "area": 0.07}
+    RIGHT_BACK = {"name": "Right_Back", "area": 0.07}
     SIDE_BACK = {
-        "name": "Side Back",
+        "name": "Side_Back",
         "area": 0.11,
     }  # TODO need to be checked where exactly this part is located
     PELVIS = {"name": "Pelvis", "area": 0.055}
-    LEFT_UPPER_ARM = {"name": "Left Upper Arm", "area": 0.074}
-    RIGHT_UPPER_ARM = {"name": "Right Upper Arm", "area": 0.076}
-    LEFT_FOREARM = {"name": "Left Forearm", "area": 0.05}
-    RIGHT_FOREARM = {"name": "Right Forearm", "area": 0.05}
-    LEFT_HAND = {"name": "Left Hand", "area": 0.038}
-    RIGHT_HAND = {"name": "Right Hand", "area": 0.038}
-    LEFT_FRONT_THIGH = {"name": "Left Front Thigh", "area": 0.09}
-    RIGHT_FRONT_THIGH = {"name": "Right Front Thigh", "area": 0.09}
-    LEFT_BACK_THIGH = {"name": "Left Back Thigh", "area": 0.09}
-    RIGHT_BACK_THIGH = {"name": "Right Back Thigh", "area": 0.09}
-    LEFT_LOWER_LEG = {"name": "Left Lower Leg", "area": 0.0975}
-    RIGHT_LOWER_LEG = {"name": "Right Lower Leg", "area": 0.0975}
-    LEFT_FOOT = {"name": "Left Foot", "area": 0.048}
-    RIGHT_FOOT = {"name": "Right Foot", "area": 0.048}
+    LEFT_UPPER_ARM = {"name": "Left_Upper_Arm", "area": 0.074}
+    RIGHT_UPPER_ARM = {"name": "Right_Upper_Arm", "area": 0.076}
+    LEFT_FOREARM = {"name": "Left_Forearm", "area": 0.05}
+    RIGHT_FOREARM = {"name": "Right_Forearm", "area": 0.05}
+    LEFT_HAND = {"name": "Left_Hand", "area": 0.038}
+    RIGHT_HAND = {"name": "Right_Hand", "area": 0.038}
+    LEFT_FRONT_THIGH = {"name": "Left_Front_Thigh", "area": 0.09}
+    RIGHT_FRONT_THIGH = {"name": "Right_Front_Thigh", "area": 0.09}
+    LEFT_BACK_THIGH = {"name": "Left_Back_Thigh", "area": 0.09}
+    RIGHT_BACK_THIGH = {"name": "Right_Back_Thigh", "area": 0.09}
+    LEFT_LOWER_LEG = {"name": "Left_Lower_Leg", "area": 0.0975}
+    RIGHT_LOWER_LEG = {"name": "Right_Lower_Leg", "area": 0.0975}
+    LEFT_FOOT = {"name": "Left_Foot", "area": 0.048}
+    RIGHT_FOOT = {"name": "Right_Foot", "area": 0.048}
 
     # Get the name of the body part
     @property

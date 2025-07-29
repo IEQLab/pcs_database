@@ -110,6 +110,26 @@ class BodyPartLauraOutput:
     Right_Back: str = "Right Back"
 
 
+@dataclass
+class BodyPartDatabaseFormat:
+    Head: str = "Head"
+    Chest: str = "Chest"
+    Back: str = "Back"
+    Pelvis: str = "Pelvis"
+    Left_Upper_Arm: str = "Left Upper Arm"
+    Right_Upper_Arm: str = "Right Upper Arm"
+    Left_Forearm: str = "Left Forearm"
+    Right_Forearm: str = "Right Forearm"
+    Left_Hand: str = "Left Hand"
+    Right_Hand: str = "Right Hand"
+    Left_Thigh: str = "Left Thigh"
+    Right_Thigh: str = "Right Thigh"
+    Left_Lower_Leg: str = "Left Lower Leg"
+    Right_Lower_Leg: str = "Right Lower Leg"
+    Left_Foot: str = "Left Foot"
+    Right_Foot: str = "Right Foot"
+
+
 # Define condition pairs and calculate deltas
 # condition_pairs = [
 #     ("withoutPCS_Ta25", "Daison_Fan_Level2_Ta25"),
