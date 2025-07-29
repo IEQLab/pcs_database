@@ -111,24 +111,6 @@ def add_trial_metadata_summary_to_database(
     return df_merged
 
 
-# Merge the clothing data into the database
-def add_clothing_data_to_database(
-    df_database: DataFrame, df_clothing_processed: DataFrame
-) -> DataFrame:
-    """Add the single row of clothing data to all rows in the database with IDs 1-20."""
-    # Define the range of IDs to update
-    target_ids = range(1, 21)
-
-    # Add clothing data to the database for the specified IDs
-    for column in df_clothing_processed.columns:
-        if column != "PCS_ID":
-            df_database.loc[df_database["PCS_ID"].isin(target_ids), column] = (
-                df_clothing_processed.iloc[0][column]
-            )
-
-    return df_database
-
-
 def save_database(df_database, output_path):
     """Save the compiled database to a CSV file."""
     df_database.to_csv(output_path, index=False)
