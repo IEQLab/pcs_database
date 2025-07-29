@@ -92,5 +92,9 @@ We welcome contributions of sharing your data. The data in this repository are s
 2. **Where the data are stored and published**:  
    The data are stored and published through this GitHub repository, which is managed by the IEQ Lab at the University of Sydney. The repository is publicly accessible.
 
+# Contact
+If you have any questions or requests regarding the PCS database, please contact:
+- **Akihisa Nomoto** (monyo323232@gmail.com)
+
 # Other Information
 There is [an example PCS database](data/pcs_database_example.csv)
