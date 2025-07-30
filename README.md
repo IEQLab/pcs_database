@@ -91,8 +91,11 @@ We welcome contributions of sharing your data. The data in this repository are s
 1. **Who the data are shared with**:  
    The data are shared with the public.
 
-2. **Where the data are stored and published**:  
-   The data are stored and published through this GitHub repository managed by [IEQ Lab at The University of Sydney](https://www.sydney.edu.au/architecture/our-research/research-labs-and-facilities/indoor-environmental-quality-lab.html).
+2. **Where the data are stored**:  
+   The data are stored in this GitHub repository managed by [IEQ Lab at The University of Sydney](https://www.sydney.edu.au/architecture/our-research/research-labs-and-facilities/indoor-environmental-quality-lab.html).
+
+3. **Where the data will be published**:  
+   The data will likely be published in research papers and integrated into a web application hosted by UC Berkeley: [https://abc.cbe.berkeley.edu/](https://abc.cbe.berkeley.edu/).
 
 # Contact
 If you have any questions or requests regarding the PCS database, please contact:
