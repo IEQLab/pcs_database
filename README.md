@@ -10,11 +10,14 @@ The repository contains the data and the related code to generate database as th
 Please note that all the image files are not stored in this repository due to the limited storage of this repository,
 but you can access them at [here](https://unisyd-my.sharepoint.com/:f:/r/personal/akihisa_nomoto_sydney_edu_au/Documents/PCS%20Database?csf=1&web=1&e=QgKj7a) upon request.
 
-We also offer a simple web application for this database, which you can access at https://pcs-database.onrender.com. 
-(Please note that we may change the hosting service in the future.)
+[//]: # (We also offer a simple web application for this database, which you can access at https://pcs-database.onrender.com. )
 
-Each time you start using our service, it may take up to a minute to wake up—just like a sleeping koala 🐨🐨🐨. 
-This is a characteristic of the free hosting service we currently use, which puts applications to sleep when there is no traffic.
+[//]: # (&#40;Please note that we may change the hosting service in the future.&#41;)
+
+[//]: # ()
+[//]: # (Each time you start using our service, it may take up to a minute to wake up—just like a sleeping koala 🐨🐨🐨. )
+
+[//]: # (This is a characteristic of the free hosting service we currently use, which puts applications to sleep when there is no traffic.)
 
     
     ```
