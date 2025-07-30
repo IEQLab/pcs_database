@@ -87,10 +87,10 @@ Schema Description (Generated on 2025-07-09 14:28:57)
 We welcome contributions of sharing your data. The data in this repository are shared under the following conditions:
 
 1. **Who the data are shared with**:  
-   The data are shared with [IEQ Lab at The University of Sydney](https://www.sydney.edu.au/architecture/our-research/research-labs-and-facilities/indoor-environmental-quality-lab.html).
+   The data are shared with the public.
 
 2. **Where the data are stored and published**:  
-   The data are stored and published through this GitHub repository, which is managed by the IEQ Lab at the University of Sydney. The repository is publicly accessible.
+   The data are stored and published through this GitHub repository managed by [IEQ Lab at The University of Sydney](https://www.sydney.edu.au/architecture/our-research/research-labs-and-facilities/indoor-environmental-quality-lab.html).
 
 # Contact
 If you have any questions or requests regarding the PCS database, please contact:
