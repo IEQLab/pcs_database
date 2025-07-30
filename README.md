@@ -1,5 +1,7 @@
 # PCS Database
 
+![pcs_database_graphical_abstract.png](image/pcs_database_graphical_abstract.png)
+
 This repository is for a database of PCS (Personal Comfort System) such as a desk fan and foot warmer. 
 Each PCS cooling/heating effects on the human body was quantified using a thermal manikin in a climate controlled chamber
 at the IEQLab of The University of Sydney.
