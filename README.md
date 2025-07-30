@@ -86,16 +86,16 @@ Schema Description (Generated on 2025-07-09 14:28:57)
 <!-- METADATA_END -->
 
 # Data Sharing Policy
-We welcome contributions of sharing your data. The data in this repository are shared under the following conditions:
+We welcome contributions to this database from external participats. The data in this repository is shared under the following conditions:
 
 1. **Who the data are shared with**:  
-   The data are shared with the public.
+   These repository is public, giving access to general public. Only results from manikin measurements will be part of this repository, human subject data will not be included.
 
 2. **Where the data are stored**:  
    The data are stored in this GitHub repository managed by [IEQ Lab at The University of Sydney](https://www.sydney.edu.au/architecture/our-research/research-labs-and-facilities/indoor-environmental-quality-lab.html).
 
 3. **Where the data will be published**:  
-   The data will likely be published in research papers and integrated into a web application hosted by UC Berkeley: [https://abc.cbe.berkeley.edu/](https://abc.cbe.berkeley.edu/).
+   The data will be published in journal/conference papers and integrated into a web application hosted by UC Berkeley: [https://abc.cbe.berkeley.edu/](https://abc.cbe.berkeley.edu/).
 
 # Contact
 If you have any questions or requests regarding the PCS database, please contact:
