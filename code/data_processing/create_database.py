@@ -117,6 +117,32 @@ def save_database(df_database, output_path):
     print(f"Database created successfully: {output_path}")
 
 
+def combine_dataframes(df_database_sydney_uni, df_database_others):
+    """Combine two DataFrames into one, ensuring that columns match."""
+
+    def _check_columns_match(df1, df2):
+        """Check if the columns of two DataFrames match."""
+        if list(df1.columns) != list(df2.columns):
+            raise ValueError("Column names do not match between the two DataFrames.")
+
+    def _validate_pcs_ids(df_database):
+        """Validate that PCS_IDs in the database are sequential and unique."""
+        if df_database["PCS_ID"].is_unique:
+            if df_database["PCS_ID"].is_monotonic_increasing:
+                print("PCS_IDs are sequential and unique.")
+            else:
+                raise ValueError("PCS_IDs are not in sequential order.")
+        else:
+            raise ValueError("PCS_IDs are not unique.")
+
+    _check_columns_match(df1=df_database_sydney_uni, df2=df_database_others)
+    df_combined = pd.concat(
+        [df_database_sydney_uni, df_database_others], ignore_index=True
+    )
+    _validate_pcs_ids(df_combined)
+    return df_combined
+
+
 def create_database():
     # Define file paths
     template_path = os.path.join(Config.DataPaths.BASE_DIR, "pcs_database_example.csv")
@@ -126,11 +152,13 @@ def create_database():
     clothing_data_path = os.path.join(
         Config.DataPaths.PROCESSED_DATA_DIR, "clothing_measurement_data.csv"
     )
+    others_data_path_tmp = r"/data/external"
     output_path = os.path.join(Config.DataPaths.BASE_DIR, "pcs_database.csv")
 
     # Define the dataframes
     df_measurement_results = pd.read_csv(measurement_results_path)
     df_clothing = pd.read_csv(clothing_data_path)
+    df_database_others = pd.read_csv(others_data_path_tmp)
     df_template = load_template(template_path=template_path)
     df_database = create_empty_database(df_template=df_template)
     df_database = add_measurements_to_database(df_database, df_measurement_results)
@@ -142,6 +170,9 @@ def create_database():
     df_trial_metadata_summary = pd.read_csv(trial_metadata_summary_path)
     df_database = add_trial_metadata_summary_to_database(
         df_database=df_database, df_trial_metadata_summary=df_trial_metadata_summary
+    )
+    df_database = combine_dataframes(
+        df_database_sydney_uni=df_database, df_database_others=df_database_others
     )
     save_database(df_database, output_path)
 

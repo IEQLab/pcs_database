@@ -1,2 +1,0 @@
-2025-02-17 to 2025-02-XX
-The RH sensor became weird. It reads 10%, or 20%. During this period, different RH sensor is being used.

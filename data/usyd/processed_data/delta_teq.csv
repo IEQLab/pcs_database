@@ -1,0 +1,7 @@
+Delta_Teq_All,Delta_Teq_Group A,Delta_Teq_Group B,Delta_Teq_Crown,Delta_Teq_Head,Delta_Teq_Left Chest,Delta_Teq_Right Chest,Delta_Teq_Left Back,Delta_Teq_Right Back,Delta_Teq_Abdomen,Delta_Teq_Buttocks,Delta_Teq_Left Upper Arm,Delta_Teq_Right Upper Arm,Delta_Teq_Left Forearm,Delta_Teq_Right Forearm,Delta_Teq_Left Hand,Delta_Teq_Right Hand,Delta_Teq_Left Front Thigh,Delta_Teq_Right Front Thigh,Delta_Teq_Left Back Thigh,Delta_Teq_Right Back Thigh,Delta_Teq_Left Lower Leg,Delta_Teq_Right Lower Leg,Delta_Teq_Left Foot,Delta_Teq_Right Foot,Condition1,Condition2
+-0.2,0.0,0.0,-1.3,-0.48,-0.2,-0.2,0.0,-0.1,0.0,0.0,-0.1,0.0,0.0,-0.1,0.1,0.0,-0.1,-0.08,0.0,-0.1,0.0,0.0,-0.07,0.0,withoutPCS_Ta25,Daison_Fan_Level2_Ta25
+-0.1,0.0,0.0,-1.7,-0.68,-0.2,-0.2,0.0,-0.1,0.0,0.0,-0.1,0.0,0.0,0.0,0.1,0.0,-0.1,0.0,0.0,0.0,0.0,0.1,0.0,0.0,withoutPCS_Ta25,Daison_Fan_Level4_Ta25
+-0.2,0.0,0.0,-2.1,-0.98,-0.2,-0.2,-0.1,-0.1,0.0,0.1,-0.2,0.0,0.07,0.0,0.1,0.0,0.0,0.0,0.0,0.0,0.08,0.1,0.0,0.07,withoutPCS_Ta25,Daison_Fan_Level6_Ta25
+-0.13,0.0,0.0,-1.5,-0.38,-0.1,-0.1,0.0,-0.1,0.0,0.0,-0.1,0.0,0.0,-0.1,0.0,0.0,-0.1,-0.1,0.0,-0.1,0.0,0.0,-0.1,-0.1,withoutPCS_Ta25,Neck_Fan_Level1_Ta25
+-0.2,0.0,0.0,-2.0,-0.48,-0.1,-0.17,0.0,0.0,0.0,0.1,-0.1,0.0,0.0,-0.02,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,-0.1,0.0,withoutPCS_Ta25,Neck_Fan_Level3_Ta25
+-0.1,0.0,0.0,-2.1,-0.58,-0.1,-0.1,0.1,0.0,0.1,0.1,0.0,0.0,0.1,0.0,0.1,0.1,0.0,0.0,0.1,0.0,0.07,0.1,0.0,0.0,withoutPCS_Ta25,Neck_Fan_Level4_Ta25
