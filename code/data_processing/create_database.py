@@ -121,8 +121,20 @@ def combine_dataframes(df_database_sydney_uni, df_database_others):
     """Combine two DataFrames into one, ensuring that columns match."""
 
     def _check_columns_match(df1, df2):
-        """Check if the columns of two DataFrames match."""
-        if list(df1.columns) != list(df2.columns):
+        """
+        Check if column names match between two DataFrames.
+        If they don't match, print the mismatched columns and raise a ValueError.
+        """
+        columns_df1 = set(df1.columns)
+        columns_df2 = set(df2.columns)
+
+        if columns_df1 != columns_df2:
+            missing_in_df1 = columns_df2 - columns_df1
+            missing_in_df2 = columns_df1 - columns_df2
+
+            print("Columns missing in df1:", missing_in_df1)
+            print("Columns missing in df2:", missing_in_df2)
+
             raise ValueError("Column names do not match between the two DataFrames.")
 
     def _validate_pcs_ids(df_database):
@@ -152,7 +164,9 @@ def create_database():
     clothing_data_path = os.path.join(
         Config.DataPaths.PROCESSED_DATA_DIR, "clothing_measurement_data.csv"
     )
-    others_data_path_tmp = r"/data/external"
+    others_data_path_tmp = os.path.join(
+        Config.DataPaths.EXTERNAL_DIR, "pcs_database_external.csv"
+    )
     output_path = os.path.join(Config.DataPaths.BASE_DIR, "pcs_database.csv")
 
     # Define the dataframes
