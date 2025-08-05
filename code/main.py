@@ -1,5 +1,5 @@
 import os
-from visualization import plot_pcs_effects
+from visualization import plot_overall_pcs_effects
 from config.configuration import Config
 from data_processing import preprocess_manikin, database_columns_names
 

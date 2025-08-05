@@ -105,12 +105,12 @@ def plot_dual_delta_p_with_theoretical_fit(
     x_vals = df_filtered[Columns.PCS_Ta].values
     y_vals = df_filtered[body_part].values
 
-    # Filter out NaN and Inf values
-    valid_indices = (
-        ~np.isnan(x_vals) & ~np.isnan(y_vals) & ~np.isinf(x_vals) & ~np.isinf(y_vals)
-    )
-    x_vals = x_vals[valid_indices]
-    y_vals = y_vals[valid_indices]
+    # # Filter out NaN and Inf values
+    # valid_indices = (
+    #     ~np.isnan(x_vals) & ~np.isnan(y_vals) & ~np.isinf(x_vals) & ~np.isinf(y_vals)
+    # )
+    # x_vals = x_vals[valid_indices]
+    # y_vals = y_vals[valid_indices]
 
     all_y_values = np.concatenate([y_22, y_25, y_vals])
     all_y_values = all_y_values[~np.isnan(all_y_values)]
