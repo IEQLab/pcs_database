@@ -9,15 +9,15 @@ This report summarizes the latest progress and findings from this project.
 
 ---
 
-## 2. Progress
+## Data Analysis
+### Data Preparation
+The dataset used for this analysis is the August dataset, which contains measurements of various personal comfort 
+systems
 
-### 2.1 Data Integration
-- Merged **University of Sydney** data with external contributions
-- Checked continuity of `PCS_ID` — ✅ No missing IDs found
-- Temporary file generated:  
-  `pcsdb_university_of_sydney_clean_20250804.csv`
-
-### 2.2 Data Visualization
+### Data Visualization
+#### PCS's heating/cooling impact to the whole body
+* Low, Mid, and High PCS settings were shown.
+* 
 ![delta_p_plot_ID20.svg](../figure/delta_p_plot_ID20.svg)
 *Figure 1. Average temperature trend for August dataset.*
 
