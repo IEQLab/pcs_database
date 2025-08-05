@@ -115,6 +115,61 @@ def calculate_to(df: pd.DataFrame) -> pd.DataFrame:
 
     return df
 
+
+def check_and_fix_rh_values(df, start_date=None, end_date=None, rh_min=0, rh_max=100, replacement_value=50):
+    """
+    Check and fix abnormal RH values within specified date range and RH value range.
+    
+    Parameters:
+    df: DataFrame with datetime index
+    start_date: Start date for checking (format: "YYYY-MM-DD")
+    end_date: End date for checking (format: "YYYY-MM-DD")  
+    rh_min: Minimum acceptable RH value (default: 0)
+    rh_max: Maximum acceptable RH value (default: 100)
+    replacement_value: Value to replace abnormal values with (default: 50), or None for NaN
+    
+    Returns:
+    DataFrame with corrected RH values
+    """
+    if "RH" not in df.columns:
+        logging.warning("RH column not found in DataFrame.")
+        return df
+    
+    df_copy = df.copy()
+    
+    # Filter by date range if specified
+    mask = pd.Series(True, index=df_copy.index)
+    if start_date is not None:
+        mask = mask & (df_copy.index >= start_date)
+    if end_date is not None:
+        mask = mask & (df_copy.index <= end_date)
+    
+    # Find abnormal RH values within the date range
+    abnormal_mask = mask & ((df_copy["RH"] < rh_min) | (df_copy["RH"] > rh_max) | df_copy["RH"].isna())
+    
+    # Count abnormal values
+    abnormal_count = abnormal_mask.sum()
+    
+    if abnormal_count > 0:
+        # Replace abnormal values
+        if replacement_value is None:
+            df_copy.loc[abnormal_mask, "RH"] = pd.NA
+            logging.info(f"Found and replaced {abnormal_count} abnormal RH values with NaN")
+        else:
+            df_copy.loc[abnormal_mask, "RH"] = replacement_value
+            logging.info(f"Found and replaced {abnormal_count} abnormal RH values with {replacement_value}")
+        
+        # Log date range info
+        if start_date or end_date:
+            date_info = f" within date range {start_date} to {end_date}"
+        else:
+            date_info = ""
+        logging.info(f"RH value range check: {rh_min}% <= RH <= {rh_max}%{date_info}")
+    else:
+        logging.info("No abnormal RH values found.")
+    
+    return df_copy
+
 def reorder_columns(df):
     """Reorder columns for better readability."""
     column_order = ["Ta", "Tg", "Twb", "To", "MRT", "RH", "V", "WBGT", "ET"]
@@ -143,6 +198,19 @@ def main():
     df = preprocess_data(df=df)
     df = find_and_rename_columns(df=df)
     df = rename_columns(df=df)
+    
+    # Check and fix abnormal RH values
+    # Example: Check RH values between 2025-02-01 and 2025-05-31, 
+    # replace values outside 10-90% range with 50%
+    df = check_and_fix_rh_values(
+        df=df, 
+        start_date="2025-02-01", 
+        end_date="2025-05-31", 
+        rh_min=10, 
+        rh_max=90, 
+        replacement_value=50  # or None for NaN
+    )
+    
     df = calculate_mrt(df=df)
     df = calculate_to(df=df)
     df = reorder_columns(df=df)
