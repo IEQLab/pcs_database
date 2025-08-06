@@ -21,7 +21,7 @@ class Config:
         EXTERNAL_DIR = os.path.join(BASE_DIR, "external")
         RAW_DATA_DIR = os.path.join(USYD_DIR, "raw data")
         MANIKIN_DATA_DIR = os.path.join(USYD_DIR, "manikin_data")
-        CHAMBER_DATA_DIR = os.path.join(USYD_DIR, "chamber_data")
+        CHAMBER_DATA_DIR = os.path.join(RAW_DATA_DIR, "chamber_data")
         CLOTHING_DATA_DIR = os.path.join(USYD_DIR, "clothing_measurement_data")
         PROCESSED_DATA_DIR = os.path.join(USYD_DIR, "processed_data")
         METADATA_DIR = os.path.join(BASE_DIR, "metadata")

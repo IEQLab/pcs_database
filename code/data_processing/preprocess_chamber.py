@@ -116,9 +116,13 @@ def calculate_to(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def check_and_fix_rh_values(df, start_date=None, end_date=None, rh_min=0, rh_max=100, replacement_value=50):
+def check_and_fix_rh_values(df: pd.DataFrame, start_date=None, end_date=None, rh_min: float = 0, rh_max: float = 100, replacement_value: float = 50):
     """
-    Check and fix abnormal RH values within specified date range and RH value range.
+    [IMPORTANT] Sometimes measured RH values were abnormal like 10% and 70% after a minute or two
+    because of the error of measurement equipment.
+    This happened for a period of time.
+
+    This function checks and fixes abnormal RH values within a specified date range and RH value range.
     
     Parameters:
     df: DataFrame with datetime index
@@ -144,29 +148,63 @@ def check_and_fix_rh_values(df, start_date=None, end_date=None, rh_min=0, rh_max
     if end_date is not None:
         mask = mask & (df_copy.index <= end_date)
     
+    # Count total data points in the target range
+    total_points_in_range = mask.sum()
+    
     # Find abnormal RH values within the date range
     abnormal_mask = mask & ((df_copy["RH"] < rh_min) | (df_copy["RH"] > rh_max) | df_copy["RH"].isna())
     
     # Count abnormal values
     abnormal_count = abnormal_mask.sum()
     
+    # Calculate statistics
+    valid_rh_mask = mask & df_copy["RH"].notna() & (df_copy["RH"] >= rh_min) & (df_copy["RH"] <= rh_max)
+    valid_count = valid_rh_mask.sum()
+    
+    # Log processing information
+    if start_date or end_date:
+        date_info = f" within date range {start_date} to {end_date}"
+    else:
+        date_info = ""
+    
+    log_message = f"RH data processing summary{date_info}:"
+    logging.info(log_message)
+    print(log_message)  # Also print to console
+    
+    log_message = f"  - Total data points in range: {total_points_in_range}"
+    logging.info(log_message)
+    print(log_message)
+    
+    log_message = f"  - Valid RH values ({rh_min}% - {rh_max}%): {valid_count}"
+    logging.info(log_message)
+    print(log_message)
+    
+    log_message = f"  - Abnormal RH values found: {abnormal_count}"
+    logging.info(log_message)
+    print(log_message)
+    
+    if total_points_in_range > 0:
+        abnormal_percentage = (abnormal_count / total_points_in_range) * 100
+        log_message = f"  - Abnormal data percentage: {abnormal_percentage:.2f}%"
+        logging.info(log_message)
+        print(log_message)
+    
     if abnormal_count > 0:
         # Replace abnormal values
         if replacement_value is None:
             df_copy.loc[abnormal_mask, "RH"] = pd.NA
-            logging.info(f"Found and replaced {abnormal_count} abnormal RH values with NaN")
+            log_message = f"  - Action: Replaced {abnormal_count} abnormal RH values with NaN"
+            logging.info(log_message)
+            print(log_message)
         else:
             df_copy.loc[abnormal_mask, "RH"] = replacement_value
-            logging.info(f"Found and replaced {abnormal_count} abnormal RH values with {replacement_value}")
-        
-        # Log date range info
-        if start_date or end_date:
-            date_info = f" within date range {start_date} to {end_date}"
-        else:
-            date_info = ""
-        logging.info(f"RH value range check: {rh_min}% <= RH <= {rh_max}%{date_info}")
+            log_message = f"  - Action: Replaced {abnormal_count} abnormal RH values with {replacement_value}%"
+            logging.info(log_message)
+            print(log_message)
     else:
-        logging.info("No abnormal RH values found.")
+        log_message = "  - Action: No replacement needed"
+        logging.info(log_message)
+        print(log_message)
     
     return df_copy
 
@@ -200,15 +238,14 @@ def main():
     df = rename_columns(df=df)
     
     # Check and fix abnormal RH values
-    # Example: Check RH values between 2025-02-01 and 2025-05-31, 
-    # replace values outside 10-90% range with 50%
+    # replace values outside 30-80% range with None
     df = check_and_fix_rh_values(
         df=df, 
         start_date="2025-02-01", 
         end_date="2025-05-31", 
-        rh_min=10, 
-        rh_max=90, 
-        replacement_value=50  # or None for NaN
+        rh_min=30, 
+        rh_max=80, 
+        replacement_value=None # or None for NaN
     )
     
     df = calculate_mrt(df=df)
