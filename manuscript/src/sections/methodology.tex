@@ -1,1 +1,46 @@
 \section{Methodology}\label{sec:methodology}
+
+\subsection{Experimental Setup}
+The personal comfort system (PCS) performance evaluation was conducted using a thermal manikin in a controlled environmental chamber at The University of Sydney. 
+The experimental setup consisted of the following components:
+
+\subsection{Data Collection and Processing}
+
+\subsubsection{Thermal Measurements}
+Heat flux data were collected from each body segment at 1-minute intervals using calibrated heat flux sensors. The equivalent temperature for each body part was calculated using the formula:
+
+\begin{equation}
+T_{eq} = T_{skin} - \frac{q}{h_{total}}
+\label{eq:equivalent_temp}
+\end{equation}
+
+where $T_{eq}$ is the equivalent temperature, $T_{skin}$ is the skin temperature, $q$ is the heat flux, and $h_{total}$ is the total heat transfer coefficient.
+
+\subsubsection{Performance Metrics}
+The cooling effectiveness of each PCS device was quantified using several key metrics:
+
+\begin{itemize}
+    \item \textbf{Delta equivalent temperature ($\Delta T_{eq}$):} The difference in equivalent temperature between baseline and PCS conditions
+    \item \textbf{Power efficiency:} Cooling effectiveness per watt of power consumption ($^\circ$C/W)
+    \item \textbf{Heat transfer coefficient change ($\Delta h$):} Modification in heat transfer due to PCS operation
+\end{itemize}
+
+\subsection{Database Development}
+A comprehensive database was developed to store and analyze the collected data:
+
+\begin{enumerate}
+    \item \textbf{Data validation:} Automated quality checks for anomalous readings and measurement consistency
+    \item \textbf{Standardization:} All measurements normalized to standard conditions for comparability
+    \item \textbf{Access interface:} Python-based API for efficient data retrieval and analysis
+    \item \textbf{Documentation:} Complete metadata including device specifications, test conditions, and measurement uncertainties
+\end{enumerate}
+
+\subsection{Statistical Analysis}
+Statistical analysis was performed to assess the significance of cooling effects and identify patterns in PCS performance:
+
+\begin{itemize}
+    \item Descriptive statistics for all measured parameters
+    \item Analysis of variance (ANOVA) to compare performance across different PCS types
+    \item Correlation analysis between power consumption and cooling effectiveness
+    \item Uncertainty analysis following ISO guidelines for thermal measurements
+\end{itemize}
