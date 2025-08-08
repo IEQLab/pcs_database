@@ -49,16 +49,16 @@ from typing import Dict, List, Optional, Any
 try:
     from .config.configuration import Config
     from .data_processing.calc_equivalent_temperature import (
-        calculate_total_heat_transfer_coefficient,
-        calculate_delta_total_heat_transfer_coefficient_by_pcs,
-        calculate_heat_transfer_by_pcs
+        calculate_h_total,
+        calculate_delta_h_total,
+        calculate_delta_q_skin
     )
 except ImportError:
     from config.configuration import Config
     from data_processing.calc_equivalent_temperature import (
-        calculate_total_heat_transfer_coefficient,
-        calculate_delta_total_heat_transfer_coefficient_by_pcs,
-        calculate_heat_transfer_by_pcs
+        calculate_h_total,
+        calculate_delta_h_total,
+        calculate_delta_q_skin
     )
 
 
@@ -359,20 +359,20 @@ class PCSDevice:
         """
         try:
             # Calculate baseline heat transfer coefficient
-            h_baseline = calculate_total_heat_transfer_coefficient(
+            h_baseline = calculate_h_total(
                 q_skin=self.baseline_p_all,
                 t_skin=34.0,  # Assumed skin temperature
                 t_o=self.baseline_ta  # Using air temperature as approximation
             )
             
             # Calculate PCS heat transfer coefficient
-            h_pcs = calculate_total_heat_transfer_coefficient(
+            h_pcs = calculate_h_total(
                 q_skin=self.pcs_p_all,
                 t_skin=34.0,
                 t_o=self.pcs_ta
             )
             
-            return calculate_delta_total_heat_transfer_coefficient_by_pcs(h_pcs, h_baseline)
+            return calculate_delta_h_total(h_pcs, h_baseline)
         except (ValueError, ZeroDivisionError):
             return 0.0
     
