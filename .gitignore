@@ -7,6 +7,46 @@ __pycache__/
 
 # Image
 * dng
+# Generated figures and plots (exclude from version control)
+figure/
+*.png
+*.svg
+*.pdf
+*.jpg
+*.jpeg
+*.gif
+*.bmp
+*.tiff
+*.eps
+*.ps
+figures/
+# *.png
+# *.svg
+# *.pdf
+# *.jpg
+# *.jpeg
+# *.gif
+# *.bmp
+# *.tiff
+# *.eps
+# *.ps
+
+# Generated data files (optional - uncomment if you don't want to track processed data)
+# data/usyd/processed_data/
+# data/pcs_database.csv
+
+# Jupyter Notebook outputs
+*.ipynb_checkpoints/
+
+# VS Code settings (optional)
+.vscode/
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
 
 # C extensions
 *.so
