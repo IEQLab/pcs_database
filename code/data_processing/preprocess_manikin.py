@@ -1,4 +1,5 @@
 import os
+import sys
 import logging
 import numpy as np
 import pandas as pd
@@ -6,8 +7,17 @@ import chardet
 import re
 from collections import defaultdict
 from dataclasses import asdict
-import data_processing.database_columns_names
-import utils.utilities
+
+# Add the project root directory to sys.path
+project_root = os.path.join(os.path.dirname(__file__), '..', '..')
+sys.path.insert(0, project_root)
+
+# Add the code directory to sys.path
+code_dir = os.path.join(os.path.dirname(__file__), '..')
+sys.path.insert(0, code_dir)
+
+import data_processing.database_columns_names as database_columns_names
+import utils.utilities as utilities
 from data_processing import calc_equivalent_temperature
 from data_processing import preprocess_chamber
 from config.configuration import Config
@@ -382,8 +392,8 @@ def reorder_columns(df):
     Ensures that 'Reference_time' is preserved.
     """
     # Generate ordered list of columns based on body parts
-    new_columns_list = data_processing.database_columns_names.generate_columns(
-        body_parts=utils.utilities.BodyPart
+    new_columns_list = database_columns_names.generate_columns(
+        body_parts=utilities.BodyPart
     )
 
     logging.info(f"new_columns_list: {new_columns_list}")
@@ -470,7 +480,11 @@ def apply_htc_and_teq_calculation(
 
     # If no specific body parts are provided, use the default body part list
     if body_parts is None:
-        body_parts = list(asdict(utils.utilities.BodyPart()).values())
+        body_parts = list(asdict(utilities.BodyPart()).values())
+    
+    # Add "All" (whole body) at the beginning of the body parts list
+    if "All" not in body_parts:
+        body_parts = ["All"] + body_parts
 
     # Dictionary to temporarily store all new columns
     # This avoids WARNING to repeatedly modify the DataFrame during the loop,
@@ -486,19 +500,17 @@ def apply_htc_and_teq_calculation(
         pcs_ht = f"PCS_ht_{part}"
         base_ht = f"Baseline_ht_{part}"
         delta_ht = f"Delta_ht_{part}"
-        pcs_teq = f"PCS_Teq_{part}"
-        base_teq = f"Baseline_Teq_{part}"
         delta_teq = f"Delta_Teq_{part}"
 
         # Compute total heat transfer coefficient (htc) for PCS and Baseline
         new_cols[pcs_ht] = df.apply(
-            lambda row: calc_equivalent_temperature.calculate_total_heat_transfer_coefficient(
+            lambda row: calc_equivalent_temperature.calculate_h_total(
                 q_skin=row[q_pcs], t_skin=row[tsk_pcs], t_o=row[to_col_pcs]
             ),
             axis=1,
         )
         new_cols[base_ht] = df.apply(
-            lambda row: calc_equivalent_temperature.calculate_total_heat_transfer_coefficient(
+            lambda row: calc_equivalent_temperature.calculate_h_total(
                 q_skin=row[q_base], t_skin=row[tsk_base], t_o=row[to_col_base]
             ),
             axis=1,
@@ -506,23 +518,12 @@ def apply_htc_and_teq_calculation(
         new_cols[delta_ht] = new_cols[pcs_ht] - new_cols[base_ht]
 
         # Calculate Teq using pre-computed HTC values
-        new_cols[pcs_teq] = df.apply(
-            lambda row: (
-                row[tsk_pcs] - row[q_pcs] / new_cols[pcs_ht][row.name]
-                if new_cols[pcs_ht][row.name] != 0
-                else np.nan
+        new_cols[delta_teq] = df.apply(
+            lambda row: calc_equivalent_temperature.calculate_delta_equivalent_temperature(
+                q_skin_with_pcs=row[q_pcs], q_skin_without_pcs=row[q_base], h_total_without_pcs=new_cols[base_ht][row.name]
             ),
             axis=1,
         )
-        new_cols[base_teq] = df.apply(
-            lambda row: (
-                row[tsk_base] - row[q_base] / new_cols[base_ht][row.name]
-                if new_cols[base_ht][row.name] != 0
-                else np.nan
-            ),
-            axis=1,
-        )
-        new_cols[delta_teq] = new_cols[pcs_teq] - new_cols[base_teq]
 
     df = pd.concat([df, pd.DataFrame(new_cols, index=df.index)], axis=1)
 
@@ -534,7 +535,7 @@ def reorder_final_columns(df: pd.DataFrame) -> pd.DataFrame:
     Reorder final DataFrame columns in logical sequence:
     Reference info → environment → P/Tsk/ht/Teq (Delta → PCS → Baseline)
     """
-    body_parts = list(asdict(utils.utilities.BodyPartDatabaseFormat()).values())
+    body_parts = list(asdict(utilities.BodyPartDatabaseFormat()).values())
 
     # Step 1: Base information (always at the front)
     base_cols = ["Reference_time", "Condition_without_PCS", "Condition_with_PCS"]
@@ -666,12 +667,17 @@ def main():
             # Change spaces to underscores in column names
             delta_results_with_extracted_info = (
                 delta_results_with_extracted_info.rename(
-                    columns=lambda x: utils.utilities.replace_space_to_underscore(x)
+                    columns=lambda x: utilities.replace_space_to_underscore(x)
                 )
             )
 
             delta_results_with_extracted_info = merge_specific_columns_data(
                 df=delta_results_with_extracted_info, drop_original_data=True
+            )
+
+            delta_results_with_extracted_info = utilities.change_decimal_places(
+                df=delta_results_with_extracted_info,
+                decimal_places=2
             )
 
             file_name_to_save = os.path.join(
