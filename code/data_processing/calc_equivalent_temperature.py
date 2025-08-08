@@ -9,10 +9,10 @@ def calculate_t_eq(q_skin, t_skin, h_total):
     return t_skin - (q_skin / h_total)
 
 def calculate_delta_h_total(h_total_with_pcs, h_total_without_pcs):
-    return h_total_with_pcs - h_total_without_pcs
+    return h_total_without_pcs - h_total_with_pcs
 
 def calculate_delta_q_skin(q_skin_with_pcs, q_skin_without_pcs):
-    return q_skin_with_pcs - q_skin_without_pcs
+    return q_skin_without_pcs - q_skin_with_pcs
 
 def calculate_delta_equivalent_temperature(q_skin_with_pcs, q_skin_without_pcs, h_total_without_pcs):
     delta_q = calculate_delta_q_skin(q_skin_with_pcs, q_skin_without_pcs)
