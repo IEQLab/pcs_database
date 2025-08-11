@@ -50,19 +50,44 @@ def _compute_mid_min_max_from_numeric_levels(df_device: pd.DataFrame) -> dict:
     levels = level_medians.index.to_list()
     L = len(levels)
 
+    show_range = True
+    point_level = None
+
     if L == 1:
+        # Single level: plot point only, no range
         mid_effect = float(level_medians.iloc[0])
-    elif L % 2 == 1:
-        mid_effect = float(level_medians.iloc[L // 2])
+        show_range = False
+        point_level = float(levels[0])
+    elif L == 2:
+        # Two levels: use the smaller effect as point, show range to larger effect
+        low_med = float(level_medians.iloc[0])
+        high_med = float(level_medians.iloc[1])
+        if low_med <= high_med:
+            # Normal case: Level 0 ≤ Level 1
+            mid_effect = low_med
+            point_level = float(levels[0])
+        else:
+            # Inverted case: Level 0 > Level 1 (e.g., ID20)
+            mid_effect = high_med
+            point_level = float(levels[1])
     else:
-        mid_effect = float((level_medians.iloc[L // 2 - 1] + level_medians.iloc[L // 2]) / 2.0)
+        # 3+ levels: standard mid logic
+        if L % 2 == 1:
+            mid_effect = float(level_medians.iloc[L // 2])
+            point_level = float(levels[L // 2])
+        else:
+            mid_effect = float((level_medians.iloc[L // 2 - 1] + level_medians.iloc[L // 2]) / 2.0)
+            point_level = float((levels[L // 2 - 1] + levels[L // 2]) / 2.0)
 
     return {
-        "median": mid_effect,
+        "median": float(mid_effect),
         "min": float(level_medians.min()),
         "max": float(level_medians.max()),
         "used_levels": levels,
-        "policy": "mid_level_range",
+        "policy": "mid_level_range_L1L2_handling",
+        "n_levels": L,
+        "show_range": show_range,
+        "point_level": point_level,
     }
 
 
@@ -83,6 +108,14 @@ def plot_overall_pcs_effects():
     )
     df = pd.read_csv(file_path)
     
+    # Load device category mapping (Cooling / Heating) from metadata
+    try:
+        meta_path = os.path.join(Config.DataPaths.METADATA_DIR, "pcs_product_info.csv")
+        df_meta = pd.read_csv(meta_path)
+        category_map = df_meta.set_index("PCS_ID")["Category"].to_dict()
+    except Exception:
+        category_map = {}
+    
     # Filter for ~25°C conditions (24-26°C range)
     df_25c = df[(df['Baseline_Ta'] >= 24) & (df['Baseline_Ta'] <= 26)].copy()
     
@@ -92,6 +125,62 @@ def plot_overall_pcs_effects():
         return
 
     print(f"Found {len(df_25c)} records in 24-26°C range")
+
+    # Quick validation helper: per-device level medians and mid/min/max comparisons
+    def _validate_device(pcs_id: int, df_device: pd.DataFrame):
+        sub = df_device[["PCS_Level", "Delta_Teq_All"]].dropna()
+        level_medians = sub.groupby("PCS_Level")["Delta_Teq_All"].median().sort_index()
+        levels = level_medians.index.to_list()
+        vals = level_medians.values.tolist()
+        L = len(levels)
+        if L == 0:
+            return None
+        if L == 1:
+            mid = float(vals[0])
+        elif L % 2 == 1:
+            mid = float(vals[L // 2])
+        else:
+            mid = float((vals[L // 2 - 1] + vals[L // 2]) / 2.0)
+        vmin = float(np.min(vals))
+        vmax = float(np.max(vals))
+        n_points = len(sub)
+        level_counts = sub.groupby("PCS_Level").size().to_dict()
+        return {
+            "PCS_ID": pcs_id,
+            "n_levels": L,
+            "n_points": n_points,
+            "levels": levels,
+            "level_medians": vals,
+            "mid": round(mid, 3),
+            "min": round(vmin, 3),
+            "max": round(vmax, 3),
+            "mid_is_min": abs(mid - vmin) < 1e-9,
+            "mid_is_max": abs(mid - vmax) < 1e-9,
+            "level_counts": level_counts,
+        }
+
+    # Validate specific IDs of interest and ensure each device has at least 3 unique levels
+    to_check = [3, 6, 12, 14]
+    print("\nValidation snapshot (IDs: 3, 6, 12, 14):")
+    for pid in to_check:
+        dev = df_25c[df_25c["PCS_ID"] == pid]
+        rep = _validate_device(pid, dev)
+        if rep:
+            print(rep)
+        else:
+            print({"PCS_ID": pid, "note": "no data in range"})
+
+    print("\nPer-device checks (n_levels >= 3 recommended):")
+    issues = []
+    for pid in sorted(df_25c["PCS_ID"].unique()):
+        rep = _validate_device(pid, df_25c[df_25c["PCS_ID"] == pid])
+        if rep:
+            if rep["n_levels"] < 3:
+                issues.append((pid, rep["n_levels"]))
+    if issues:
+        print("Devices with fewer than 3 unique levels:", issues)
+    else:
+        print("All devices have at least 3 unique levels in this range.")
 
     # For each PCS_ID, calculate statistics using the selected policy
     pcs_stats = []
@@ -121,17 +210,30 @@ def plot_overall_pcs_effects():
         median_val = row['median']
         min_val = row['min']
         max_val = row['max']
-        
-        # Plot range as horizontal line
-        ax.plot([min_val, max_val], [y_pos, y_pos], 'k-', alpha=0.6, linewidth=2)
-        
-        # Plot median as circle
-        color = 'blue' if median_val < 0 else 'red'
+        n_levels = int(row.get('n_levels', 3))
+        show_range = bool(row.get('show_range', True))
+
+        # Plot range as horizontal line (only if we have >=2 levels)
+        if show_range:
+            ax.plot([min_val, max_val], [y_pos, y_pos], 'k-', alpha=0.6, linewidth=2)
+
+        # Plot median as circle colored by corrected Category rule (Cooling=blue, Heating=red)
+        # Correct rule: IDs 1–13 => Cooling, IDs >=14 => Heating
+        pid = int(row['PCS_ID'])
+        category = 'Cooling' if pid <= 13 else 'Heating'
+        color = 'blue' if category == 'Cooling' else 'red'
         ax.plot(median_val, y_pos, 'o', color=color, markersize=8, markeredgecolor='black', markeredgewidth=1)
-        
-        # Plot min/max as vertical bars
-        ax.plot([min_val, min_val], [y_pos-0.15, y_pos+0.15], 'k-', linewidth=2)
-        ax.plot([max_val, max_val], [y_pos-0.15, y_pos+0.15], 'k-', linewidth=2)
+
+        # Plot endpoint bars
+        if show_range:
+            if n_levels == 2:
+                # For two levels, draw only the Max-end bar if it differs from the Low level
+                if not np.isclose(median_val, max_val, atol=1e-9):
+                    ax.plot([max_val, max_val], [y_pos-0.15, y_pos+0.15], 'k-', linewidth=2)
+            else:
+                # For 3+ levels, draw both Min and Max bars
+                ax.plot([min_val, min_val], [y_pos-0.15, y_pos+0.15], 'k-', linewidth=2)
+                ax.plot([max_val, max_val], [y_pos-0.15, y_pos+0.15], 'k-', linewidth=2)
     
     # Customize the plot
     ax.set_xlabel('Delta_Teq_All (°C)', fontsize=12)
@@ -161,7 +263,7 @@ def plot_overall_pcs_effects():
                markeredgecolor='black', label='Cooling Effect'),
         Line2D([0], [0], marker='o', color='w', markerfacecolor='red', markersize=8,
                markeredgecolor='black', label='Heating Effect'),
-        Line2D([0], [0], color='black', linewidth=2, label='Min-Max Range')
+        Line2D([0], [0], color='black', linewidth=2, label='Min–Max Range (>=2 levels)')
     ]
     ax.legend(handles=legend_elements, loc='upper right')
     
