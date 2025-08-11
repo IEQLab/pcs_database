@@ -5,6 +5,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Code
+code/debug
+
 # Image
 * dng
 # Generated figures and plots (exclude from version control)
