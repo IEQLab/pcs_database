@@ -27,74 +27,12 @@ code_dir = os.path.join(os.path.dirname(__file__), '..')
 sys.path.insert(0, code_dir)
 
 from config.configuration import Config
-from utils.utilities import filter_by_target_temperature
-
-
-def _compute_mid_min_max_from_numeric_levels(df_device: pd.DataFrame) -> dict:
-    """
-    Given a device DataFrame with numeric PCS_Level (0..1) and Delta_Teq_All, compute:
-    - per-level median Delta_Teq_All
-    - mid effect: odd -> median at middle level; even -> average of medians at two middle levels
-    - min/max across per-level medians
-    Returns dict with keys: median, min, max, used_levels, policy.
-    """
-    # Keep only needed columns
-    df = df_device[["PCS_Level", "Delta_Teq_All"]].dropna(subset=["PCS_Level", "Delta_Teq_All"]).copy()
-    if df.empty:
-        return {}
-
-    # Group by numeric level and compute per-level medians; sort by level value
-    level_medians = df.groupby("PCS_Level")["Delta_Teq_All"].median().sort_index()
-    if level_medians.empty:
-        return {}
-
-    levels = level_medians.index.to_list()
-    L = len(levels)
-
-    show_range = True
-    point_level = None
-
-    if L == 1:
-        # Single level: plot point only, no range
-        mid_effect = float(level_medians.iloc[0])
-        show_range = False
-        point_level = float(levels[0])
-    elif L == 2:
-        # Two levels: use the smaller effect as point, show range to larger effect
-        low_med = float(level_medians.iloc[0])
-        high_med = float(level_medians.iloc[1])
-        if low_med <= high_med:
-            # Normal case: Level 0 ≤ Level 1
-            mid_effect = low_med
-            point_level = float(levels[0])
-        else:
-            # Inverted case: Level 0 > Level 1 (e.g., ID20)
-            mid_effect = high_med
-            point_level = float(levels[1])
-    else:
-        # 3+ levels: standard mid logic
-        if L % 2 == 1:
-            mid_effect = float(level_medians.iloc[L // 2])
-            point_level = float(levels[L // 2])
-        else:
-            mid_effect = float((level_medians.iloc[L // 2 - 1] + level_medians.iloc[L // 2]) / 2.0)
-            point_level = float((levels[L // 2 - 1] + levels[L // 2]) / 2.0)
-
-    return {
-        "median": float(mid_effect),
-        "min": float(level_medians.min()),
-        "max": float(level_medians.max()),
-        "used_levels": levels,
-        "policy": "mid_level_range_L1L2_handling",
-        "n_levels": L,
-        "show_range": show_range,
-        "point_level": point_level,
-    }
+from utils.utilities import filter_by_target_temperature, compute_mid_level_effect
 
 
 def _compute_device_stats(df_device: pd.DataFrame) -> dict:
     """Compute per-device mid/min/max using numeric PCS_Level as described above."""
-    return _compute_mid_min_max_from_numeric_levels(df_device)
+    return compute_mid_level_effect(df_device, 'Delta_Teq_All')
 
 
 def plot_overall_pcs_effects():
@@ -118,7 +56,7 @@ def plot_overall_pcs_effects():
         category_map = {}
     
     # Filter for ~25°C conditions using utility function (25°C ± 1°C range)
-    df_25c = filter_by_target_temperature(df, target_ta=25.0, tolerance=1.0)
+    df_25c = filter_by_target_temperature(df, target_ta=25.0, tolerance=1.0, ta_column='PCS_Ta')
     
     # For specific PCS_IDs with multiple angles, filter to 270° only
     multi_angle_ids = [8, 9, 10, 13]

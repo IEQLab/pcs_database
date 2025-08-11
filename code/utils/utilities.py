@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 from dataclasses import dataclass
 
 
@@ -37,6 +38,83 @@ def filter_by_target_temperature(df: pd.DataFrame, target_ta: float = 25.0, tole
     print(f"Records after filtering: {len(filtered_df)}")
     
     return filtered_df
+
+
+def compute_mid_level_effect(df_device: pd.DataFrame, value_column: str = 'Delta_Teq_All') -> dict:
+    """
+    Compute mid-level effect from numeric PCS_Level data.
+    
+    This function implements the mid-level calculation logic:
+    - For each PCS_Level, compute the median of the value_column
+    - Mid effect calculation:
+        - If odd number of levels: use median at middle level
+        - If even number of levels: average of medians at two middle levels
+    
+    Args:
+        df_device: DataFrame containing PCS_Level and value data for one device
+        value_column: Column name containing the values to compute (default: 'Delta_Teq_All')
+    
+    Returns:
+        Dictionary with keys: median, min, max, used_levels, n_levels, show_range, point_level
+        Returns empty dict if no valid data found
+    
+    Example:
+        # Get mid-level effect for a specific PCS device
+        device_data = df[df['PCS_ID'] == 8]
+        mid_stats = compute_mid_level_effect(device_data, 'Delta_Teq_All')
+    """
+    # Keep only needed columns
+    df = df_device[["PCS_Level", value_column]].dropna(subset=["PCS_Level", value_column]).copy()
+    if df.empty:
+        return {}
+
+    # Group by numeric level and compute per-level medians; sort by level value
+    level_medians = df.groupby("PCS_Level")[value_column].median().sort_index()
+    if level_medians.empty:
+        return {}
+
+    levels = level_medians.index.to_list()
+    L = len(levels)
+
+    show_range = True
+    point_level = None
+
+    if L == 1:
+        # Single level: plot point only, no range
+        mid_effect = float(level_medians.iloc[0])
+        show_range = False
+        point_level = float(levels[0])
+    elif L == 2:
+        # Two levels: use the smaller effect as point, show range to larger effect
+        low_med = float(level_medians.iloc[0])
+        high_med = float(level_medians.iloc[1])
+        if low_med <= high_med:
+            # Normal case: Level 0 ≤ Level 1
+            mid_effect = low_med
+            point_level = float(levels[0])
+        else:
+            # Inverted case: Level 0 > Level 1 (e.g., ID20)
+            mid_effect = high_med
+            point_level = float(levels[1])
+    else:
+        # 3+ levels: standard mid logic
+        if L % 2 == 1:
+            mid_effect = float(level_medians.iloc[L // 2])
+            point_level = float(levels[L // 2])
+        else:
+            mid_effect = float((level_medians.iloc[L // 2 - 1] + level_medians.iloc[L // 2]) / 2.0)
+            point_level = float((levels[L // 2 - 1] + levels[L // 2]) / 2.0)
+
+    return {
+        "median": float(mid_effect),
+        "min": float(level_medians.min()),
+        "max": float(level_medians.max()),
+        "used_levels": levels,
+        "n_levels": L,
+        "show_range": show_range,
+        "point_level": point_level,
+        "level_medians": level_medians
+    }
 
 
 # Capoitalize the first letter of each word with underscores replaced by spaces
