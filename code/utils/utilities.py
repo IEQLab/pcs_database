@@ -63,8 +63,14 @@ def compute_mid_level_effect(df_device: pd.DataFrame, value_column: str = 'Delta
         device_data = df[df['PCS_ID'] == 8]
         mid_stats = compute_mid_level_effect(device_data, 'Delta_Teq_All')
     """
-    # Keep only needed columns
+    # Keep only needed columns and ensure PCS_Level is numeric
     df = df_device[["PCS_Level", value_column]].dropna(subset=["PCS_Level", value_column]).copy()
+    if df.empty:
+        return {}
+    
+    # Convert PCS_Level to numeric if it's not already
+    df["PCS_Level"] = pd.to_numeric(df["PCS_Level"], errors='coerce')
+    df = df.dropna(subset=["PCS_Level"])  # Remove any rows where conversion failed
     if df.empty:
         return {}
 
@@ -103,7 +109,10 @@ def compute_mid_level_effect(df_device: pd.DataFrame, value_column: str = 'Delta
             point_level = float(levels[L // 2])
         else:
             mid_effect = float((level_medians.iloc[L // 2 - 1] + level_medians.iloc[L // 2]) / 2.0)
-            point_level = float((levels[L // 2 - 1] + levels[L // 2]) / 2.0)
+            # Ensure levels are numeric before arithmetic operations
+            level_1 = float(levels[L // 2 - 1])
+            level_2 = float(levels[L // 2])
+            point_level = float((level_1 + level_2) / 2.0)
 
     return {
         "median": float(mid_effect),

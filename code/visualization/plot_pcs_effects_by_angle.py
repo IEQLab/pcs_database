@@ -45,7 +45,7 @@ def plot_pcs_effects_by_angle(target_pcs_ids=[8, 9, 10, 13], target_angles=[180,
     """
     # Load the processed results
     file_path = os.path.join(
-        Config.DataPaths.USYD_DIR, "processed_data", "delta_results.csv"
+        Config.DataPaths.BASE_DIR, "pcs_database.csv"
     )
     df = pd.read_csv(file_path)
     
@@ -121,7 +121,8 @@ def plot_pcs_effects_by_angle(target_pcs_ids=[8, 9, 10, 13], target_angles=[180,
                 angle_data[angle] = {
                     'effects': body_part_effects,
                     'labels': body_part_labels,
-                    'n_points': len(angle_subset)
+                    'n_points': 1,  # Mid-level gives one representative value per angle
+                    'original_records': len(angle_subset)  # Keep track of original data count
                 }
         
         # Plot lines for each angle
@@ -143,7 +144,7 @@ def plot_pcs_effects_by_angle(target_pcs_ids=[8, 9, 10, 13], target_angles=[180,
                            linestyle=style['linestyle'],
                            linewidth=2,
                            markersize=6,
-                           label=f"{style['label']} (n={n_points})")
+                           label=f"{style['label']} (mid-level)")
             
             # Customize subplot
             ax.set_title(f'PCS {pcs_id} - Mid-Level Effects by Angle', fontsize=14, fontweight='bold')
@@ -195,7 +196,7 @@ def plot_pcs_effects_by_angle(target_pcs_ids=[8, 9, 10, 13], target_angles=[180,
                     n_levels = whole_body_stats.get('n_levels', 0) if whole_body_stats else 0
                     
                     print(f"    {angle}°: {len(angle_data)} records, PCS_Level: {dict(level_counts)}, Ta: {ta_range}")
-                    print(f"      → Mid-level whole body effect: {mid_value:.3f}°C (from {n_levels} levels)")
+                    print(f"      → Mid-level whole body effect: {mid_value:.3f}°C (from {n_levels} levels) → n=1 representative value")
             
             # Show example body part data availability
             sample_record = pcs_data.iloc[0]
