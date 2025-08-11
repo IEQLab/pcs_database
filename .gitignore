@@ -8,8 +8,15 @@ __pycache__/
 # Code
 code/debug
 
-# Image
-* dng
+# Image (original sources you don't want to track)
+# Ignore RAW image directories and DNG files (large originals)
+image/**/raw image/
+*.dng
+*.DNG
+
+# Ignore specific large originals
+image/PCS Database Graphical Abstract.pptx
+
 # Generated figures and plots (exclude from version control)
 figure/
 *.png
