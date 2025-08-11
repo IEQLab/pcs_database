@@ -24,7 +24,11 @@ from config.configuration import Config
 from dataclasses import dataclass
 from typing import List
 from config.manikin_body_part_names import BodyPartLaura
-from merge_body_part_data import merge_specific_columns_data
+from data_processing.merge_body_part_data import merge_specific_columns_data
+from data_processing.level_aggregation import (
+    add_level_annotations,
+    compute_device_summary,
+)
 
 
 # TODO: Add chamber info to this dataset
@@ -675,9 +679,17 @@ def main():
                 df=delta_results_with_extracted_info, drop_original_data=True
             )
 
+            # Add normalized level annotations
+            delta_results_with_extracted_info = add_level_annotations(
+                delta_results_with_extracted_info, id_col="PCS_ID", level_col="PCS_Level"
+            )
+
+            # Replace PCS_Level with Level_Intensity for database use (0.0-1.0 scale)
+            delta_results_with_extracted_info["PCS_Level"] = delta_results_with_extracted_info["Level_Pos"]
+
+            # Round numeric columns to avoid excessive precision
             delta_results_with_extracted_info = utilities.change_decimal_places(
-                df=delta_results_with_extracted_info,
-                decimal_places=2
+                df=delta_results_with_extracted_info, decimal_places=2
             )
 
             file_name_to_save = os.path.join(
@@ -685,7 +697,6 @@ def main():
             )
             delta_results_with_extracted_info.to_csv(file_name_to_save, index=False)
             print(f"Saved delta results to {file_name_to_save}")
-
             # # Extract Teq-related columns and save
             # teq_data = extract_columns(delta_results)
             # file_name_to_save = os.path.join(config.PROCESSED_DATA_DIR, "delta_teq.csv")

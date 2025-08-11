@@ -1,16 +1,15 @@
 """
 This script visualizes the overall heating/cooling effects of Personal Comfort Systems (PCS) by plotting Delta_Teq values.
-Main functionalities:
-1. Loads a processed CSV database containing PCS experimental data.
-2. Filters and processes data to focus on conditions where ambient air temperature is 25°C, ensuring all PCS conditions are represented.
-3. Plots Delta_Teq_All (overall equivalent temperature change) for each PCS_ID:
-    - X-axis: Delta_Teq_All (negative values indicate cooling, positive indicate heating)
-    - Y-axis: PCS_ID (ordered with PCS_ID=1 at the top)
-    - For each PCS_ID, displays the median Delta_Teq_All as a circle, with minimum and maximum values as bars to show the range.
-4. Additional plotting of Delta_Teq by body parts for each condition, excluding group-specific columns.
-5. Includes utility for selecting a default PCS level from available options, prioritizing numeric or named levels.
+
+Simplified policy (using numeric PCS_Level in [0, 1]):
+- For each PCS_ID at ~25°C, compute the median Delta_Teq_All for each unique PCS_Level.
+- Choose the "Mid" intensity per device as:
+    - If the number of unique levels is odd: pick the middle level (by numeric order) and use its median.
+    - If even: take the average of the medians at the two middle levels.
+- Plot that Mid effect as the device marker and the min/max of per-level medians as the range bar.
+
 Intended usage:
-- To provide a clear visual summary of PCS effects across devices and conditions, supporting further analysis and reporting.
+- Provide a clear and fair per-device summary without complex level heuristics now that PCS_Level is numeric.
 """
 
 import os
@@ -18,7 +17,6 @@ import sys
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
-from sklearn.metrics import r2_score
 
 # Add the project root directory to sys.path
 project_root = os.path.join(os.path.dirname(__file__), '..', '..')
@@ -29,38 +27,60 @@ code_dir = os.path.join(os.path.dirname(__file__), '..')
 sys.path.insert(0, code_dir)
 
 from config.configuration import Config
-from utils.image_loader import load_device_image
 
 
-def select_default_level(available_levels):
+def _compute_mid_min_max_from_numeric_levels(df_device: pd.DataFrame) -> dict:
     """
-    Select a default level from a list of available levels.
-    Priority:
-        1. Numeric levels like 'Level1', 'Level2', etc. -> choose middle
-        2. Named levels like 'Low', 'Mid', 'High' -> prefer 'Mid'
-        3. Otherwise -> choose the middle alphabetically
+    Given a device DataFrame with numeric PCS_Level (0..1) and Delta_Teq_All, compute:
+    - per-level median Delta_Teq_All
+    - mid effect: odd -> median at middle level; even -> average of medians at two middle levels
+    - min/max across per-level medians
+    Returns dict with keys: median, min, max, used_levels, policy.
     """
-    available_levels = sorted(available_levels)
-    numeric_levels = [
-        lvl
-        for lvl in available_levels
-        if lvl.lower().startswith("level") and lvl[5:].isdigit()
-    ]
-    if numeric_levels:
-        numeric_levels.sort(key=lambda x: int(x[5:]))
-        return numeric_levels[len(numeric_levels) // 2]
-    for preferred in ["Mid", "Low", "High"]:
-        if preferred in available_levels:
-            return preferred
-    return available_levels[len(available_levels) // 2]
+    # Keep only needed columns
+    df = df_device[["PCS_Level", "Delta_Teq_All"]].dropna(subset=["PCS_Level", "Delta_Teq_All"]).copy()
+    if df.empty:
+        return {}
+
+    # Group by numeric level and compute per-level medians; sort by level value
+    level_medians = df.groupby("PCS_Level")["Delta_Teq_All"].median().sort_index()
+    if level_medians.empty:
+        return {}
+
+    levels = level_medians.index.to_list()
+    L = len(levels)
+
+    if L == 1:
+        mid_effect = float(level_medians.iloc[0])
+    elif L % 2 == 1:
+        mid_effect = float(level_medians.iloc[L // 2])
+    else:
+        mid_effect = float((level_medians.iloc[L // 2 - 1] + level_medians.iloc[L // 2]) / 2.0)
+
+    return {
+        "median": mid_effect,
+        "min": float(level_medians.min()),
+        "max": float(level_medians.max()),
+        "used_levels": levels,
+        "policy": "mid_level_range",
+    }
+
+
+def _compute_device_stats(df_device: pd.DataFrame) -> dict:
+    """Compute per-device mid/min/max using numeric PCS_Level as described above."""
+    return _compute_mid_min_max_from_numeric_levels(df_device)
 
 
 def plot_overall_pcs_effects():
     """
     Plot overall PCS effects (Delta_Teq_All) for each PCS_ID at ~25°C ambient temperature.
+
+    This uses a fixed policy based on numeric PCS_Level (see module docstring).
     """
-    # Load the PCS database
-    file_path = os.path.join(Config.DataPaths.BASE_DIR, "pcs_database.csv")
+    # Load the processed results with numeric PCS_Level
+    file_path = os.path.join(
+        Config.DataPaths.USYD_DIR, "processed_data", "delta_results.csv"
+    )
     df = pd.read_csv(file_path)
     
     # Filter for ~25°C conditions (24-26°C range)
@@ -73,31 +93,17 @@ def plot_overall_pcs_effects():
 
     print(f"Found {len(df_25c)} records in 24-26°C range")
 
-    # For each PCS_ID, select default level and calculate statistics
+    # For each PCS_ID, calculate statistics using the selected policy
     pcs_stats = []
     
     for pcs_id in sorted(df_25c['PCS_ID'].unique()):
         pcs_data = df_25c[df_25c['PCS_ID'] == pcs_id]
-        
-        # Select default level using the utility function
-        available_levels = pcs_data['PCS_Level'].unique().tolist()
-        default_level = select_default_level(available_levels)
-        
-        # Get data for the default level
-        default_data = pcs_data[pcs_data['PCS_Level'] == default_level]
-        
-        if not default_data.empty:
-            delta_teq_all_values = default_data['Delta_Teq_All'].dropna()
-            
-            if len(delta_teq_all_values) > 0:
-                pcs_stats.append({
-                    'PCS_ID': pcs_id,
-                    'median': delta_teq_all_values.median(),
-                    'min': delta_teq_all_values.min(),
-                    'max': delta_teq_all_values.max(),
-                    'count': len(delta_teq_all_values),
-                    'default_level': default_level
-                })
+        stats = _compute_device_stats(pcs_data)
+        if stats:
+            pcs_stats.append({
+                'PCS_ID': pcs_id,
+                **stats,
+            })
     
     if not pcs_stats:
         print("No valid data found for plotting")
@@ -130,7 +136,10 @@ def plot_overall_pcs_effects():
     # Customize the plot
     ax.set_xlabel('Delta_Teq_All (°C)', fontsize=12)
     ax.set_ylabel('PCS_ID', fontsize=12)
-    ax.set_title('Overall PCS Effects on Equivalent Temperature (~25°C Ambient)\nBlue: Cooling, Red: Heating', fontsize=14)
+    ax.set_title(
+        'Overall PCS Effects on Equivalent Temperature (~25°C Ambient)\nMid-level effect with Min/Max per-level range | Blue: Cooling, Red: Heating',
+        fontsize=14,
+    )
     
     # Set y-axis to show PCS_IDs with ID=1 at the top
     y_ticks = sorted(stats_df['PCS_ID'].unique())
