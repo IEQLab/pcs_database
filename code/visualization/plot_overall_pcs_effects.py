@@ -27,6 +27,7 @@ code_dir = os.path.join(os.path.dirname(__file__), '..')
 sys.path.insert(0, code_dir)
 
 from config.configuration import Config
+from utils.utilities import filter_by_target_temperature
 
 
 def _compute_mid_min_max_from_numeric_levels(df_device: pd.DataFrame) -> dict:
@@ -116,8 +117,8 @@ def plot_overall_pcs_effects():
     except Exception:
         category_map = {}
     
-    # Filter for ~25°C conditions (24-26°C range)
-    df_25c = df[(df['Baseline_Ta'] >= 24) & (df['Baseline_Ta'] <= 26)].copy()
+    # Filter for ~25°C conditions using utility function (25°C ± 1°C range)
+    df_25c = filter_by_target_temperature(df, target_ta=25.0, tolerance=1.0)
     
     # For specific PCS_IDs with multiple angles, filter to 270° only
     multi_angle_ids = [8, 9, 10, 13]
@@ -134,11 +135,9 @@ def plot_overall_pcs_effects():
                 print(f"Warning: PCS_ID {pid} has no 270° data, using all available angles")
     
     if df_25c.empty:
-        print("No data found for ~25°C ambient temperature (24-26°C range)")
+        print("No data found for target ambient temperature range")
         print(f"Available temperatures: {sorted(df['Baseline_Ta'].dropna().unique())}")
         return
-
-    print(f"Found {len(df_25c)} records in 24-26°C range")
 
     # Quick validation helper: per-device level medians and mid/min/max comparisons
     def _validate_device(pcs_id: int, df_device: pd.DataFrame):

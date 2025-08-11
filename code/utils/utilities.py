@@ -6,6 +6,39 @@ def weighted_average(values, weights):
     return sum(v * w for v, w in zip(values, weights)) / sum(weights)
 
 
+def filter_by_target_temperature(df: pd.DataFrame, target_ta: float = 25.0, tolerance: float = 1.0, 
+                                ta_column: str = 'PCS_Ta') -> pd.DataFrame:
+    """
+    Filter DataFrame by target ambient temperature ± tolerance.
+    
+    Args:
+        df: Input DataFrame containing temperature data
+        target_ta: Target ambient temperature in °C (default: 25.0)
+        tolerance: Temperature tolerance in °C (default: 1.0)
+        ta_column: Column name containing ambient temperature data (default: 'PCS_Ta')
+    
+    Returns:
+        Filtered DataFrame containing only records within target_ta ± tolerance
+    
+    Example:
+        # Filter for 25°C ± 1°C (24-26°C range)
+        filtered_df = filter_by_target_temperature(df, target_ta=25.0, tolerance=1.0)
+    """
+    if ta_column not in df.columns:
+        raise ValueError(f"Column '{ta_column}' not found in DataFrame")
+    
+    min_ta = target_ta - tolerance
+    max_ta = target_ta + tolerance
+    
+    filtered_df = df[(df[ta_column] >= min_ta) & (df[ta_column] <= max_ta)].copy()
+    
+    print(f"Temperature filtering: {target_ta}°C ± {tolerance}°C ({min_ta}-{max_ta}°C range)")
+    print(f"Records before filtering: {len(df)}")
+    print(f"Records after filtering: {len(filtered_df)}")
+    
+    return filtered_df
+
+
 # Capoitalize the first letter of each word with underscores replaced by spaces
 def capitalize_first_letter_with_underscores(string):
     """Capitalize the first letter of each word in a string with underscores replaced by spaces"""
