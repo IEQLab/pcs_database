@@ -119,6 +119,20 @@ def plot_overall_pcs_effects():
     # Filter for ~25°C conditions (24-26°C range)
     df_25c = df[(df['Baseline_Ta'] >= 24) & (df['Baseline_Ta'] <= 26)].copy()
     
+    # For specific PCS_IDs with multiple angles, filter to 270° only
+    multi_angle_ids = [8, 9, 10, 13]
+    for pid in multi_angle_ids:
+        mask = (df_25c['PCS_ID'] == pid)
+        if mask.any():
+            # Replace with 270° data only, if available
+            angle_270_data = df_25c[mask & (df_25c['Angle_Horizontal'] == 270)]
+            if len(angle_270_data) > 0:
+                # Remove all data for this PCS_ID and add back only 270° data
+                df_25c = df_25c[~mask]
+                df_25c = pd.concat([df_25c, angle_270_data], ignore_index=True)
+            else:
+                print(f"Warning: PCS_ID {pid} has no 270° data, using all available angles")
+    
     if df_25c.empty:
         print("No data found for ~25°C ambient temperature (24-26°C range)")
         print(f"Available temperatures: {sorted(df['Baseline_Ta'].dropna().unique())}")
