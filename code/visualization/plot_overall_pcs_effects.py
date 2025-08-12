@@ -43,7 +43,7 @@ def plot_overall_pcs_effects():
     """
     # Load the processed results with numeric PCS_Level
     file_path = os.path.join(
-        Config.DataPaths.USYD_DIR, "processed_data", "delta_results.csv"
+        Config.DataPaths.BASE_DIR, "pcs_database.csv"
     )
     df = pd.read_csv(file_path)
     
