@@ -48,6 +48,7 @@ from typing import Dict, List, Optional, Any
 # Try relative imports first (for module execution), then absolute imports (for direct execution)
 try:
     from .config.configuration import Config
+    from .utils.utilities import compute_mid_level_effect
     from .data_processing.calc_equivalent_temperature import (
         calculate_h_total,
         calculate_delta_h_total,
@@ -55,6 +56,7 @@ try:
     )
 except ImportError:
     from config.configuration import Config
+    from utils.utilities import compute_mid_level_effect
     from data_processing.calc_equivalent_temperature import (
         calculate_h_total,
         calculate_delta_h_total,
@@ -480,11 +482,105 @@ class PCSDatabase:
         return cls._data
     
     @classmethod
-    def _exists(cls, id: int, level: str) -> bool:
+    def _exists(cls, id: int, level: float) -> bool:
         """Check if a device with given ID and level exists."""
         data = cls._load_data()
-        return not data[(data['PCS_ID'] == id) & (data['PCS_Level'] == level)].empty
+        # Convert PCS_Level to float for comparison
+        data_copy = data.copy()
+        data_copy['PCS_Level'] = data_copy['PCS_Level'].astype(float)
+        return not data_copy[(data_copy['PCS_ID'] == id) & (data_copy['PCS_Level'] == level)].empty
     
+    @classmethod
+    def _map_levels_to_names(cls, id: int) -> Dict[str, float]:
+        """
+        Map friendly level names (Low/Mid/High) to actual device levels.
+        
+        Uses compute_mid_level_effect logic for intelligent mid-level calculation:
+        - Low: minimum level
+        - High: maximum level  
+        - Mid: calculated using compute_mid_level_effect algorithm
+        
+        Args:
+            id: PCS device ID
+            
+        Returns:
+            Dictionary mapping friendly names to actual level floats
+        """
+        data = cls._load_data()
+        device_data = data[data['PCS_ID'] == id]
+        
+        if device_data.empty:
+            return {}
+        
+        # Convert PCS_Level to float and get available levels
+        device_data = device_data.copy()
+        device_data['PCS_Level'] = device_data['PCS_Level'].astype(float)
+        available_levels = sorted(device_data['PCS_Level'].unique().tolist())
+        
+        if len(available_levels) == 1:
+            # Single level maps to all friendly names
+            level_val = available_levels[0]
+            return {'Low': level_val, 'Mid': level_val, 'High': level_val}
+        
+        # Use compute_mid_level_effect to find intelligent mid-level
+        mid_stats = compute_mid_level_effect(device_data, 'Delta_Teq_All')
+        
+        mapping = {
+            'Low': available_levels[0],  # Minimum level
+            'High': available_levels[-1]  # Maximum level
+        }
+        
+        if mid_stats and 'point_level' in mid_stats:
+            # Use point_level from compute_mid_level_effect
+            mid_level = mid_stats['point_level']
+            # Find closest actual level to computed mid level
+            closest_level = min(available_levels, key=lambda x: abs(x - mid_level))
+            mapping['Mid'] = closest_level
+        else:
+            # Fallback: use middle level if available
+            if len(available_levels) >= 2:
+                mid_index = len(available_levels) // 2
+                mapping['Mid'] = available_levels[mid_index]
+            else:
+                mapping['Mid'] = mapping['Low']
+        
+        return mapping
+
+    @classmethod
+    def _normalize_level(cls, id: int, level: str) -> float:
+        """
+        Normalize level input - convert friendly names to actual levels if needed.
+        
+        Args:
+            id: PCS device ID
+            level: Level input (could be friendly name like "Mid" or numeric like "0.5")
+            
+        Returns:
+            Actual level float that exists in database
+        """
+        # Try to convert to float directly first
+        try:
+            level_float = float(level)
+            # Check if this level exists for the device
+            available_levels = cls.get_available_levels(id)
+            if level_float in available_levels:
+                return level_float
+        except (ValueError, TypeError):
+            pass
+        
+        # Check if it's a friendly name and map it
+        if level in ['Low', 'Mid', 'High']:
+            level_mapping = cls._map_levels_to_names(id)
+            if level in level_mapping:
+                return level_mapping[level]
+        
+        # If no mapping found, try to convert to float anyway
+        try:
+            return float(level)
+        except (ValueError, TypeError):
+            # If all else fails, return original for error handling
+            return level
+
     @classmethod
     def get_device(cls, id: int, level: str) -> PCSDevice:
         """
@@ -492,39 +588,121 @@ class PCSDatabase:
         
         Args:
             id: PCS device ID (1-20 for Sydney University)
-            level: Power level (e.g., "Low", "Mid", "High")
+            level: Power level - supports both:
+                   - Friendly names: "Low", "Mid", "High"
+                   - Actual levels: "0.0", "0.5", "1.0", etc.
             
         Returns:
             PCSDevice instance
             
         Raises:
             ValueError: If device not found
+            
+        Examples:
+            # Using friendly names
+            device_low = PCSDatabase.get_device(id=1, level="Low")
+            device_mid = PCSDatabase.get_device(id=1, level="Mid") 
+            device_high = PCSDatabase.get_device(id=1, level="High")
+            
+            # Using actual levels (backwards compatible)
+            device = PCSDatabase.get_device(id=1, level="0.5")
         """
-        # Check cache first
-        cache_key = (id, level)
+        # Normalize level input (convert friendly names if needed)
+        actual_level = cls._normalize_level(id, level)
+        
+        # Check cache first  
+        cache_key = (id, actual_level)
         if cache_key in cls._cache:
             return cls._cache[cache_key]
         
         # Validate existence
-        if not cls._exists(id, level):
+        if not cls._exists(id, actual_level):
             available_levels = cls.get_available_levels(id)
+            level_mapping = cls._map_levels_to_names(id)
+            
             if available_levels:
-                raise ValueError(
-                    f"PCS ID {id} with level '{level}' not found. "
-                    f"Available levels: {available_levels}"
-                )
+                error_msg = f"PCS ID {id} with level '{level}' not found."
+                if level_mapping:
+                    friendly_str = {k: f"{v:.1f}" for k, v in level_mapping.items()}
+                    error_msg += f"\nFriendly levels: {friendly_str}"
+                error_msg += f"\nAvailable levels: {[f'{x:.1f}' for x in available_levels]}"
+                raise ValueError(error_msg)
             else:
                 raise ValueError(f"PCS ID {id} not found in database")
         
         # Load data
         data = cls._load_data()
-        device_data = data[(data['PCS_ID'] == id) & (data['PCS_Level'] == level)].iloc[0]
+        data_copy = data.copy()
+        data_copy['PCS_Level'] = data_copy['PCS_Level'].astype(float)
+        device_data = data_copy[(data_copy['PCS_ID'] == id) & (data_copy['PCS_Level'] == actual_level)].iloc[0]
         
-        # Create device and cache
+        # Create device and cache (use original level for display)
         device = PCSDevice(id=id, level=level, _data=device_data)
         cls._cache[cache_key] = device
         
         return device
+
+    @classmethod
+    def get_level_info(cls, id: int) -> Dict[str, Any]:
+        """
+        Get level mapping information for a device.
+        
+        Args:
+            id: PCS device ID
+            
+        Returns:
+            Dictionary with level mapping and statistics
+        """
+        data = cls._load_data()
+        device_data = data[data['PCS_ID'] == id]
+        
+        if device_data.empty:
+            return {}
+        
+        available_levels = sorted(device_data['PCS_Level'].astype(float).unique().tolist())
+        level_mapping = cls._map_levels_to_names(id)
+        mid_stats = compute_mid_level_effect(device_data, 'Delta_Teq_All')
+        
+        return {
+            'available_levels': available_levels,
+            'friendly_mapping': level_mapping,
+            'mid_level_stats': mid_stats,
+            'total_levels': len(available_levels)
+        }
+
+    @classmethod
+    def compare_devices_by_effectiveness(cls, device_ids: List[int], level: str = "Mid") -> List[Dict[str, Any]]:
+        """
+        Compare devices at the same friendly level.
+        
+        Args:
+            device_ids: List of device IDs to compare
+            level: Friendly level to compare at ("Low", "Mid", "High")
+            
+        Returns:
+            List of device comparison data sorted by effectiveness
+        """
+        devices = []
+        for device_id in device_ids:
+            try:
+                device = cls.get_device(device_id, level)
+                devices.append({
+                    'id': device_id,
+                    'brand': device.brand,
+                    'model': device.model_name,
+                    'level': level,
+                    'actual_level': cls._normalize_level(device_id, level),
+                    'effectiveness': device.cooling_effectiveness,
+                    'power_efficiency': device.power_efficiency,
+                    'power_consumption': device.power_consumption
+                })
+            except ValueError:
+                # Skip devices that don't have this level
+                continue
+        
+        # Sort by effectiveness (descending)
+        devices.sort(key=lambda x: x['effectiveness'], reverse=True)
+        return devices
     
     @classmethod
     def get_all_levels(cls, id: int) -> List[PCSDevice]:
@@ -541,7 +719,7 @@ class PCSDatabase:
         return [cls.get_device(id, level) for level in levels]
     
     @classmethod
-    def get_available_levels(cls, id: int) -> List[str]:
+    def get_available_levels(cls, id: int) -> List[float]:
         """
         Get available power levels for a specific PCS ID.
         
@@ -549,13 +727,15 @@ class PCSDatabase:
             id: PCS device ID
             
         Returns:
-            List of available level names
+            List of available level floats
         """
         data = cls._load_data()
         device_data = data[data['PCS_ID'] == id]
         if device_data.empty:
             return []
-        return sorted(device_data['PCS_Level'].unique().tolist())
+        # Convert to float and return sorted unique levels
+        levels = device_data['PCS_Level'].astype(float).unique().tolist()
+        return sorted(levels)
     
     @classmethod
     def get_all_device_ids(cls) -> List[int]:
@@ -590,66 +770,15 @@ class PCSDatabase:
         cls._cache.clear()
 
 
-# Example usage and testing
-if __name__ == "__main__":
-    # Example usage
-    try:
-        # Get a specific device
-        device = PCSDatabase.get_device(id=1, level="Mid")
-        print(f"Device: {device}")
-        print(f"Brand: {device.brand}")
-        print(f"Cooling effectiveness: {device.cooling_effectiveness:.2f}°C")
-        print(f"Power efficiency: {device.power_efficiency:.3f}°C/W")
-        print(f"Temperature reduction: {device.calculate_temperature_reduction()}")
-        
-        print("\n" + "="*50)
-        
-        # Get all levels for device ID 1
-        devices = PCSDatabase.get_all_levels(id=1)
-        print(f"All levels for PCS ID 1:")
-        for dev in devices:
-            print(f"  {dev.level}: {dev.cooling_effectiveness:.2f}°C effectiveness")
-        
-        print("\n" + "="*50)
-        
-        # Get available device IDs
-        ids = PCSDatabase.get_all_device_ids()
-        print(f"Available device IDs: {ids}")
-        
-    except Exception as e:
-        print(f"Error: {e}")
-
-
-if __name__ == "__main__":
+def test_pcs_database():
     # Test basic functionality when run directly
     print("=== PCS Database Module Test ===")
-    try:
-        # Test database loading
-        device = PCSDatabase.get_device(1, "Mid")
-        print(f"Test device: {device.model_name}")
-        print(f"Cooling effectiveness: {device.cooling_effectiveness:.2f}°C")
-        
-        # Test hierarchical body part access
-        print("\n=== Hierarchical Body Part Access Test ===")
-        print(f"Head cooling: {device.delta_teq.head:.2f}°C")
-        print(f"Chest cooling: {device.delta_teq.chest:.2f}°C")
-        print(f"Left hand cooling: {device.delta_teq.left_hand:.2f}°C")
-        print(f"Right foot cooling: {device.delta_teq.right_foot:.2f}°C")
-        
-        # Test delta_teq object methods
-        print(f"\nDelta teq object: {device.delta_teq}")
-        available_parts = device.delta_teq.available_parts()
-        print(f"Available body parts: {available_parts[:5]}...")  # Show first 5
-        
-        # Test all body part deltas
-        all_deltas = device.delta_teq.all_parts()
-        non_zero_deltas = {k: v for k, v in all_deltas.items() if v != 0}
-        print(f"Non-zero cooling effects: {len(non_zero_deltas)} parts")
-        
-        # Test major parts
-        major_parts = device.delta_teq.major_parts()
-        print(f"Major parts cooling: {major_parts}")
-        
-        print("Module test successful!")
-    except Exception as e:
-        print(f"Module test failed: {e}")
+    device = PCSDatabase.get_device(id=1, level="Mid")
+    print(f"Test device: Brand {device.brand}, Model {device.model_name}")
+    print(f"Delta Teq for Overall: {device.delta_teq.overall}°C")
+    print(f"Delta Teq at Head: {device.delta_teq.head}°C")
+    print(f"Delta Teq at Chest: {device.delta_teq.chest}°C")
+
+
+if __name__ == "__main__":
+    test_pcs_database()
