@@ -76,8 +76,17 @@ def load_data_with_custom_columns(file_path, custom_columns, strict_datetime=Tru
             df["Datetime"], format="%d/%m/%Y %I:%M:%S %p", errors="coerce"
         )
     else:
-        # Fallback: let pandas guess the format (slower but handles inconsistent formats)
-        df["Datetime"] = pd.to_datetime(df["Datetime"], errors="coerce")
+        # Fallback: let pandas guess the format but ensure DD/MM/YYYY interpretation
+        # For dates like "11/02/2025", treat as DD/MM/YYYY (11th February, not November 2nd)
+        df["Datetime"] = pd.to_datetime(df["Datetime"], format="%d/%m/%Y %H:%M", errors="coerce")
+        
+        # If that fails, try with different common formats
+        if df["Datetime"].isna().all():
+            df["Datetime"] = pd.to_datetime(df["Datetime"], format="%d/%m/%Y %I:%M:%S %p", errors="coerce")
+        
+        # If still failing, try automatic detection with European date preference
+        if df["Datetime"].isna().all():
+            df["Datetime"] = pd.to_datetime(df["Datetime"], dayfirst=True, errors="coerce")
 
     # Use Datetime as the DataFrame index
     df.set_index("Datetime", inplace=True)
