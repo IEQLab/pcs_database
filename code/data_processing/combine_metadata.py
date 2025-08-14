@@ -1,7 +1,13 @@
 import os
+import sys
 import pandas as pd
 import yaml
-from config.configuration import Config
+
+# Add project root to Python path
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+sys.path.insert(0, project_root)
+
+from code.config.configuration import Config
 
 
 def load_metadata_relations(path: str) -> dict:
