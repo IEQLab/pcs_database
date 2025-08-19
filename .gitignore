@@ -20,10 +20,13 @@ image/PCS Database Graphical Abstract.pptx
 # Generated figures and plots (exclude from version control)
 figure/
 *.png
+!image/**/*.png
 *.svg
 *.pdf
 *.jpg
+!image/**/*.jpg
 *.jpeg
+!image/**/*.jpeg
 *.gif
 *.bmp
 *.tiff
