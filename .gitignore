@@ -48,6 +48,9 @@ figures/
 # data/usyd/processed_data/
 # data/pcs_database.csv
 
+# Meeting materials
+meeting/
+
 # Jupyter Notebook outputs
 *.ipynb_checkpoints/
 
