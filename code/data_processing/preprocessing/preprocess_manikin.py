@@ -139,7 +139,7 @@ def average_last_five_minute(file_path, custom_columns):
 
 
 # Step 4: Search for files by keyword
-def find_files_with_keyword(folder_path, keyword, exclude_folders=["Old", "UFAD"]):
+def find_files_with_keyword(folder_path, keyword, exclude_folders=["Old", "UFAD", "original"]):
     """
     Search for files in a folder containing a specific keyword in their names,
     while avoiding files inside specific folders.
@@ -176,6 +176,7 @@ def extract_info_from_filename(filename):
         "PCS_ID": None,
         "PCS_Name": None,
         "PCS_Level": None,
+        "PCS_Mode": None,
         "Angle_Horizontal": None,
         "Distance_Horizontal": None,
         "Ta": None,
@@ -195,6 +196,23 @@ def extract_info_from_filename(filename):
         # PCS_name and Level (parts[2], parts[3]) with safety check
         dict_extracted_info["PCS_Name"] = parts[2] if len(parts) > 2 else None
         dict_extracted_info["PCS_Level"] = parts[3] if len(parts) > 3 else None
+
+        # Extract PCS_Mode based on filename suffixes for specific IDs
+        pcs_id = dict_extracted_info["PCS_ID"]
+        # IDs 3, 4, 10 (original fan mode IDs) and 11, 12, 13 (mist mode variants)
+        dual_mode_ids = {3, 4, 10}
+        
+        if pcs_id in dual_mode_ids:
+            if "FanMode" in filename:
+                dict_extracted_info["PCS_Mode"] = "Fan"
+            elif "MistMode" in filename:
+                dict_extracted_info["PCS_Mode"] = "Evaporative"
+            else:
+                # Default mode for these IDs if no specific mode is detected
+                dict_extracted_info["PCS_Mode"] = "Unknown"
+        else:
+            # For other IDs, set default mode or leave as None
+            dict_extracted_info["PCS_Mode"] = None
 
         for part in parts[4:]:
             if part.startswith("Angle"):
@@ -316,6 +334,7 @@ def add_extracted_info_to_dataframe(df):
                 "PCS_ID": with_pcs_info["PCS_ID"],
                 "PCS_Name": with_pcs_info["PCS_Name"],
                 "PCS_Level": with_pcs_info["PCS_Level"],
+                "PCS_Mode": with_pcs_info["PCS_Mode"],
                 "Angle_Horizontal": with_pcs_info["Angle_Horizontal"],
                 "Distance_Horizontal": with_pcs_info["Distance_Horizontal"],
                 "Tset": with_pcs_info["Ta"],
@@ -331,6 +350,7 @@ def add_extracted_info_to_dataframe(df):
         "PCS_ID",
         "PCS_Name",
         "PCS_Level",
+        "PCS_Mode",
         "Angle_Horizontal",
         "Distance_Horizontal",
         "Tset",
@@ -597,7 +617,7 @@ def main():
         matching_files = find_files_with_keyword(
             folder_path=Config.DataPaths.RAW_DATA_DIR,
             keyword=keyword,
-            exclude_folders=["Old", "UFAD"],
+            exclude_folders=["Old", "UFAD", "original"],
         )
         logging.info(f"matching_files: {matching_files}")
         if not matching_files:
