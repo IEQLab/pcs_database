@@ -2,14 +2,14 @@
 Utility: Find files larger than a given threshold (default: 50 MB) in this repo.
 
 Usage examples:
-  - Default scan from repo root with 50 MB threshold:
+  - Default scan from repo root with 50 MB threshold (auto-saves to data/others/):
       python code/utils/find_large_files.py
 
   - Custom threshold and extra excludes:
       python code/utils/find_large_files.py --min-size-mb 25 --exclude .git --exclude venv
 
-  - Save results to CSV/JSON (detected by extension):
-      python code/utils/find_large_files.py --save data/large_files_report.csv
+  - Save results to custom location (csv, tsv, json, or txt):
+      python code/utils/find_large_files.py --save data/custom_large_files_report.csv
 """
 
 from __future__ import annotations
@@ -17,8 +17,16 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import sys
 from pathlib import Path
 from typing import Iterable, List, Dict
+
+# Add project root to path for imports
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+
+from code.config.configuration import Config
 
 
 DEFAULT_EXCLUDES = {
@@ -159,6 +167,20 @@ def main() -> int:
     if args.save:
         save_results(Path(args.save), rows)
         print(f"Saved results to: {args.save}")
+    else:
+        # Default save location using Config.DataPaths.OTHERS_DIR
+        if rows:  # Only save if there are results
+            csv_path = os.path.join(Config.DataPaths.OTHERS_DIR, f"large_files_over_{args.min_size_mb:.0f}mb.csv")
+            json_path = os.path.join(Config.DataPaths.OTHERS_DIR, f"large_files_over_{args.min_size_mb:.0f}mb.json")
+            
+            # Ensure the others directory exists
+            os.makedirs(Config.DataPaths.OTHERS_DIR, exist_ok=True)
+            
+            save_results(Path(csv_path), rows)
+            save_results(Path(json_path), rows)
+            print(f"Results automatically saved to:")
+            print(f"  CSV: {csv_path}")
+            print(f"  JSON: {json_path}")
 
     # Exit code 0 if none found, 1 if some found (useful for CI checks)
     return 1 if rows else 0

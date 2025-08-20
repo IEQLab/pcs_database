@@ -1,0 +1,23 @@
+% Minimal makeindex/mendex style to satisfy toolchains expecting dot.ist
+% Placed locally so VS Code/latexmk recipes that call `mendex -s dot.ist` don't fail.
+
+actual '?'
+encap '|'
+level '!'
+quote '"'
+
+preamble "\\begin{theindex}\n\n"
+postamble "\n\\end{theindex}\n"
+
+item_0 "\\item "
+item_1 "\\subitem "
+item_2 "\\subsubitem "
+
+% Dotted leaders between entry and page numbers
+% (safe even if not used)
+delim_0 " \\\\dotfill "
+delim_1 " \\\\dotfill "
+delim_2 " \\\\dotfill "
+
+% Group headings off by default (keeps things simple)
+headings_flag 0

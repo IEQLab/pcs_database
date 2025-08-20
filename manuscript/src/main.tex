@@ -13,6 +13,10 @@
 %% \documentclass[final,5p,times]{elsarticle}
 %% \documentclass[final,5p,times,twocolumn]{elsarticle}
 
+% Ensure dvipdfmx driver is used for graphics-related packages loaded by the class
+\PassOptionsToPackage{dvipdfmx}{graphicx}
+\PassOptionsToPackage{dvipdfmx}{xcolor}
+\PassOptionsToPackage{dvipdfmx}{hyperref}
 \documentclass[review, 1p]{elsarticle}
 
 \usepackage{mypreamble}

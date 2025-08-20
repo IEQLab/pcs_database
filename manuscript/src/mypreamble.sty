@@ -1,6 +1,7 @@
 \ProvidesPackage{mypreamble}
 
 \usepackage{lineno}
+% Hyperref (driver set by main.tex with PassOptionsToPackage)
 \usepackage[hidelinks]{hyperref}
 
 \urlstyle{same}
@@ -73,6 +74,8 @@
 \usepackage{array, ltablex, multirow}
 \usepackage{placeins}
 \usepackage{graphicx}
+% Prefer modern image formats when extension omitted
+\DeclareGraphicsExtensions{.pdf,.png,.jpg,.jpeg,.eps}
 \usepackage{subcaption}
 
 \usepackage[nonumberlist,nogroupskip]{glossaries}

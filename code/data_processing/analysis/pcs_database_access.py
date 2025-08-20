@@ -40,117 +40,33 @@ Design Pattern:
 """
 
 import os
+import sys
 import pandas as pd
 import numpy as np
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Any
 
-# Try relative imports first (for module execution), then absolute imports (for direct execution)
+# Add the project root to Python path for imports
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+
 try:
-    from .config.configuration import Config
-    from .utils.utilities import compute_mid_level_effect
-    from .data_processing.calc_equivalent_temperature import (
+    from code.config.configuration import Config
+    from code.data_processing.calc_equivalent_temperature import (
         calculate_h_total,
         calculate_delta_h_total,
         calculate_delta_q_skin
     )
 except ImportError:
+    # Fallback for direct script execution
+    sys.path.append(os.path.join(project_root, 'code'))
     from config.configuration import Config
-    from utils.utilities import compute_mid_level_effect
     from data_processing.calc_equivalent_temperature import (
         calculate_h_total,
         calculate_delta_h_total,
         calculate_delta_q_skin
     )
-
-
-class BodyPartDeltaTeq:
-    """
-    Body part temperature reduction accessor for hierarchical access.
-    
-    This class provides a clean interface for accessing temperature reduction data
-    for different body parts using dot notation: device.delta_teq.head
-    
-    Examples:
-        device.delta_teq.head           # Head cooling
-        device.delta_teq.chest          # Chest cooling
-        device.delta_teq.left_hand      # Left hand cooling
-        device.delta_teq.right_foot     # Right foot cooling
-        
-        # Get all available parts
-        parts = device.delta_teq.available_parts()
-        
-        # Get all part data as dictionary
-        all_data = device.delta_teq.all_parts()
-    """
-    
-    def __init__(self, device_data: pd.Series):
-        self._data = device_data
-    
-    def __getattr__(self, body_part: str) -> float:
-        """
-        Dynamically access body part temperature reduction.
-        
-        Args:
-            body_part: Body part name (e.g., 'head', 'chest', 'left_hand')
-            
-        Returns:
-            Temperature reduction [°C]
-        """
-        # Convert to CSV column format (e.g., 'left_hand' -> 'Left_Hand')
-        body_part_formatted = '_'.join(word.capitalize() for word in body_part.split('_'))
-        column_name = f'Delta_Teq_{body_part_formatted}'
-        
-        # Return value or 0.0 if not found
-        return float(self._data.get(column_name, 0))
-    
-    def available_parts(self) -> List[str]:
-        """
-        Get list of available body parts with temperature reduction data.
-        
-        Returns:
-            List of body part names in lowercase with underscores
-        """
-        delta_columns = [col for col in self._data.index if col.startswith('Delta_Teq_') and col != 'Delta_Teq_All']
-        body_parts = []
-        
-        for col in delta_columns:
-            # Extract body part name and convert to lowercase with underscores
-            body_part = col[10:]  # Remove 'Delta_Teq_' prefix
-            body_part_lower = '_'.join(word.lower() for word in body_part.split('_'))
-            body_parts.append(body_part_lower)
-        
-        return sorted(body_parts)
-    
-    def all_parts(self) -> Dict[str, float]:
-        """
-        Get temperature reduction for all available body parts.
-        
-        Returns:
-            Dictionary with body part names as keys and temperature reductions as values
-        """
-        result = {}
-        for body_part in self.available_parts():
-            result[body_part] = getattr(self, body_part)
-        return result
-    
-    def major_parts(self) -> Dict[str, float]:
-        """
-        Get temperature reduction for major body parts (head, chest, back).
-        
-        Returns:
-            Dictionary with major body part names and their temperature reductions
-        """
-        major_parts = ['head', 'chest', 'back']
-        result = {}
-        for part in major_parts:
-            if part in self.available_parts():
-                result[part] = getattr(self, part)
-        return result
-    
-    def __repr__(self) -> str:
-        available = len(self.available_parts())
-        return f"BodyPartDeltaTeq(available_parts={available})"
 
 
 @dataclass
@@ -293,34 +209,19 @@ class PCSDevice:
         return float(value)
     
     @property
-    def delta_teq(self) -> BodyPartDeltaTeq:
-        """
-        Hierarchical access to body part temperature reductions.
-        
-        This provides a clean interface for accessing temperature reduction data
-        for different body parts using dot notation.
-        
-        Returns:
-            BodyPartDeltaTeq instance for accessing individual body parts
-            
-        Examples:
-            # Direct access to specific body parts
-            device.delta_teq.head              # Head cooling
-            device.delta_teq.chest             # Chest cooling
-            device.delta_teq.left_hand         # Left hand cooling
-            device.delta_teq.right_foot        # Right foot cooling
-            
-            # Get available parts and data
-            parts = device.delta_teq.available_parts()
-            all_data = device.delta_teq.all_parts()
-            major_data = device.delta_teq.major_parts()
-            
-            # Loop access
-            for part in ['head', 'chest', 'back']:
-                cooling = getattr(device.delta_teq, part)
-                print(f"{part}: {cooling:.2f}°C")
-        """
-        return BodyPartDeltaTeq(self._data)
+    def delta_teq_head(self) -> float:
+        """Head equivalent temperature reduction [°C]"""
+        return float(self._data.get('Delta_Teq_Head', 0))
+    
+    @property
+    def delta_teq_chest(self) -> float:
+        """Chest equivalent temperature reduction [°C]"""
+        return float(self._data.get('Delta_Teq_Chest', 0))
+    
+    @property
+    def delta_teq_back(self) -> float:
+        """Back equivalent temperature reduction [°C]"""
+        return float(self._data.get('Delta_Teq_Back', 0))
     
     # === Heat Transfer Data ===
     @property
@@ -380,15 +281,18 @@ class PCSDevice:
     
     def calculate_temperature_reduction(self) -> Dict[str, float]:
         """
-        Calculate temperature reduction for all body parts.
+        Calculate temperature reduction for different body parts.
         
         Returns:
             Dictionary with body part names as keys and temperature reductions as values
         """
-        # Get all body part data using the new hierarchical interface
-        result = {'overall': self.delta_teq_all, 'effectiveness': self.cooling_effectiveness}
-        result.update(self.delta_teq.all_parts())
-        return result
+        return {
+            'overall': self.delta_teq_all,
+            'head': self.delta_teq_head,
+            'chest': self.delta_teq_chest,
+            'back': self.delta_teq_back,
+            'effectiveness': self.cooling_effectiveness
+        }
     
     def get_body_part_delta(self, body_part: str) -> float:
         """
@@ -399,12 +303,9 @@ class PCSDevice:
             
         Returns:
             Temperature reduction [°C]
-            
-        Examples:
-            device.get_body_part_delta('head')      # Same as device.delta_teq.head
-            device.get_body_part_delta('left_hand') # Same as device.delta_teq.left_hand
         """
-        return getattr(self.delta_teq, body_part)
+        column_name = f'Delta_Teq_{body_part.title()}'
+        return float(self._data.get(column_name, 0))
     
     def __str__(self) -> str:
         return f"PCS Device {self.id} ({self.level}): {self.brand} {self.model_name}"
@@ -482,105 +383,11 @@ class PCSDatabase:
         return cls._data
     
     @classmethod
-    def _exists(cls, id: int, level: float) -> bool:
+    def _exists(cls, id: int, level: str) -> bool:
         """Check if a device with given ID and level exists."""
         data = cls._load_data()
-        # Convert PCS_Level to float for comparison
-        data_copy = data.copy()
-        data_copy['PCS_Level'] = data_copy['PCS_Level'].astype(float)
-        return not data_copy[(data_copy['PCS_ID'] == id) & (data_copy['PCS_Level'] == level)].empty
+        return not data[(data['PCS_ID'] == id) & (data['PCS_Level'] == level)].empty
     
-    @classmethod
-    def _map_levels_to_names(cls, id: int) -> Dict[str, float]:
-        """
-        Map friendly level names (Low/Mid/High) to actual device levels.
-        
-        Uses compute_mid_level_effect logic for intelligent mid-level calculation:
-        - Low: minimum level
-        - High: maximum level  
-        - Mid: calculated using compute_mid_level_effect algorithm
-        
-        Args:
-            id: PCS device ID
-            
-        Returns:
-            Dictionary mapping friendly names to actual level floats
-        """
-        data = cls._load_data()
-        device_data = data[data['PCS_ID'] == id]
-        
-        if device_data.empty:
-            return {}
-        
-        # Convert PCS_Level to float and get available levels
-        device_data = device_data.copy()
-        device_data['PCS_Level'] = device_data['PCS_Level'].astype(float)
-        available_levels = sorted(device_data['PCS_Level'].unique().tolist())
-        
-        if len(available_levels) == 1:
-            # Single level maps to all friendly names
-            level_val = available_levels[0]
-            return {'Low': level_val, 'Mid': level_val, 'High': level_val}
-        
-        # Use compute_mid_level_effect to find intelligent mid-level
-        mid_stats = compute_mid_level_effect(device_data, 'Delta_Teq_All')
-        
-        mapping = {
-            'Low': available_levels[0],  # Minimum level
-            'High': available_levels[-1]  # Maximum level
-        }
-        
-        if mid_stats and 'point_level' in mid_stats:
-            # Use point_level from compute_mid_level_effect
-            mid_level = mid_stats['point_level']
-            # Find closest actual level to computed mid level
-            closest_level = min(available_levels, key=lambda x: abs(x - mid_level))
-            mapping['Mid'] = closest_level
-        else:
-            # Fallback: use middle level if available
-            if len(available_levels) >= 2:
-                mid_index = len(available_levels) // 2
-                mapping['Mid'] = available_levels[mid_index]
-            else:
-                mapping['Mid'] = mapping['Low']
-        
-        return mapping
-
-    @classmethod
-    def _normalize_level(cls, id: int, level: str) -> float:
-        """
-        Normalize level input - convert friendly names to actual levels if needed.
-        
-        Args:
-            id: PCS device ID
-            level: Level input (could be friendly name like "Mid" or numeric like "0.5")
-            
-        Returns:
-            Actual level float that exists in database
-        """
-        # Try to convert to float directly first
-        try:
-            level_float = float(level)
-            # Check if this level exists for the device
-            available_levels = cls.get_available_levels(id)
-            if level_float in available_levels:
-                return level_float
-        except (ValueError, TypeError):
-            pass
-        
-        # Check if it's a friendly name and map it
-        if level in ['Low', 'Mid', 'High']:
-            level_mapping = cls._map_levels_to_names(id)
-            if level in level_mapping:
-                return level_mapping[level]
-        
-        # If no mapping found, try to convert to float anyway
-        try:
-            return float(level)
-        except (ValueError, TypeError):
-            # If all else fails, return original for error handling
-            return level
-
     @classmethod
     def get_device(cls, id: int, level: str) -> PCSDevice:
         """
@@ -588,121 +395,39 @@ class PCSDatabase:
         
         Args:
             id: PCS device ID (1-20 for Sydney University)
-            level: Power level - supports both:
-                   - Friendly names: "Low", "Mid", "High"
-                   - Actual levels: "0.0", "0.5", "1.0", etc.
+            level: Power level (e.g., "Low", "Mid", "High")
             
         Returns:
             PCSDevice instance
             
         Raises:
             ValueError: If device not found
-            
-        Examples:
-            # Using friendly names
-            device_low = PCSDatabase.get_device(id=1, level="Low")
-            device_mid = PCSDatabase.get_device(id=1, level="Mid") 
-            device_high = PCSDatabase.get_device(id=1, level="High")
-            
-            # Using actual levels (backwards compatible)
-            device = PCSDatabase.get_device(id=1, level="0.5")
         """
-        # Normalize level input (convert friendly names if needed)
-        actual_level = cls._normalize_level(id, level)
-        
-        # Check cache first  
-        cache_key = (id, actual_level)
+        # Check cache first
+        cache_key = (id, level)
         if cache_key in cls._cache:
             return cls._cache[cache_key]
         
         # Validate existence
-        if not cls._exists(id, actual_level):
+        if not cls._exists(id, level):
             available_levels = cls.get_available_levels(id)
-            level_mapping = cls._map_levels_to_names(id)
-            
             if available_levels:
-                error_msg = f"PCS ID {id} with level '{level}' not found."
-                if level_mapping:
-                    friendly_str = {k: f"{v:.1f}" for k, v in level_mapping.items()}
-                    error_msg += f"\nFriendly levels: {friendly_str}"
-                error_msg += f"\nAvailable levels: {[f'{x:.1f}' for x in available_levels]}"
-                raise ValueError(error_msg)
+                raise ValueError(
+                    f"PCS ID {id} with level '{level}' not found. "
+                    f"Available levels: {available_levels}"
+                )
             else:
                 raise ValueError(f"PCS ID {id} not found in database")
         
         # Load data
         data = cls._load_data()
-        data_copy = data.copy()
-        data_copy['PCS_Level'] = data_copy['PCS_Level'].astype(float)
-        device_data = data_copy[(data_copy['PCS_ID'] == id) & (data_copy['PCS_Level'] == actual_level)].iloc[0]
+        device_data = data[(data['PCS_ID'] == id) & (data['PCS_Level'] == level)].iloc[0]
         
-        # Create device and cache (use original level for display)
+        # Create device and cache
         device = PCSDevice(id=id, level=level, _data=device_data)
         cls._cache[cache_key] = device
         
         return device
-
-    @classmethod
-    def get_level_info(cls, id: int) -> Dict[str, Any]:
-        """
-        Get level mapping information for a device.
-        
-        Args:
-            id: PCS device ID
-            
-        Returns:
-            Dictionary with level mapping and statistics
-        """
-        data = cls._load_data()
-        device_data = data[data['PCS_ID'] == id]
-        
-        if device_data.empty:
-            return {}
-        
-        available_levels = sorted(device_data['PCS_Level'].astype(float).unique().tolist())
-        level_mapping = cls._map_levels_to_names(id)
-        mid_stats = compute_mid_level_effect(device_data, 'Delta_Teq_All')
-        
-        return {
-            'available_levels': available_levels,
-            'friendly_mapping': level_mapping,
-            'mid_level_stats': mid_stats,
-            'total_levels': len(available_levels)
-        }
-
-    @classmethod
-    def compare_devices_by_effectiveness(cls, device_ids: List[int], level: str = "Mid") -> List[Dict[str, Any]]:
-        """
-        Compare devices at the same friendly level.
-        
-        Args:
-            device_ids: List of device IDs to compare
-            level: Friendly level to compare at ("Low", "Mid", "High")
-            
-        Returns:
-            List of device comparison data sorted by effectiveness
-        """
-        devices = []
-        for device_id in device_ids:
-            try:
-                device = cls.get_device(device_id, level)
-                devices.append({
-                    'id': device_id,
-                    'brand': device.brand,
-                    'model': device.model_name,
-                    'level': level,
-                    'actual_level': cls._normalize_level(device_id, level),
-                    'effectiveness': device.cooling_effectiveness,
-                    'power_efficiency': device.power_efficiency,
-                    'power_consumption': device.power_consumption
-                })
-            except ValueError:
-                # Skip devices that don't have this level
-                continue
-        
-        # Sort by effectiveness (descending)
-        devices.sort(key=lambda x: x['effectiveness'], reverse=True)
-        return devices
     
     @classmethod
     def get_all_levels(cls, id: int) -> List[PCSDevice]:
@@ -719,7 +444,7 @@ class PCSDatabase:
         return [cls.get_device(id, level) for level in levels]
     
     @classmethod
-    def get_available_levels(cls, id: int) -> List[float]:
+    def get_available_levels(cls, id: int) -> List[str]:
         """
         Get available power levels for a specific PCS ID.
         
@@ -727,15 +452,13 @@ class PCSDatabase:
             id: PCS device ID
             
         Returns:
-            List of available level floats
+            List of available level names
         """
         data = cls._load_data()
         device_data = data[data['PCS_ID'] == id]
         if device_data.empty:
             return []
-        # Convert to float and return sorted unique levels
-        levels = device_data['PCS_Level'].astype(float).unique().tolist()
-        return sorted(levels)
+        return sorted(device_data['PCS_Level'].unique().tolist())
     
     @classmethod
     def get_all_device_ids(cls) -> List[int]:
@@ -770,14 +493,31 @@ class PCSDatabase:
         cls._cache.clear()
 
 
-def test_pcs_database():
-    # Test basic functionality when run directly
-    print("=== PCS Database Module Test ===")
-    device = PCSDatabase.get_device(id=1, level="Mid")
-    print(f"Test device: Brand {device.brand}, Model {device.model_name}")
-    print(f"Delta Teq for Overall: {device.delta_teq.overall}°C")
-    print(f"Delta Teq at Head: {device.delta_teq.head}°C")
-    print(f"Delta Teq at Chest: {device.delta_teq.chest}°C")
-
+# Example usage and testing
 if __name__ == "__main__":
-    test_pcs_database()
+    # Example usage
+    try:
+        # Get a specific device
+        device = PCSDatabase.get_device(id=1, level="Mid")
+        print(f"Device: {device}")
+        print(f"Brand: {device.brand}")
+        print(f"Cooling effectiveness: {device.cooling_effectiveness:.2f}°C")
+        print(f"Power efficiency: {device.power_efficiency:.3f}°C/W")
+        print(f"Temperature reduction: {device.calculate_temperature_reduction()}")
+        
+        print("\n" + "="*50)
+        
+        # Get all levels for device ID 1
+        devices = PCSDatabase.get_all_levels(id=1)
+        print(f"All levels for PCS ID 1:")
+        for dev in devices:
+            print(f"  {dev.level}: {dev.cooling_effectiveness:.2f}°C effectiveness")
+        
+        print("\n" + "="*50)
+        
+        # Get available device IDs
+        ids = PCSDatabase.get_all_device_ids()
+        print(f"Available device IDs: {ids}")
+        
+    except Exception as e:
+        print(f"Error: {e}")

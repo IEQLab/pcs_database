@@ -5,7 +5,9 @@
 
 % Packages
 \usepackage{amsmath}
-\usepackage{graphicx}
+\usepackage[dvipdfmx]{graphicx}
+% Search figures under repo's figure directory
+\graphicspath{{../../figure/}}
 \usepackage{csvsimple}
 
 %\newcommand{\projectroot}{.} % プロジェクトのルートディレクトリ
@@ -67,7 +69,8 @@ Probably the next report will be a database focusing on the typical office PCS.
 \subsection{Figure}
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=0.8\textwidth]{C:/Users/monyo/OneDrive - The University of Sydney (Staff)/PCS Library/figure/example_plot.pdf}
+    % Use relative path; actual file is in repo's figure/ directory
+    \includegraphics[width=0.8\textwidth]{example_plot.pdf}
     \caption{Example PDF Figure}
     \label{fig:example}
 \end{figure}

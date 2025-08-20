@@ -19,6 +19,7 @@ class Config:
         BASE_DIR = os.path.join(PROJECT_DIR, "data")
         USYD_DIR = os.path.join(BASE_DIR, "usyd")
         EXTERNAL_DIR = os.path.join(BASE_DIR, "external")
+        OTHERS_DIR = os.path.join(BASE_DIR, "others")
         RAW_DATA_DIR = os.path.join(USYD_DIR, "raw data")
         MANIKIN_DATA_DIR = os.path.join(USYD_DIR, "manikin_data")
         CHAMBER_DATA_DIR = os.path.join(RAW_DATA_DIR, "chamber_data")
