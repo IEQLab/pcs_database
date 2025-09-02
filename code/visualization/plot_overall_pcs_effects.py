@@ -47,30 +47,50 @@ def plot_overall_pcs_effects():
     )
     df = pd.read_csv(file_path)
     
-    # Load device category mapping (Cooling / Heating) from metadata
+    # Load device category mapping (Cooling / Heating) and names from metadata
     try:
         meta_path = os.path.join(Config.DataPaths.METADATA_DIR, "pcs_product_info.csv")
         df_meta = pd.read_csv(meta_path)
         category_map = df_meta.set_index("PCS_ID")["Category"].to_dict()
+        name_map = df_meta.set_index("PCS_ID")["PCS_Name"].to_dict()
     except Exception:
         category_map = {}
+        name_map = {}
     
     # Filter for ~25°C conditions using utility function (25°C ± 1°C range)
     df_25c = filter_by_target_temperature(df, target_ta=25.0, tolerance=1.0, ta_column='PCS_Ta')
     
     # For specific PCS_IDs with multiple angles, filter to 270° only
+    # But be more flexible for dual-mode devices to preserve both Fan and Evaporative data
     multi_angle_ids = [8, 9, 10, 13]
+    dual_mode_ids = [3, 4, 10]  # Devices with both Fan and Evaporative modes
+    
     for pid in multi_angle_ids:
         mask = (df_25c['PCS_ID'] == pid)
         if mask.any():
-            # Replace with 270° data only, if available
-            angle_270_data = df_25c[mask & (df_25c['Angle_Horizontal'] == 270)]
-            if len(angle_270_data) > 0:
-                # Remove all data for this PCS_ID and add back only 270° data
-                df_25c = df_25c[~mask]
-                df_25c = pd.concat([df_25c, angle_270_data], ignore_index=True)
+            # For dual-mode devices, be more flexible with angle selection
+            if pid in dual_mode_ids:
+                # Check if 270° data exists for both modes
+                angle_270_data = df_25c[mask & (df_25c['Angle_Horizontal'] == 270)]
+                fan_270 = angle_270_data[angle_270_data['PCS_Mode'] == 'Fan']
+                evap_270 = angle_270_data[angle_270_data['PCS_Mode'] == 'Evaporative']
+                
+                if len(fan_270) > 0 and len(evap_270) > 0:
+                    # Both modes have 270° data, use 270° only
+                    df_25c = df_25c[~mask]
+                    df_25c = pd.concat([df_25c, angle_270_data], ignore_index=True)
+                    print(f"PCS_ID {pid}: Using 270° data for both modes")
+                else:
+                    # At least one mode lacks 270° data, keep all angles
+                    print(f"PCS_ID {pid}: Keeping all angles (some modes lack 270° data)")
             else:
-                print(f"Warning: PCS_ID {pid} has no 270° data, using all available angles")
+                # For single-mode devices, apply original logic
+                angle_270_data = df_25c[mask & (df_25c['Angle_Horizontal'] == 270)]
+                if len(angle_270_data) > 0:
+                    df_25c = df_25c[~mask]
+                    df_25c = pd.concat([df_25c, angle_270_data], ignore_index=True)
+                else:
+                    print(f"Warning: PCS_ID {pid} has no 270° data, using all available angles")
     
     if df_25c.empty:
         print("No data found for target ambient temperature range")
@@ -134,30 +154,65 @@ def plot_overall_pcs_effects():
         print("All devices have at least 3 unique levels in this range.")
 
     # For each PCS_ID, calculate statistics using the selected policy
+    # Handle PCS_Mode separately for devices with Fan/Evaporative modes
     pcs_stats = []
     
     for pcs_id in sorted(df_25c['PCS_ID'].unique()):
         pcs_data = df_25c[df_25c['PCS_ID'] == pcs_id]
-        stats = _compute_device_stats(pcs_data)
-        if stats:
-            pcs_stats.append({
-                'PCS_ID': pcs_id,
-                **stats,
-            })
+        
+        # Check if this device has PCS_Mode data (Fan or Evaporative)
+        mode_data = pcs_data['PCS_Mode'].dropna()
+        unique_modes = mode_data.unique()
+        
+        if len(unique_modes) > 0 and not all(pd.isna(unique_modes)):
+            # Device has PCS_Mode data - split by mode
+            for mode in unique_modes:
+                if pd.notna(mode):  # Skip NaN values
+                    mode_data_subset = pcs_data[pcs_data['PCS_Mode'] == mode]
+                    stats = _compute_device_stats(mode_data_subset)
+                    if stats:
+                        device_name = name_map.get(pcs_id, f"Device_{pcs_id}")
+                        mode_display = "Fan" if mode == "Fan" else "Evaporative"
+                        pcs_stats.append({
+                            'PCS_ID': pcs_id,
+                            'PCS_Mode': mode,
+                            'display_id': f"ID{pcs_id}, {device_name} ({mode_display} mode)",
+                            'sort_key': f"{pcs_id:02d}_{mode}",  # For sorting Fan before Evaporative
+                            **stats,
+                        })
+        else:
+            # Device has no PCS_Mode data - use all data as before
+            stats = _compute_device_stats(pcs_data)
+            if stats:
+                device_name = name_map.get(pcs_id, f"Device_{pcs_id}")
+                pcs_stats.append({
+                    'PCS_ID': pcs_id,
+                    'PCS_Mode': None,
+                    'display_id': f"ID{pcs_id}, {device_name}",
+                    'sort_key': f"{pcs_id:02d}_",  # Single underscore for devices without modes
+                    **stats,
+                })
     
+    # Convert to DataFrame for easier plotting
     if not pcs_stats:
         print("No valid data found for plotting")
         return
     
-    # Convert to DataFrame for easier plotting
+    # Create unique y-positions for plotting
+    # Sort by PCS_ID first, then by PCS_Mode to group modes together with Fan on top
     stats_df = pd.DataFrame(pcs_stats)
+    stats_df = stats_df.sort_values('sort_key', na_position='first')
+    stats_df = stats_df.reset_index(drop=True)
+    
+    # Assign y-positions (use index for consistent spacing)
+    stats_df['y_pos'] = range(len(stats_df))
     
     # Create the plot
-    fig, ax = plt.subplots(figsize=(12, 8))
+    fig, ax = plt.subplots(figsize=(12, max(8, len(stats_df) * 0.5)))
     
     # Plot data points
     for _, row in stats_df.iterrows():
-        y_pos = row['PCS_ID']
+        y_pos = row['y_pos']
         median_val = row['median']
         min_val = row['min']
         max_val = row['max']
@@ -169,11 +224,16 @@ def plot_overall_pcs_effects():
             ax.plot([min_val, max_val], [y_pos, y_pos], 'k-', alpha=0.6, linewidth=2)
 
         # Plot median as circle colored by corrected Category rule (Cooling=blue, Heating=red)
-        # Correct rule: IDs 1–13 => Cooling, IDs >=14 => Heating
+        # Correct rule: IDs 1–10 => Cooling, IDs >=11 => Heating
         pid = int(row['PCS_ID'])
-        category = 'Cooling' if pid <= 13 else 'Heating'
+        category = 'Cooling' if pid <= 10 else 'Heating'
+        
+        # Use same marker and color scheme for all devices, distinguish only by Cooling/Heating
+        marker = 'o'
         color = 'blue' if category == 'Cooling' else 'red'
-        ax.plot(median_val, y_pos, 'o', color=color, markersize=8, markeredgecolor='black', markeredgewidth=1)
+            
+        ax.plot(median_val, y_pos, marker, color=color, markersize=8, 
+                markeredgecolor='black', markeredgewidth=1)
 
         # Plot endpoint bars
         if show_range:
@@ -188,17 +248,18 @@ def plot_overall_pcs_effects():
     
     # Customize the plot
     ax.set_xlabel('Delta_Teq_All (°C)', fontsize=12)
-    ax.set_ylabel('PCS_ID', fontsize=12)
+    ax.set_ylabel('PCS Device', fontsize=12)
     ax.set_title(
         'Overall PCS Effects on Equivalent Temperature (~25°C Ambient)\nMid-level effect with Min/Max per-level range | Blue: Cooling, Red: Heating',
         fontsize=14,
     )
     
-    # Set y-axis to show PCS_IDs with ID=1 at the top
-    y_ticks = sorted(stats_df['PCS_ID'].unique())
+    # Set y-axis to show display IDs
+    y_ticks = stats_df['y_pos'].tolist()
+    y_labels = stats_df['display_id'].tolist()
     ax.set_yticks(y_ticks)
-    ax.set_yticklabels(y_ticks)
-    # Invert y-axis so that PCS_ID=1 is at the top
+    ax.set_yticklabels(y_labels)
+    # Invert y-axis so that lower IDs are at the top
     ax.invert_yaxis()
     
     # Add vertical line at x=0
