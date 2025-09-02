@@ -1,0 +1,33 @@
+%! Date = 02/09/2025
+% Standalone version of introduction.tex for independent compilation
+
+% Preamble
+\documentclass[11pt]{article}
+
+% Packages
+\usepackage{amsmath}
+\usepackage[dvipdfmx]{graphicx}
+% Search figures under repo's figure directory
+\graphicspath{{../../../figure/}{figures/}}
+\usepackage{csvsimple}
+\usepackage{hyperref}
+\usepackage{siunitx}
+
+% Import necessary definitions
+\input{../myglossary.tex}
+
+% Document
+\begin{document}
+\title{Introduction Section - Standalone Version}
+\author{Akihisa Nomoto}
+\date{\today}
+\maketitle
+
+% Include the introduction content
+\input{introduction.tex}
+
+% Bibliography
+\bibliographystyle{plain}
+\bibliography{../mybibfile}
+
+\end{document}
