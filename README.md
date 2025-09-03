@@ -44,6 +44,7 @@ Schema Description (Generated on 2025-07-09 14:28:57)
 | Parameter | Type | Description | Example |
 |---|---|---|---|
 | **`PCS_ID`** | *integer* | Unique PCS identifier (integer number) | 1 |
+| **`PCS_Name`** | *string* | Unique PCS descriptor identifier (text) | 1 |
 | **`Category`** | *string* | Category of the PCS. Must be one of: `Cooling, Heating`. | Cooling |
 | **`Physical_Effect`** | *string* | Physical effect of the PCS. Must be one or more: Convective, Conductive, Radiant, Evaporative. | Convective |
 | **`Type`** | *string* | Type of PCS (e.g., fan, foot warmer). | Small desk fan |
