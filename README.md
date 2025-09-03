@@ -39,12 +39,12 @@ but you can access them at [here](https://unisyd-my.sharepoint.com/:f:/r/persona
 <!-- METADATA_START -->
 # Database Metadata
 
-Schema Description (Generated on 2025-07-09 14:28:57)
+Schema Description (Generated on 2025-09-03 12:27:42)
 
 | Parameter | Type | Description | Example |
 |---|---|---|---|
 | **`PCS_ID`** | *integer* | Unique PCS identifier (integer number) | 1 |
-| **`PCS_Name`** | *string* | Unique PCS descriptor identifier (text) | 1 |
+| **`PCS_Name`** | *string* | Unique PCS descriptor identifier | Desk Fan_Dyson |
 | **`Category`** | *string* | Category of the PCS. Must be one of: `Cooling, Heating`. | Cooling |
 | **`Physical_Effect`** | *string* | Physical effect of the PCS. Must be one or more: Convective, Conductive, Radiant, Evaporative. | Convective |
 | **`Type`** | *string* | Type of PCS (e.g., fan, foot warmer). | Small desk fan |

@@ -1,6 +1,17 @@
 import json
+import os
+import sys
 from datetime import datetime
-from code.config import configuration
+
+# Add the project root directory to sys.path
+project_root = os.path.join(os.path.dirname(__file__), '..', '..')
+sys.path.insert(0, project_root)
+
+# Add the code directory to sys.path
+code_dir = os.path.join(os.path.dirname(__file__), '..')
+sys.path.insert(0, code_dir)
+
+from config.configuration import Config
 
 
 def extract_properties(properties):
@@ -146,10 +157,10 @@ def update_readme_with_metadata(readme_path, markdown_file_path):
 
 if __name__ == "__main__":
     save_schema_as_markdown(
-        json_file_path=configuration.Config.DataPaths.METADATA_JSON_FILE,
-        markdown_file_path=configuration.Config.DataPaths.METADATA_MARKDOWN_FILE,
+        json_file_path=Config.DataPaths.METADATA_JSON_FILE,
+        markdown_file_path=Config.DataPaths.METADATA_MARKDOWN_FILE,
     )
     update_readme_with_metadata(
-        readme_path=configuration.Config.README_PATH,
-        markdown_file_path=configuration.Config.DataPaths.METADATA_MARKDOWN_FILE
+        readme_path=Config.README_PATH,
+        markdown_file_path=Config.DataPaths.METADATA_MARKDOWN_FILE
     )

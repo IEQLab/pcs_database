@@ -94,9 +94,10 @@
     "columns": {
       "type": "object",
       "description": "Metadata for each column in the PCS database CSV",
-      "required": ["PCS_ID", "Category", "Physical_Effect", "Type", "Size", "Availability", "Image", "PCS_Level", "Target_Body", ],
+      "required": ["PCS_ID", "Category", "Physical_Effect", "Type", "Size", "Availability", "Image", "PCS_Level", "Target_Body"],
       "properties": {
         "PCS_ID": {"type": "integer", "description": "Unique PCS identifier (integer number)", "example": 1},
+        "PCS_Name": {"type": "string", "description": "Unique PCS descriptor identifier", "example": "Desk Fan_Dyson"},
         "Category": {"type": "string", "enum": ["Cooling", "Heating"], "description": "Category of the PCS.", "example": "Cooling"},
         "Physical_Effect": {"type": "string", "description": "Physical effect of the PCS. Must be one or more: Convective, Conductive, Radiant, Evaporative.", "example": "Convective"},
         "Type": {"type": "string", "description": "Type of PCS (e.g., fan, foot warmer).", "example": "Small desk fan"},
@@ -174,5 +175,5 @@
         }
       }
     }
-  },
+  }
 }
