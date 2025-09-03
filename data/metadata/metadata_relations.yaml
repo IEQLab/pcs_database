@@ -14,9 +14,13 @@ manikin_info:
 experiment_info:
   primary_key: Experiment_ID
 
+metadata_relations:
+  primary_key: [PCS_ID, Experiment_ID, Manikin_ID, Clothing_ID]
+
 trial_info:
   primary_key: PCS_ID
   foreign_keys:
     experiment_info: Experiment_ID
     manikin_info: Manikin_ID
     clothing_info: Clothing_ID
+    metadata_relations: [PCS_ID, Experiment_ID, Manikin_ID, Clothing_ID]
