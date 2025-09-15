@@ -14,21 +14,30 @@ def load_device_image(target_id):
     Returns:
         str or None: Full path to the selected image, or None if not found.
     """
-    base_path = Config.ImagePaths.EDITED_IMAGE_DIR
-    search_pattern = os.path.join(base_path, f"ID{target_id}_*.png")
-    matched_files = glob.glob(search_pattern)
+    # Try both device_image directory and edited_image subdirectory
+    search_dirs = [
+        Config.ImagePaths.DEVICE_IMAGE_DIR,
+        Config.ImagePaths.EDITED_IMAGE_DIR
+    ]
+    
+    for base_path in search_dirs:
+        if not os.path.exists(base_path):
+            continue
+            
+        search_pattern = os.path.join(base_path, f"ID{target_id}_*.png")
+        matched_files = glob.glob(search_pattern)
 
-    # First, try to find an 'angled' image
-    for file_path in matched_files:
-        if "angled" in os.path.basename(file_path).lower():
-            return file_path
+        # First, try to find an 'angled' image
+        for file_path in matched_files:
+            if "angled" in os.path.basename(file_path).lower():
+                return file_path
 
-    # Then, try to find a 'front' image if 'angled' not found
-    for file_path in matched_files:
-        if "front" in os.path.basename(file_path).lower():
-            return file_path
+        # Then, try to find a 'front' image if 'angled' not found
+        for file_path in matched_files:
+            if "front" in os.path.basename(file_path).lower():
+                return file_path
 
-    # No image found
+    # No image found in any directory
     return None
 
 

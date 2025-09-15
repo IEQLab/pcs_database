@@ -26,20 +26,33 @@ def combine_metadata(
         relations[trial_table_name].get("foreign_keys", {}).items()
     ):
         related_df = pd.read_csv(os.path.join(base_path, f"{related_table}.csv"))
-        trial_df = trial_df.merge(
-            related_df,
-            how="left",
-            left_on=fk_column,
-            right_on=relations[related_table]["primary_key"],
-            suffixes=("_trial", f"_{related_table}"),
-        )
+        
+        # Handle special case for metadata_relations with composite key
+        if related_table == "metadata_relations":
+            # Merge on multiple columns
+            merge_columns = fk_column  # This should be a list of columns
+            trial_df = trial_df.merge(
+                related_df,
+                how="left",
+                on=merge_columns,
+                suffixes=("_trial", f"_{related_table}"),
+            )
+        else:
+            # Regular single-column merge
+            trial_df = trial_df.merge(
+                related_df,
+                how="left",
+                left_on=fk_column,
+                right_on=relations[related_table]["primary_key"],
+                suffixes=("_trial", f"_{related_table}"),
+            )
 
     # Add pcs_product_info.csv and reorder columns
     pcs_info = pd.read_csv(os.path.join(base_path, "pcs_product_info.csv"))
     trial_df = trial_df.merge(pcs_info, how="left", on="PCS_ID", suffixes=("", "_pcs"))
 
-    # Reorder columns to match the desired order
-    required_columns = list(pcs_info.columns) + ["Experiment_ID", "Manikin_ID"]
+    # Reorder columns to match the desired order (including Target_Body from metadata_relations)
+    required_columns = list(pcs_info.columns) + ["Experiment_ID", "Manikin_ID", "Target_Body"]
     columns_order = required_columns + [
         col for col in trial_df.columns if col not in required_columns
     ]

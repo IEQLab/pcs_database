@@ -283,11 +283,18 @@ def plot_overall_pcs_effects():
     plt.tight_layout()
     
     # Save plots
-    figure_dir = Config.FigurePaths.BASE_DIR
-    plt.savefig(os.path.join(figure_dir, "overall_pcs_effects.svg"), dpi=300, bbox_inches='tight')
-    plt.savefig(os.path.join(figure_dir, "overall_pcs_effects.png"), dpi=300, bbox_inches='tight')
+    overall_effects_dir = os.path.join(Config.FigurePaths.BASE_DIR, "overall_pcs_effects")
+    os.makedirs(overall_effects_dir, exist_ok=True)
     
-    print(f"Plot saved to {figure_dir}")
+    svg_path = os.path.join(overall_effects_dir, "overall_pcs_effects.svg")
+    png_path = os.path.join(overall_effects_dir, "overall_pcs_effects.png")
+    
+    plt.savefig(svg_path, dpi=300, bbox_inches='tight')
+    plt.savefig(png_path, dpi=300, bbox_inches='tight')
+
+    print(f"Plot saved to {overall_effects_dir}")
+    print(f"SVG: {svg_path}")
+    print(f"PNG: {png_path}")
     print(f"Plotted {len(stats_df)} PCS devices")
     
     plt.show()

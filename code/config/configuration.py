@@ -57,7 +57,7 @@ class Config:
             # mpl.rcParams["axes.prop_cycle"] = mpl.cycler(color=cls.COLOR_CYCLE)
 
     class PCSID:
-        SydneyUniversity = list(range(1, 21))  # PCS ID for Sydney University (1-20)
+        SydneyUniversity = list(range(1, 17))  # PCS ID for Sydney University (1-20)
 
 
 # Configure logging
