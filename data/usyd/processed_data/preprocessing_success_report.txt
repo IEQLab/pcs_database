@@ -1,0 +1,12 @@
+DATA PREPROCESSING WORKFLOW - SUCCESS REPORT
+==================================================
+
+Steps completed: 5
+Completed steps:
+  ✅ column_definitions
+  ✅ chamber_preprocessing
+  ✅ manikin_preprocessing
+  ✅ metadata_combination
+  ✅ database_creation
+
+Report generated: c:\Users\monyo\OneDrive - The University of Sydney (Staff)\PCS Database\data\usyd\processed_data\preprocessing_success_report.txt
