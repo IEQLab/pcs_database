@@ -158,7 +158,7 @@ def create_database():
     clothing_data_path = os.path.join(
         Config.DataPaths.PROCESSED_DATA_DIR, "clothing_measurement_data.csv"
     )
-    others_data_path_tmp = os.path.join(
+    external_database_path = os.path.join(
         Config.DataPaths.EXTERNAL_DIR, "pcs_database_external.csv"
     )
     output_path = os.path.join(Config.DataPaths.BASE_DIR, "pcs_database.csv")
@@ -166,7 +166,7 @@ def create_database():
     # Define the dataframes
     df_measurement_results = pd.read_csv(measurement_results_path)
     df_clothing = pd.read_csv(clothing_data_path)
-    df_database_others = pd.read_csv(others_data_path_tmp)
+    df_database_others = pd.read_csv(external_database_path)
     df_template = load_template(template_path=template_path)
     df_database = create_empty_database(df_template=df_template)
     df_database = add_measurements_to_database(df_database, df_measurement_results)
@@ -182,6 +182,7 @@ def create_database():
     df_database = combine_dataframes(
         df_database_sydney_uni=df_database, df_database_others=df_database_others
     )
+    df_database = utils.change_decimal_places(df=df_database.copy(), decimal_places=2)
     save_database(df_database, output_path)
 
     return df_database
