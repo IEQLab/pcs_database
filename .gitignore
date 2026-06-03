@@ -17,7 +17,7 @@ image/**/raw image/
 # Ignore specific large originals
 image/PCS Database Graphical Abstract.pptx
 
-# Ingnore older files for any materials
+# Ingnore older files
 **/_old*/
 
 # Ignore internal procedure materials under presentation
