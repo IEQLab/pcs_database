@@ -19,7 +19,7 @@ image/PCS Database Graphical Abstract.pptx
 
 # Ignore internal procedure materials under presentation
 presentation/_社内手続き/
-presentation/template/
+presentation/_template/
 
 # Generated figures and plots (exclude from version control)
 figure/
